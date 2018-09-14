@@ -1,0 +1,42 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\begin{tikzpicture}[scale = 0.5]
+
+  \path[use as bounding box] (-4.5, -4.5) rectangle (4.5, 4.5);
+
+  \node[Vertex] (v)  at (0, 0)  {$v$};
+  \node[Vertex] (u1) at (  0:4) {$u_1$};
+  \node[Vertex] (u2) at ( 90:4) {$u_2$};
+  \node[Vertex] (u3) at (180:4) {$u_3$};
+  \node[Vertex] (u4) at (270:4) {$u_4$};
+
+  \node[vertex] (w1)  at (  0:2) {};
+  \node[vertex] (w2)  at ( 30:2) {};
+  \node[vertex] (w3)  at ( 60:2) {};
+  \node[vertex] (w4)  at ( 90:2) {};
+  \node[vertex] (w5)  at (120:2) {};
+  \node[vertex] (w6)  at (150:2) {};
+  \node[vertex] (w7)  at (180:2) {};
+  \node[vertex] (w8)  at (210:2) {};
+  \node[vertex] (w9)  at (240:2) {};
+  \node[vertex] (w10) at (270:2) {};
+  \node[vertex] (w11) at (300:2) {};
+  \node[vertex] (w12) at (330:2) {};
+
+  \draw[edge] (w1) -- (w2) -- (w3) -- (w4) -- (w5) -- (w6) -- (w7) -- (w8) -- (w9) -- (w10) -- (w11) -- (w12) -- (w1);
+
+  \foreach \i in {1, ..., 12} {
+    \draw[edge] (v) -- (w\i);
+  }
+
+  \draw[edge] (w1)  -- (u1);
+  \draw[edge] (w4)  -- (u2);
+  \draw[edge] (w7)  -- (u3);
+  \draw[edge] (w10) -- (u4);
+
+\end{tikzpicture}

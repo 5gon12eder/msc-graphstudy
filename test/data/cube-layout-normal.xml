@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- Copyright (C) 2017 Moritz Klammler <moritz.klammler@student.kit.edu>                                            -->
+<!--                                                                                                                 -->
+<!-- Copying and distribution of this file, with or without modification, are permitted in any medium without        -->
+<!-- royalty provided the copyright notice and this notice are preserved.  This file is offered as-is, without any   -->
+<!-- warranty.                                                                                                       -->
+
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns&#10;http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd&quot;&gt;&#10;">
+
+  <key for="node" attr.name="x" attr.type="double" id="x" />
+  <key for="node" attr.name="y" attr.type="double" id="y" />
+
+  <graph id="cube" edgedefault="undirected">
+
+    <node id="0">
+      <data key="x">-83.114564066579092</data>
+      <data key="y">83.114564066579092</data>
+    </node>
+
+    <node id="1">
+      <data key="x">27.704854688859697</data>
+      <data key="y">83.114564066579092</data>
+    </node>
+
+    <node id="2">
+      <data key="x">83.114564066579092</data>
+      <data key="y">27.704854688859697</data>
+    </node>
+
+    <node id="3">
+      <data key="x">-27.704854688859697</data>
+      <data key="y">27.704854688859697</data>
+    </node>
+
+    <node id="4">
+      <data key="x">-83.114564066579092</data>
+      <data key="y">-27.704854688859697</data>
+    </node>
+
+    <node id="5">
+      <data key="x">27.704854688859697</data>
+      <data key="y">-27.704854688859697</data>
+    </node>
+
+    <node id="6">
+      <data key="x">83.114564066579092</data>
+      <data key="y">-83.114564066579092</data>
+    </node>
+
+    <node id="7">
+      <data key="x">-27.704854688859697</data>
+      <data key="y">-83.114564066579092</data>
+    </node>
+
+    <edge id="0" source="0" target="1" />
+    <edge id="1" source="1" target="2" />
+    <edge id="2" source="2" target="3" />
+    <edge id="3" source="3" target="0" />
+    <edge id="4" source="4" target="5" />
+    <edge id="5" source="5" target="6" />
+    <edge id="6" source="6" target="7" />
+    <edge id="7" source="7" target="4" />
+    <edge id="8" source="0" target="4" />
+    <edge id="9" source="1" target="5" />
+    <edge id="10" source="2" target="6" />
+    <edge id="11" source="3" target="7" />
+  </graph>
+
+</graphml>

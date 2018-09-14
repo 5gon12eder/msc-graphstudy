@@ -1,0 +1,328 @@
+#! /usr/bin/python3
+#! -*- coding:utf-8; mode:python; -*-
+
+# Copyright (C) 2018 Karlsruhe Institute of Technology
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+#
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with this program.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+from sys import hexversion as PYTHON_HEXVERSION
+if PYTHON_HEXVERSION < 0x30602f0:
+    raise Exception("Your Python interpreter is too old; Python 3.6 or newer is required for this program to run")
+
+import argparse
+import json
+import os
+import shutil
+import sys
+import textwrap
+
+from maintainer import *
+
+PROGRAM_NAME = 'configure'
+
+CMAKE_EXECUTABLE = find_build_tool('CMAKE', 'cmake')
+CTEST_EXECUTABLE = find_build_tool('CTEST', 'ctest')
+GCC_CXX_EXECUTABLE = find_build_tool('GCCCXX', 'g++')
+CLANG_CXX_EXECUTABLE = find_build_tool('CLANGCXX', 'clang++')
+VALGRIND_EXECUTABLE = find_build_tool('VALGRIND', 'valgrind')
+
+# These are implicit for all configurations and should not be mentioned again.
+EXTRA_MAINTAINER_CXX_FLAGS = [
+    '-pedantic',
+    '-Wall',
+    '-Wextra',
+    '-Werror',
+    '-Wno-error=deprecated-declarations',
+]
+
+# These are the default steps that will be exercised by CTest if the configuration does not say otherwise.  The
+# specification is interpreted as a mapping of steps (which will of course be performed in the right order) to a
+# (potentially) empty list of additional command-line arguments.  Do NOT add 'Build' here, we don't use CTest for
+# building because it happens to swallow errors.  If a value maps to `None`, the action will be disabled.
+CTEST_DEFAULT_STEPS = {
+    'Test' : [ ],
+}
+
+CONFIGURATIONS = {
+    'default' : {
+        'help' : "normal build using the system's standard toolchain",
+        'cmake' : {
+            'CMAKE_CXX_FLAGS' : [ '-std=c++17' ],
+        },
+    },
+    'clang' : {
+        'help' : "normal build using Clang with libc++",
+        'cmake' : {
+            'CMAKE_BUILD_TYPE' : 'None',
+            'CMAKE_CXX_COMPILER' : CLANG_CXX_EXECUTABLE,
+            'CMAKE_CXX_FLAGS' : [ '-std=c++17', '-stdlib=libc++' ],
+            'CMAKE_EXE_LINKER_FLAGS' : [ '-lc++', '-lc++abi' ],
+        },
+    },
+    'clang-gnu' : {
+        'help' : "normal build using Clang with libstdc++",
+        'cmake' : {
+            'CMAKE_BUILD_TYPE' : 'None',
+            'CMAKE_CXX_COMPILER' : CLANG_CXX_EXECUTABLE,
+            'CMAKE_CXX_FLAGS' : [ '-std=c++17' ],
+        },
+    },
+    'gcc-debug' : {
+        'help' : "debug build using GCC with an auditing libstdc++",
+        'cmake' : {
+            'CMAKE_BUILD_TYPE' : 'Debug',
+            'CMAKE_CXX_COMPILER' : GCC_CXX_EXECUTABLE,
+            'CMAKE_CXX_FLAGS' : [ '-std=c++17', '-D_GLIBCXX_DEBUG' ],
+        },
+    },
+    'gcc-release' : {
+        'help' : "release build using GCC with libstdc++",
+        'cmake' : {
+            'CMAKE_BUILD_TYPE' : 'Release',
+            'CMAKE_CXX_COMPILER' : GCC_CXX_EXECUTABLE,
+            'CMAKE_CXX_FLAGS' : [ '-std=c++17', '-DNDEBUG' ],
+        },
+    },
+    'sanitize' : {
+        'help' : "debug build using ASan and UbSan",
+        'cmake' : {
+            'CMAKE_BUILD_TYPE' : 'Debug',
+            'CMAKE_CXX_COMPILER' : GCC_CXX_EXECUTABLE,
+            'CMAKE_CXX_FLAGS' : [ '-std=c++17', '-fsanitize=address,undefined' ],
+        },
+        'ctest' : {
+            'Test' : [ '-R', '(unit|cli)test-.*' ],
+        }
+    },
+    'valgrind' : {
+        'help' : "debug build running tests through Valgrind",
+        'cmake' : {
+            'CMAKE_BUILD_TYPE' : 'Debug',
+            'CMAKE_CXX_COMPILER' : GCC_CXX_EXECUTABLE,
+            'CMAKE_CXX_FLAGS' : [ '-std=c++17' ],
+            'MEMORYCHECK_COMMAND' : VALGRIND_EXECUTABLE,
+            'MEMORYCHECK_COMMAND_OPTIONS' : [ '--error-exitcode=2', '--trace-children=yes', '--leak-check=full' ],
+        },
+        'ctest' : {
+            'Test' : None,
+            'MemCheck' : [ '-R', '(unit|cli)test-.*' ],
+        }
+    },
+}
+
+def main(args):
+    ns = parse_cmd_line_args(args)
+    if not ns.configs:
+        return print_configurations()
+    mainctx = Main(PROGRAM_NAME)
+    mainctx.msg_on_success = "Done configuring project"
+    mainctx.msg_on_error = "Error configuring project"
+    with mainctx:
+        configure_project(ns)
+    return mainctx.status
+
+def configure_project(ns):
+    configurator = Configurator(keep_going=ns.keep_going, quiet=ns.quiet, dry=ns.dry_run)
+    report_build_tools()
+    prepare_build_directories(ns.configs, configurator.vpathroot, cleaning=ns.cleaning, force=ns.force, dry=ns.dry_run)
+    if not ns.cleaning:
+        configurator(ns.configs)
+
+class Configurator(ForEachCfg):
+
+    def _perform_task(self, cfgname, builddir=None, vardepsdir=None):
+        cmakecmd = get_cmake_command(cfgname, srcdir=self.srcdir, builddir=builddir, vardepsdir=vardepsdir)
+        ctestcmds = get_ctest_commands(cfgname)
+        testdriverfile = os.path.join(builddir, CONFIG_TEST_FILE)
+        report("Writing test driver file {!r} ...".format(testdriverfile))
+        if not self.dry:
+            with open(testdriverfile, 'w') as ostr:
+                json.dump(ctestcmds, ostr, indent=4)
+                ostr.write('\n')
+        self._run_build_tool(cmakecmd)
+
+def prepare_build_directories(configurations, vpathroot, cleaning=None, force=False, dry=False):
+    assert cleaning in [ None, 'M', 'A' ]
+    for cfgname in configurations:
+        builddir = os.path.join(vpathroot, cfgname)
+        if os.path.isdir(builddir):
+            if cleaning is None:
+                pass
+            elif cleaning == 'M':
+                make_mostly_clean(builddir, cfgname, dry=dry)
+                continue
+            elif cleaning == 'A':
+                remove_build_directory(builddir, cfgname, dry=dry)
+                continue
+            elif force:
+                remove_build_directory(builddir, cfgname, dry=dry)
+        report("Preparing build directory {!r} ...".format(builddir))
+        try:
+            if dry: pretend('mkdir', 'builddir')
+            else: os.mkdir(builddir)
+        except FileExistsError:
+            report("Build directory {!r} already exists (use --force to remove and recreate)".format(builddir))
+        except OSError as e:
+            report("Cannot create build directory: {!s}".format(e))
+        cfgnamefile = os.path.join(builddir, CONFIG_NAME_FILE)
+        if dry:
+            pretend('echo', cfgname, stdout=cfgnamefile)
+        else:
+            with open(cfgnamefile, 'w') as ostr:
+                print(cfgname, file=ostr)
+
+def parse_cmd_line_args(args):
+    ap = argparse.ArgumentParser(
+        prog=PROGRAM_NAME,
+        usage='%(prog)s [--force] [--clean] [CONFIG...]',
+        add_help=False,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent("""\
+        Sets up the selected configurations If no configuration is selected, a list of
+        available configurations is printed instead.
+
+        This script is intended to be used by maintainers in order to verify that all
+        configurations build correctly.  It is probably not very useful for other
+        people.
+
+        This script must be run from the top-level source directory.
+        """),
+        epilog=textwrap.dedent("""\
+        environment variables:
+          MSC_VPATH_BUILD_ROOT  root directory for build directories
+          MSC_VAR_DEPS_ROOT     root directory for custom-built dependencies
+        """),
+    )
+    ap.add_argument('configs', metavar='CONFIG', type=config_name, nargs='*', help="configurations to build")
+    ap.add_argument(
+        '-c', '--clean', action='store_const', dest='cleaning', const='A',
+        help="remove build directory completely"
+    )
+    ap.add_argument(
+        '-m', '--mostlyclean', action='store_const', dest='cleaning', const='M',
+        help="remove everything but external dependencies"
+    )
+    ap.add_argument('-f', '--force', action='store_true', help="remove existing configurations, then recreate them")
+    ap.add_argument('-k', '--keep-going', action='store_true', help="continue with other configurations after failures")
+    ap.add_argument('-t', '--dry-run', action='store_true', help="don't execute CMake/CTest commands, just print them")
+    ap.add_argument('-q', '--quiet', action='store_true', help="swallow output of executed commands")
+    ap.add_argument('--version', action='version', version='?', help="show version information and exit")
+    ap.add_argument('--help', action='help', help="show usage information and exit")
+    return ap.parse_args(args)
+
+def config_name(cfgname):
+    if cfgname in CONFIGURATIONS.keys():
+        return cfgname
+    else:
+        raise argparse.ArgumentTypeError("Unknown configuration: {!r}".format(cfgname))
+
+def get_cmake_command(cfgname, srcdir='.', builddir='.', vardepsdir=None):
+    cmakeargs = {
+        'CMAKE_COLOR_MAKEFILE' : False,
+        'EXTRA_CMAKE_CXX_FLAGS' : list(EXTRA_MAINTAINER_CXX_FLAGS),
+    }
+    try: cmakeargs['MSC_KIT_BEAMER_ZIP'] = os.environ['MSC_KIT_BEAMER_ZIP']
+    except KeyError: pass
+    if vardepsdir is not None:
+        cmakeargs['CMAKE_INCLUDE_PATH'] = os.path.join(vardepsdir, 'include')
+        cmakeargs['CMAKE_LIBRARY_PATH'] = os.path.join(vardepsdir, 'lib')
+    cmakeargs.update(CONFIGURATIONS[cfgname]['cmake'])
+    cmd = [ CMAKE_EXECUTABLE ]
+    cmd.extend('-D{:s}={:s}'.format(k, get_cmake_cmd_arg_value(v)) for (k, v) in cmakeargs.items())
+    if os.path.isabs(srcdir):
+        cmd.append(srcdir)
+    else:
+        cmd.append(os.path.relpath(srcdir, builddir))
+    return cmd
+
+def get_ctest_commands(cfgname):
+    actions = [ 'Test', 'MemCheck' ]
+    spec = dict(CTEST_DEFAULT_STEPS)
+    spec.update(CONFIGURATIONS[cfgname].get('ctest', { }))
+    assert all(a in actions for a in spec.keys())
+    commands = list()
+    commands.append([ CMAKE_EXECUTABLE, '--build', '.' ])
+    for action in actions:
+        more = spec.get(action)
+        if more is None: continue
+        cmd = [ CTEST_EXECUTABLE, '-M', 'Experimental', '-T', action ]
+        cmd.extend(more)
+        commands.append(cmd)
+    return commands
+
+def get_cmake_cmd_arg_value(value):
+    if value is None:
+        return None
+    elif value is True:
+        return 'ON'
+    elif value is False:
+        return 'OFF'
+    elif isinstance(value, int):
+        return str(value)
+    elif isinstance(value, str):
+        return value
+    elif isinstance(value, list):
+        if not value:
+            return None
+        else:
+            assert all(map(lambda s : isinstance(s, str), value))
+            return ' '.join(value)
+    else:
+        raise ValueError(repr(value))
+
+def make_mostly_clean(builddir, cfgname, dry=False):
+    if looks_like_build_directory(builddir, cfgname):
+        report("Deleting most files in build directory {!r} ...".format(builddir))
+        for item in os.scandir(builddir):
+            if item.name in [ 'dependencies', CONFIG_NAME_FILE ]:
+                pass
+            elif item.is_dir():
+                if dry: pretend('rm', '-f', '-r', item.path)
+                else: shutil.rmtree(item.path)
+            else:
+                if dry: pretend('rm', '-f', item.path)
+                else: os.remove(item.path)
+    else:
+        report(("Cowardly refusing to delete files in {!r} which does not look like a build directory for"
+                + " configuration {!r}").format(builddir, cfgname))
+        raise Error()
+
+def remove_build_directory(builddir, cfgname, dry=False):
+    if looks_like_build_directory(builddir, cfgname):
+        report("Recursively deleting build directory {!r} ...".format(builddir))
+        if dry: pretend('rm', '-f', '-r', builddir)
+        else: shutil.rmtree(builddir)
+    else:
+        report(("Cowardly refusing to delete {!r} which does not look like a build directory for"
+                + " configuration {!r}").format(builddir, cfgname))
+        raise Error()
+
+def report_build_tools():
+    tools = [
+        ('CMAKE',    CMAKE_EXECUTABLE,     "CMake"),
+        ('CTEST',    CTEST_EXECUTABLE,     "CTest"),
+        ('GCCCXX',   GCC_CXX_EXECUTABLE,   "GCC C++ compiler"),
+        ('CLANGCXX', CLANG_CXX_EXECUTABLE, "Clang C++ compiler"),
+        ('VALGRIND', VALGRIND_EXECUTABLE,  "Valgrind"),
+    ]
+    for (envvar, envval, what) in tools:
+        report("Using {:s} executable {!r} (set environment variable {!s} to override)".format(what, envval, envvar))
+
+def print_configurations():
+    print("Available Configurations:")
+    print()
+    for cfgname in CONFIGURATIONS.keys():
+        print('{:16s}{:s}'.format(cfgname, CONFIGURATIONS[cfgname]['help']))
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))

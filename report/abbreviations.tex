@@ -1,0 +1,248 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\DeclareAcronym{chap}{%
+  short = \textsection,
+  short-plural = \textsection,
+  long = chapter,
+  sort = {*},
+  class = internal,
+}
+
+\DeclareAcronym{section}{%
+  short = \textsection,
+  short-plural = \textsection,
+  long = section,
+  sort = {*},
+}
+
+\DeclareAcronym{paragraph}{%
+  short = \textparagraph,
+  short-plural = \textparagraph,
+  long = paragraph,
+  sort = {*},
+  class = internal,
+}
+
+\DeclareAcronym{ad}{%
+  short = {a.d.},
+  long = {also known as},
+  foreign = {alias dictus},
+  short-format = \itshape,
+  foreign-lang = latin,
+}
+
+\DeclareAcronym{algo}{%
+  short = {algo.},
+  long = algorithm,
+}
+
+\DeclareAcronym{ascii}{%
+  short = {ASCII},
+  long = {American Standard Code for Information Interchange},
+}
+
+\DeclareAcronym{cf}{%
+  short = {cf.},
+  long = {compare, consult},
+  foreign = {confer},
+  short-format = \itshape,
+  foreign-lang = latin,
+}
+
+\DeclareAcronym{def}{%
+  short = {def.},
+  long = {definition},
+}
+
+\DeclareAcronym{ed}{%
+  short = {ed.},
+  long = {edition, editor, edited},
+}
+
+\DeclareAcronym{eg}{%
+  short = {e.g.},
+  long = {for example},
+  foreign = {exempli gratia},
+  short-format = \itshape,
+  foreign-lang = latin,
+}
+
+\DeclareAcronym{eq}{%
+  short = {eq.},
+  long = {equation},
+}
+
+\DeclareAcronym{etal}{%
+  short = {et~al.},
+  long = {and others},
+  foreign = {et alii},
+  short-format = \itshape,
+  foreign-lang = latin,
+}
+
+\DeclareAcronym{fig}{%
+  short = {fig.},
+  long = {figure},
+}
+
+\DeclareAcronym{fmmm}{%
+  short = FMMM,
+  alt = {FM\textsuperscript{3}},
+  long = {Fast Multipole Multi-Level Method},
+}
+
+\DeclareAcronym{graphml}{%
+  short = GraphML,
+  long = {Graph Markup Language},
+}
+
+\DeclareAcronym{html}{%
+  short = HTML,
+  long = {Hypertext Markup Language},
+}
+
+\DeclareAcronym{id}{%
+  short = ID,
+  long = {identity, unique identifier},
+}
+
+\DeclareAcronym{ie}{%
+  short = {i.e.},
+  long = {that is},
+  foreign = {id est},
+  short-format = \itshape,
+  foreign-lang = latin,
+}
+
+\DeclareAcronym{io}{%
+  short = {I/O},
+  long = {input {\&} output},
+}
+
+\DeclareAcronym{json}{%
+  short = JSON,
+  long = {JavaScript Object Notation},
+}
+
+\DeclareAcronym{mse}{%
+  short = {MSE},
+  long = {mean squared error},
+}
+
+\DeclareAcronym{nist}{%
+  short = NIST,
+  long = {National Institute of Standards and Technology},
+}
+
+\DeclareAcronym{ogdf}{%
+  short = OGDF,
+  long = {Open Graph Drawing Framework},
+}
+
+\DeclareAcronym{pc}{%
+  short = {PC},
+  long = {personal computer},
+}
+
+\DeclareAcronym{pca}{%
+  short = PCA,
+  long = {principal component analysis},
+}
+
+\DeclareAcronym{posix}{%
+  short = POSIX,
+  long = {Portable Operating System Interface},
+}
+
+\DeclareAcronym{pp}{%
+  short = {pp.},
+  long = {pages},
+}
+
+\DeclareAcronym{ram}{%
+  short = {RAM},
+  long = {random access memory},
+}
+
+\DeclareAcronym{rdf}{%
+  short = RDF,
+  long = {radial distribution function},
+}
+
+\DeclareAcronym{relu}{%
+  short = {ReLU},
+  long = {rectified linear unit},
+}
+
+\DeclareAcronym{rms}{%
+  short = RMS,
+  long = {root mean squared},
+}
+
+\DeclareAcronym{sgd}{%
+  short = {SGD},
+  long = {stochastic gradient descent},
+}
+
+\DeclareAcronym{sql}{%
+  short = {SQL},
+  long = {Structured Query Language},
+}
+
+\DeclareAcronym{st}{%
+  short = {s.t.},
+  long = {such that},
+}
+
+\DeclareAcronym{tab}{%
+  short = {tab.},
+  long = {table},
+}
+
+\DeclareAcronym{tar}{%
+  short = {TAR},
+  long = {tape archive},
+}
+
+\DeclareAcronym{thm}{%
+  short = {thm.},
+  long = {theorem},
+}
+
+\DeclareAcronym{ui}{%
+  short = {UI},
+  long = {user interface},
+}
+
+\DeclareAcronym{url}{%
+  short = URL,
+  long = {uniform resource locator},
+}
+
+\DeclareAcronym{wrt}{%
+  short = {w.r.t.},
+  long = {with respect / regard to},
+}
+
+% If the following acronym is renamed to 'xml' (as it ought to) the formatting of the list of abbreviations breaks.
+% I frankly cannot understand why this happens but it took me the better part of a day to figure out.
+\DeclareAcronym{nxml}{%
+  short = XML,
+  long = {Extensible Markup Language},
+  sort = {xml},
+}
+
+\DeclareAcronym{nxslt}{%
+  short = XSLT,
+  long = {Extensible Stylesheet Language Transformations},
+  sort = {xslt},
+}
+
+\newcommand*{\fakeacronyms}{%
+  \acuse{pp,ed,etal}
+}

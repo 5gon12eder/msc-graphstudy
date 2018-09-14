@@ -1,0 +1,321 @@
+#! /usr/bin/python3
+#! -*- coding:utf-8; mode:python; -*-
+
+# Copyright (C) 2018 Karlsruhe Institute of Technology
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+#
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with this program.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+from sys import hexversion as PYTHON_HEXVERSION
+if PYTHON_HEXVERSION < 0x30602f0:
+    raise Exception("Your Python interpreter is too old; Python 3.6 or newer is required for this program to run")
+
+import argparse
+import logging
+import os
+import re
+import shutil
+import subprocess
+import sys
+
+PROGRAM_NAME = 'add-component'
+
+class Error(Exception): pass
+
+def main(args):
+    ns = parse_cli_args(args)
+    if not os.path.isfile('.msc-graphstudy'):
+        raise Error("Confused about top-level source directory")
+    files = set()
+    for comp in ns.components:
+        files.add(generate_header(comp, ns))
+        if ns.inline: files.add(generate_inline(comp, ns))
+        files.add(generate_source(comp, ns))
+        files.add(generate_test(comp, ns))
+    files.add(update_cmake(ns.components))
+    filelist = list(filter(None, files))
+    if ns.git and filelist:
+        git_add(filelist)
+
+def parse_cli_args(args):
+    ap = argparse.ArgumentParser(
+        prog=PROGRAM_NAME,
+        usage="%(prog)s [--force] [--] NAME...",
+        add_help=False,
+        description="Create stubs for new components.",
+        epilog="This script must be run from the top-level source directory.",
+    )
+    ap.add_argument('-i', '--inline', action='store_true', help="create an additional inline header file stub")
+    ap.add_argument('-f', '--force', action='store_true', help="overwrite existing files")
+    ap.add_argument('-n', '--no-clobber', action='store_true', help="ignore existing files")
+    ap.add_argument('-g', '--git', action='store_true', help="add new files to Git")
+    ap.add_argument('-v', '--verbose', action='count', default=0, help="produce more verbose output")
+    ap.add_argument('--help', action='help', help="show usage information and exit")
+    ap.add_argument('--version', action='version', version=PROGRAM_NAME, help="show version information and exit")
+    ap.add_argument('components', metavar='NAME', nargs='+', type=parse_compname, help="components to create stubs for")
+    ns = ap.parse_args(args)
+    if ns.verbose == 0: pass
+    elif ns.verbose == 1: logging.getLogger().setLevel(logging.INFO)
+    elif ns.verbose > 1: logging.getLogger().setLevel(logging.DEBUG)
+    else: assert False
+    return ns
+
+def parse_compname(string):
+    tests = [
+        lambda s : re.match(r'^\w+$', s),
+        lambda s : s.lower() == s,
+        lambda s : not (s.startswith('_') or s.endswith('_') or '__' in s),
+        lambda s : s[0] not in '0123456789',
+    ]
+    for part in string.split('/'):
+        if not all(test(part) for test in tests):
+            raise argparse.ArgumentTypeError("Bad component name: {!r}".format(string))
+    return string
+
+def generate_header(compname, ns=None):
+    (filename, dirname, basename) = prepare_path('src/common/' + compname, suffix='.hxx', ns=ns)
+    if is_none_triple(filename, dirname, basename): return
+    guardname = 'MSC_' + compname.upper().replace('/', '_') + '_HXX'
+    subguardname = 'MSC_INCLUDED_FROM_' + compname.upper().replace('/', '_') + '_HXX'
+    lines = [
+        '/* -*- coding:utf-8; mode:c++; -*- */',
+        '',
+        '/**',
+        ' * @file {:s}'.format(basename),
+        ' *',
+        ' * @brief',
+        ' *     TODO: Explain this header file',
+        ' *',
+        ' */',
+        '',
+        '#ifndef {:s}'.format(guardname),
+        '#define {:s}'.format(guardname),
+        '',
+        '',
+        'namespace msc',
+        '{',
+        '',
+        '}  // namespace msc',
+        '',
+    ]
+    if ns.inline:
+        extralines = [
+            '#define {:}'.format(subguardname),
+            '#include "{:}"'.format(compname + '.txx'),
+            '#undef {:}'.format(subguardname),
+            '',
+        ]
+        lines.extend(extralines)
+    lines.append('#endif  // !defined({:s})'.format(guardname))
+    logging.info("Creating stub header file {!r} ...".format(filename))
+    write_lines(lines, filename)
+    return filename
+
+def generate_inline(compname, ns=None):
+    (filename, dirname, basename) = prepare_path('src/common/' + compname, suffix='.txx', ns=ns)
+    if is_none_triple(filename, dirname, basename): return
+    subguardname = 'MSC_INCLUDED_FROM_' + compname.upper().replace('/', '_') + '_HXX'
+    subnamespace = 'detail::' + compname.lower().replace('/', '_')
+    lines = [
+        '/* -*- coding:utf-8; mode:c++; -*- */',
+        '',
+        '#ifndef {:s}'.format(subguardname),
+        '#  error "Never `#include <{0:s}.txx>` directly, `#include <{0:s}.hxx>` instead"'.format(compname),
+        '#endif',
+        '',
+        '',
+        'namespace msc',
+        '{',
+        '',
+        '    namespace ' + subnamespace,
+        '    {',
+        '',
+        '    }  // namespace ' + subnamespace,
+        '',
+        '}  // namespace msc',
+    ]
+    logging.info("Creating stub inline file {!r} ...".format(filename))
+    write_lines(lines, filename)
+    return filename
+
+def generate_source(compname, ns=None):
+    (filename, dirname, basename) = prepare_path('src/common/' + compname, suffix='.cxx', ns=ns)
+    if is_none_triple(filename, dirname, basename): return
+    lines = [
+        '/* -*- coding:utf-8; mode:c++; -*- */',
+        '',
+        '#ifdef HAVE_CONFIG_H',
+        '#  include <config.h>',
+        '#endif',
+        '',
+        '#include "{:s}.hxx"'.format(compname),
+        '',
+        '',
+        'namespace msc',
+        '{',
+        '',
+        '}  // namespace msc',
+    ]
+    logging.info("Creating stub source file {!r} ...".format(filename))
+    write_lines(lines, filename)
+    return filename
+
+def generate_test(compname, ns=None):
+    (filename, dirname, basename) = prepare_path('test/unit/' + compname, suffix='.cxx', ns=ns)
+    if is_none_triple(filename, dirname, basename): return
+    lines = [
+        '/* -*- coding:utf-8; mode:c++; -*- */',
+        '',
+        '#ifdef HAVE_CONFIG_H',
+        '#  include <config.h>',
+        '#endif',
+        '',
+        '#define MSC_RUN_ALL_UNIT_TESTS_IN_MAIN',
+        '',
+        '#include "{:s}.hxx"'.format(compname),
+        '',
+        '#include "unittest.hxx"',
+        '',
+        '',
+        'namespace /*anonymous*/',
+        '{',
+        '',
+        '}  // namespace /*anonymous*/',
+        '',
+    ]
+    logging.info("Creating stub unit test file {!r} ...".format(filename))
+    write_lines(lines, filename)
+    return filename
+
+def prepare_path(dirspec, prefix=None, suffix=None, ns=None):
+    parts = list(filter(None, dirspec.split('/')))
+    prefix = prefix if prefix is not None else ''
+    suffix = suffix if suffix is not None else ''
+    parts[-1] = prefix + parts[-1] + suffix
+    filename = os.path.join(*parts)
+    (dirname, basename) = os.path.split(filename)
+    if overwrite_check(filename, ns):
+        os.makedirs(dirname, exist_ok=True)
+        return (filename, dirname, basename)
+    return (None, None, None)
+
+def is_none_triple(a, b, c):
+    return a is None and b is None and c is None
+
+def overwrite_check(filename, ns=None):
+    if os.path.exists(filename):
+        if ns.force and ns.no_clobber:
+            raise ValueError("The --force and --no-clobber options are mutually exclusive")
+        elif ns.force:
+            logging.warning("Overwriting existing file: {!r}".format(filename))
+            return True
+        elif ns.no_clobber:
+            logging.warning("File already exists: {!r}".format(filename))
+            return False
+        else:
+            raise Error("Cowardly refusing to overwrite existing files, use '--force' or --no-clobber")
+    else:
+        return True
+
+class ComponentListParser(object):
+
+    class Error(Exception): pass
+
+    __STATE_BEFORE = 1
+    __STATE_INSIDE = 2
+    __STATE_AFTER = 3
+
+    __LAST_LINE_BEFORE = re.compile(r'^\s*#\s+\[\s*BEGIN COMPONENT LIST\s*\]\s*$')
+    __FIRST_LINE_AFTER = re.compile(r'^\s*#\s+\[\s*END COMPONENT LIST\s*\]\s*$')
+
+    def __init__(self):
+        self.lines_before = None
+        self.lines_after = None
+        self.components = None
+
+    def __call__(self, istr):
+        self.lines_before = list()
+        self.lines_after = list()
+        self.components = set()
+        parser = {
+            self.__class__.__STATE_BEFORE : self.__parse_before,
+            self.__class__.__STATE_INSIDE : self.__parse_inside,
+            self.__class__.__STATE_AFTER  : self.__parse_after,
+        }
+        state = self.__class__.__STATE_BEFORE
+        for line in map(str.rstrip, istr):
+            state = parser[state](line)
+        if state is not self.__class__.__STATE_AFTER:
+            raise self.__class__.Error("Cannot parse CMake component list")
+
+    def __parse_before(self, line):
+        self.lines_before.append(line)
+        if self.__class__.__LAST_LINE_BEFORE.match(line):
+            return self.__class__.__STATE_INSIDE
+        return self.__class__.__STATE_BEFORE
+
+    def __parse_inside(self, line):
+        if self.__class__.__FIRST_LINE_AFTER.match(line):
+            self.lines_after.append(line)
+            return self.__class__.__STATE_AFTER
+        else:
+            self.components.add(line.strip())
+            return self.__class__.__STATE_INSIDE
+
+    def __parse_after(self, line):
+        self.lines_after.append(line)
+        return self.__class__.__STATE_AFTER
+
+    def dump(self, ostr):
+        indent = ' ' * 4
+        for line in self.lines_before:
+            print(line, file=ostr)
+        for comp in sorted(self.components):
+            print(indent, comp, sep='', file=ostr)
+        for line in self.lines_after:
+            print(line, file=ostr)
+
+def update_cmake(components):
+    cmakefile = os.path.join('src', 'common', 'CMakeLists.txt')
+    logging.debug("Parsing CMake file {!r} ...".format(cmakefile))
+    try:
+        parser = ComponentListParser()
+        with open(cmakefile, 'r') as istr:
+            parser(istr)
+        logging.debug("Components before: " + ', '.join(parser.components))
+        parser.components.update(components)
+        shutil.copy(cmakefile, cmakefile + '~')
+        with open(cmakefile, 'w') as ostr:
+            parser.dump(ostr)
+        return cmakefile
+    except ComponentListParser.Error:
+        logging.warning("Cannot parse CMake file {!r}; please add the new components yourself".format(cmakefile))
+
+def write_lines(lines, filename):
+    with open(filename, 'w') as ostr:
+        for line in lines:
+            print(line, file=ostr)
+
+def git_add(filenames):
+    cmd = ['git', 'add', '--']
+    cmd.extend(filenames)
+    result = subprocess.run(cmd)
+    if result.returncode != 0:
+        raise Error("Cannot add new files to Git")
+
+if __name__ == '__main__':
+    logging.basicConfig(format='{:s}: %(levelname)s: %(message)s'.format(PROGRAM_NAME), level=logging.WARNING)
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except Error as e:
+        logging.error(str(e))
+        sys.exit(True)

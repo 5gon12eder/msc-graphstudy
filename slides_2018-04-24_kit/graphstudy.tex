@@ -1,0 +1,614 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\documentclass{beamer}
+
+\input{preamble.tex}
+\KITtitleimage[width = 0.95\paperwidth]{pics/titlepicture.png}
+\logo{\pgfimage[height = 1.5\KITlogoht]{pics/algo-logo.pdf}}
+
+\addbibresource{literature.bib}
+
+\hypersetup{
+  pdfauthor = {Moritz Klammler},
+  pdftitle = {Aesthetic Value of Graph Layouts: Investigation of Statistical Syndromes for Automatic Quantification},
+  pdfsubject = {Master's Thesis},
+  pdfkeywords = {}
+}
+
+\title{Aesthetic Value of Graph Layouts}
+\subtitle{Investigation of Statistical Syndromes for Automatic Quantification}
+\author{Moritz Klammler}
+\institute[Institute of Theoretical Computer Science]%
+          {Master's Thesis of Moritz Klammler at the Institute of Theoretical Computer Science}
+
+\date{April 2018}
+
+\begin{document}
+
+\begin{frame}
+  \maketitle
+\end{frame}
+
+\begin{frame}
+  \frametitle{\abstractname}
+  \noindent\parbox{\textwidth}{%
+    \footnotesize
+    Visualizing relational data as drawing of graphs is a technique in very wide-spread use across many fields and
+    professions.  While many graph drawing algorithms have been proposed to automatically generate a supposedly
+    high-quality picture from an abstract mathematical data structure, the graph drawing community is still searching
+    for a way to quantify the aesthetic value of any given solution in a way that allows one to compare graph layouts
+    created by different algorithms for the same graph (presumably to automatically choose the better one).  We believe
+    that one promising path towards this goal could be enabled by combining data analysis techniques that have proven
+    useful in other scientific disciplines that are dealing with large structures such as astronomy, crystallography or
+    thermodynamics.  In this work we present an initial investigation of some statistical properties of graph layouts
+    that we believe could provide viable syndromes for the aesthetic value.  As a proof of concept, we used machine
+    learning techniques to train a neural network with the results of our data analysis and thereby built a model that
+    is able to discriminate between better and worse layouts with an accuracy of \(95\,\%\).  A rudimentary evaluation
+    of the model was performed and is presented.  This work primarily provides an infrastructure to enable further
+    experimentation on the topic and will be made available to the public as Free Software.
+  }
+\end{frame}
+
+\begin{frame}
+  \frametitle{\contentsname}
+  \begin{multicols}{2}
+    \tableofcontents
+  \end{multicols}
+\end{frame}
+
+\section{Introduction}
+
+\subsection{Motivation}
+\begin{frame}
+  \frametitle{Motivation}
+  \begin{center}
+    \begin{tabular}{c@{\qquad\qquad}c}
+      \InputTikzGraph{0.35\textwidth}{pics/example-a.tikz} & \InputTikzGraph{0.35\textwidth}{pics/example-b.tikz}
+    \end{tabular}
+  \end{center}
+  \par\vfill
+  Possible applications:
+  \par\smallskip
+  \begin{itemize}
+  \item Run \(N\) layout algorithms in parallel, choose the best result
+  \item Select layout algorithm for a given application
+  \item Aid the development of domain-specific layout algorithms
+  \end{itemize}
+\end{frame}
+
+\subsection{Problem Statement}
+\begin{frame}
+  \frametitle{Problem Statement}
+  \begin{itemize}
+  \item \emph{Simple graphs} only\footnote{undirected, no loops, no multiple edges}
+  \item \emph{Vertex layouts} only\footnote{vertices are 2D points, edges are straight lines}
+  \item Two layouts for the \emph{same} graph given
+  \item Decide which one is aesthetically more pleasing\footnote{ideally, we aim for a \emph{partial order}}
+  \end{itemize}
+\end{frame}
+
+\subsection{Previous Work}
+\begin{frame}
+  \frametitle{Previous Work}
+  Existing Measures:
+  \par\smallskip
+  \begin{itemize}
+  \item Energy (from force-directed methods)
+  \item\textcite{Purchase2002}\newline
+    \begingroup\footnotesize
+    edge crossings, edge bends, symmetry, minimal angles between edges, edge orthogonality, node orthogonality,
+    consistent flow direction
+    \endgroup
+  \item Binary Stress \parencite{Kamada1989,Koren2008}
+  \item\textcite{Klapaukh2014}
+  \item Combined Metric \parencite{Huang2016}
+  \end{itemize}
+  \par\bigskip
+  Problems with these:
+  \par\smallskip
+  \begin{itemize}
+  \item Too many a priory assumptions
+  \item Too localized / too little context
+  \item Might loose valuable information due to oversimplification
+  \item Some are unstable with respect to the simplest transformations (scaling)
+  \end{itemize}
+\end{frame}
+
+\subsection{Our Contribution}
+\begin{frame}
+  \frametitle{Our Contribution}
+  \begin{itemize}
+  \item Idea: Use data analysis techniques that were successful in other disciplines (crystallography, astronomy,
+    thermodynamics, \dots)
+  \item Strategy: Condense this information into a fixed-size feature vector via statistic analysis
+  \item Question: Can we find syndromes that allow for successful automatic quantification?
+  \item Guideline: Try to use as few a priori assumptions as possible and detect features from first principles
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{tikzpicture}[remember picture, overlay]
+    \node at (current page.center) {\pgfimage[height = 0.8\paperheight]{pics/webui-compare.png}};
+  \end{tikzpicture}
+\end{frame}
+
+\section{Methodology}
+\begin{frame}
+  \frametitle{Methodology}
+  \begin{itemize}
+  \item Gather as many graphs as possible
+  \item Obtain as many (known) good and bad layouts as possible
+  \item Compute properties for all of them
+  \item Use \emph{a priori} knowledge to label pairs of layouts
+  \item Use data to build a discriminator
+  \end{itemize}
+\end{frame}
+
+\subsection{Implementation}
+\begin{frame}
+  \frametitle{Implementation}
+  \begin{itemize}
+  \item Plug-in infrastructure for unattended experimentation
+  \item Graph generators, layouts, layout transformations and properties implemented as small programs
+  \item Siamese neural network
+  \item Feature-rich web front-end for data inspection
+  \end{itemize}
+  \par\bigskip
+  Technologies:
+  \par\smallskip
+  \begin{itemize}
+  \item Open Graph Drawing Framework (OGDF)
+  \item {\Keras} + {\TensorFlow}
+  \item {\CXX}, {\Python}, {\SQLite}, {\XSLT}, {\CMake}, \dots
+  \end{itemize}
+\end{frame}
+
+\section{Statistical Syndromes}
+\begin{frame}
+  \frametitle{Statistical Syndromes of Graph Layouts}
+  We investigated several \emph{properties} (multisets of scalar events) for a given layout.
+  \par\medskip
+  \begin{itemize}
+  \item Principal Components (\enum{PRINCOMP1ST} and \enum{PRINCOMP2ND})
+  \item Angles Between Incident Edges (\enum{ANGULAR})
+  \item Edge Lengths (\enum{EDGE\_LENGTH})
+  \item Pairwise Distances (\enum{RDF\_GLOBAL} and \enum{RDF\_LOCAL})
+  \item Tension (\enum{TENSION})
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Principal Components}
+  %\framesubtitle{\enum{PRINCOMP1ST} and \enum{PRINCOMP2ND}}
+  \begin{itemize}
+  \item Find linear independent axes among which the moment of inertia is maximized
+  \item Consider the distribution of vertex coordinates along those axes
+  \item Can be computed with \(\BigO(n)\) effort
+  \end{itemize}
+  \par\vspace{4ex}
+  \begin{align*}
+    &\menum{PRINCOMP1ST} = \multiset{\braket{\toolmark[2]{TT1}{\vec{p}^{(1)}}}{\Layout(v)}\suchthat{v}\in\GraphV}\\
+    &\menum{PRINCOMP2ND} = \multiset{\braket{\toolmark[2]{TT2}{\vec{p}^{(2)}}}{\Layout(v)}\suchthat{v}\in\GraphV}
+  \end{align*}
+  \begin{tikzpicture}[remember picture, overlay]
+    \node<2>[tooltip, anchor = south east, above left = 2ex of TT1] (TT1text) {first principal axis};
+    \draw<2>[toolarrow] (TT1text.east) .. controls (TT1|-TT1text.east) .. (TT1);
+    \node<2>[tooltip, anchor = north east, below left = 2ex of TT2] (TT2text) {second principal axis};
+    \draw<2>[toolarrow] (TT2text.east) .. controls (TT2|-TT2text.east) .. (TT2);
+  \end{tikzpicture}
+\end{frame}
+
+\PropertyDemo[PRINCOMP1ST]{princomp1st}{1\textsuperscript{st} Principal Component}
+\PropertyDemo[PRINCOMP2ND]{princomp2nd}{2\textsuperscript{nd} Principal Component}
+
+\begin{frame}
+  \frametitle{Angles Between Incident Edges (\enum{ANGULAR})}
+  \begin{itemize}
+  \item Enumerate polar angles of incident edges in clockwise order
+  \item Compute adjacent differences (of polar angles)
+  \item Special cases for \(\deg(v)=1\) and degenerate cases
+  \item Consider distribution of all those angles
+  \item Can be computed with \(\BigO(n+m)\) effort
+  \end{itemize}
+
+  \begin{equation*}
+    \menum{ANGULAR} = \Disjunction_{v\in\GraphV}\phi_\Layout(v)
+  \end{equation*}
+\end{frame}
+
+\PropertyDemo[ANGULAR]{angular}{Angles Between Incident Edges}
+
+\begin{frame}
+  \frametitle{Edge Lengths (\enum{EDGE\_LENGTH})}
+  \begin{itemize}
+  \item Consider distribution of edge lengths
+  \item Can be computed with \(\BigO(m)\) effort
+  \end{itemize}
+  \par
+  \begin{equation*}
+    \menum{EDGE\_LENGTH}=\multiset{\toolmark[2]{TT}{\edgelen_\Layout(e)}\suchthat{e}\in\GraphE}
+  \end{equation*}
+  \begin{tikzpicture}[remember picture, overlay]
+    \node<2>[tooltip, anchor = north east, below left = 2ex of TT] (TTtext)
+            {length of edge \(e\) in layout \(\Layout\)};
+    \draw<2>[toolarrow] (TTtext.east) .. controls (TT|-TTtext.east) .. (TT);
+  \end{tikzpicture}
+\end{frame}
+
+\PropertyDemo[EDGE\_LENGTH]{edge-length}{Edge Lengths}
+
+\begin{frame}
+  \frametitle{Pairwise Distances (\enum{RDF\_GLOBAL})}
+  \begin{itemize}
+  \item Compute pairwise distances between all pairs of vertices
+  \item Can be computed with \(\BigO(n^2)\) effort
+  \end{itemize}
+  \par
+  \begin{equation*}
+    \menum{RDF\_GLOBAL} = \multiset{\toolmark[2]{TT}{\dist_\Layout(v_1,v_2)}\suchthat{}v_1,v_2\in\GraphV}
+  \end{equation*}
+  \begin{tikzpicture}[remember picture, overlay]
+    \node<2>[tooltip, anchor = north east, below left = 2ex of TT] (TTtext)
+            {distance between \(\Layout(v_1)\) and \(\Layout(v_2)\)};
+    \draw<2>[toolarrow] (TTtext.east) .. controls (TT|-TTtext.east) .. (TT);
+  \end{tikzpicture}
+\end{frame}
+
+\PropertyDemo[RDF\_GLOBAL]{rdf-global}{Pairwise Distances}
+
+\begin{frame}
+  \frametitle{Pairwise Distances (\(\menum{RDF\_LOCAL}(d)\))}
+  \begin{itemize}
+  \item Restrict global RDF to those pairs of vertices that have a graph-theoretical distance of at most
+    \(d\in\mathbb{R}\)
+  \item Repeat for different values of \(d=2^i\) for \(i\in\mathbb{N}_0\) up to the longest finite shortest path in the
+    graph
+  \item Interpolates between \enum{EDGE\_LENGTH} and \enum{RDF\_GLOBAL}
+  \item Can be computed with \(\BigO(n^3)\) effort
+  \end{itemize}
+  \par
+  \begin{equation*}
+    \menum{RDF\_LOCAL}(d) = \multiset{%
+      \toolmark[2]{TT1}{\dist_\Layout(v_1,v_2)}
+      \suchthat
+      \toolmark[2]{TT2}{\dist(v_1,v_2)} \leq d
+      \suchthat
+      v_1, v_2 \in \GraphV
+    }
+  \end{equation*}
+  \begin{tikzpicture}[remember picture, overlay]
+    \node<2>[tooltip, below left = 2ex of TT1, anchor = north east] (TT1text)
+            {distance between \(\Layout(v_1)\) and \(\Layout(v_2)\)};
+    \node<2>[tooltip, below left = 6ex of TT2, anchor = north east] (TT2text)
+            {length of shortest path from \(v_1\) to \(v_2\)};
+    \draw<2>[toolarrow] (TT1text.east) .. controls (TT1|-TT1text.east) .. (TT1);
+    \draw<2>[toolarrow] (TT2text.east) .. controls (TT2|-TT2text.east) .. (TT2);
+  \end{tikzpicture}
+\end{frame}
+
+\PropertyDemo[RDF\_LOCAL(1)]{rdf-local-0}{Pairwise Distances}
+\PropertyDemo[RDF\_LOCAL(2)]{rdf-local-1}{Pairwise Distances}
+\PropertyDemo[RDF\_LOCAL(4)]{rdf-local-2}{Pairwise Distances}
+\PropertyDemo[RDF\_LOCAL(8)]{rdf-local-3}{Pairwise Distances}
+\PropertyDemo[RDF\_LOCAL(16)]{rdf-local-4}{Pairwise Distances}
+\PropertyDemo[RDF\_LOCAL(32)]{rdf-local-5}{Pairwise Distances}
+
+\begin{frame}
+  \frametitle{Tension (\enum{TENSION})}
+  \begin{itemize}
+  \item Consider distribution of quotients of node and graph distances
+  \item Inspired by stress but has well-behaved response to scaling
+  \item Can be computed with \(\BigO(n^3)\) effort
+  \end{itemize}
+  \par\vfill
+  \begin{equation*}
+    \menum{TENSION} =
+    \frac{\card{\GraphE}}{\sum\limits_{e\in\GraphE}\toolmark[2]{TT1}{\edgelen_\Layout(e)}}
+    \multiset{%
+      \frac{\toolmark[2]{TT2}{\dist_\Layout(v_1,v_2)}}{\toolmark[2]{TT3}{\dist(v_1,v_2)}}
+      \suchthat
+      v_1,v_2\in\GraphV
+    }
+  \end{equation*}
+  \begin{tikzpicture}[remember picture, overlay]
+    \node<2>[tooltip, anchor = north east, below left = 3ex of TT1] (TT1text)
+            {length of edge \(e\) in layout \(\Layout\)};
+    \node<2>[tooltip, anchor = south east, above left = 3ex of TT2] (TT2text)
+            {distance between \(\Layout(v_1)\) and \(\Layout(v_2)\)};
+    \node<2>[tooltip, anchor = north east, below left = 7ex of TT3] (TT3text)
+            {length of shortest path from \(v_1\) to \(v_2\)};
+    \draw<2>[toolarrow] (TT1text.east) .. controls (TT1|-TT1text.east) .. (TT1);
+    \draw<2>[toolarrow] (TT2text.east) .. controls (TT2|-TT2text.east) .. (TT2);
+    \draw<2>[toolarrow] (TT3text.east) .. controls (TT3|-TT3text.east) .. (TT3);
+  \end{tikzpicture}
+\end{frame}
+
+\PropertyDemo[TENSION]{tension}{Tension}
+
+\section{Data Generation}
+\subsection{Graphs}
+
+\subsubsection{Graph Generators}
+\begin{frame}
+  \frametitle{Graph Generators}
+  \begin{center}
+    \small\noindent%
+    \begin{tabular}{cccc}
+      \InputTikzGraph{0.2\textwidth}{pics/lindenmayer.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/quasi4d.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/bottle.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/mosaic1.tikz}\\[1ex]
+      \enum{LINDENMAYER} & \enum{QUASI4D} & \enum{BOTTLE} & \enum{MOSAIC1}\\[2ex]
+      \InputTikzGraph{0.2\textwidth}{pics/grid.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/torus1.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/torus2.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/mosaic2.tikz}\\[1ex]
+      \enum{GRID} & \enum{TORUS1} & \enum{TORUS2} & \enum{MOSAIC2}
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+\subsubsection{Graph Import Sources}
+\begin{frame}
+  \frametitle{Graph Import Sources}
+  \begin{center}
+    \small\noindent%
+    \begin{tabular}{cccc}
+      \InputTikzGraph{0.2\textwidth}{pics/rome.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/north.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/randdag.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/import.tikz}\\[1ex]
+      \enum{ROME} & \enum{NORTH} & \enum{RANDDAG} & \enum{IMPORT}\\[2ex]
+      \InputTikzGraph{0.2\textwidth}{pics/bcspwr.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/grenoble.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/psadmit.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/smtape.tikz}\\[1ex]
+      \enum{BCSPWR} & \enum{GRENOBLE} & \enum{PSADMIT} & \enum{SMTAPE}
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+\subsection{Layouts}
+\begin{frame}
+  \frametitle{Layouts}
+  \begin{center}
+    \small\noindent%
+    \begin{tabular}{ccc}
+      \InputTikzGraph{0.2\textwidth}{pics/native.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/fmmm.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/stress.tikz}\\[1ex]
+      \enum{NATIVE} & \enum{FMMM} & \enum{STRESS}\\[2ex]
+      \InputTikzGraph{0.2\textwidth}{pics/random-uniform.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/random-normal.tikz}
+      & \InputTikzGraph{0.2\textwidth}{pics/phantom.tikz}\\[1ex]
+      \enum{RANDOM\_UNIFORM} & \enum{RANDOM\_NORMAL} & \enum{PHANTOM}
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+\subsubsection{Proper Layouts}% dummy
+\subsubsection{Garbage Layouts}% dummy
+
+\section{Data Augmentation}
+
+\begin{frame}
+  \frametitle{Data Augmentation}
+  \begin{itemize}
+  \item Layout worsening (unary layout transformation)
+    \begin{itemize}
+    \item Input: Parent layout \(\Layout\) and parameter \(0\leq{r}\leq1\)
+    \item Output: Worsened layout \(\Layout_r'\)
+    \end{itemize}
+  \item Layout interpolation (binary layout transformation)
+    \begin{itemize}
+    \item Input: Parent layouts \(\Layout_\mathrm{A}\) and \(\Layout_\mathrm{B}\) and parameter \(0\leq{r}\leq1\)
+    \item Output: Interpolated layout \(\Layout_r'\)
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\subsection{Layout Worsening}
+
+\LayWorseDemo[PERTURB]{perturb}
+\LayWorseDemo[FLIP\_NODES]{flip-nodes}
+\LayWorseDemo[FLIP\_EDGES]{flip-edges}
+\LayWorseDemo[MOVLSQ]{movlsq}
+\nocite{Schaefer2006}
+
+\subsection{Layout Interpolation}
+
+\LayInterDemo[LINEAR]{linear}
+\LayInterDemo[XLINEAR]{xlinear}
+
+\section{Feature Extraction}
+\begin{frame}
+  \frametitle{Feature Extraction}
+  \begin{itemize}
+  \item Properties are multisets of unbounded size
+  \item We need to condense them into a fixed-size feature vector
+  \item Use histograms to present data
+  \item Use sliding averages (\alert<2>{Gaussian kernel}) for \enum{RDF\_LOCAL} instead
+  \item For each Property:
+    \begin{itemize}
+    \item Arithmetic mean and root mean squared (2 values)
+    \item Entropy regression of histograms (2 values)
+    \item Differential entropy in case of \enum{RDF\_LOCAL} (1 value)
+    \end{itemize}
+  \item Principal components (4 values)
+  \item (Logarithm of) number of vertices and edges (2 values)
+  \end{itemize}
+  \par\bigskip
+  All features are normalized by subtracting the mean and dividing by the standard deviation.
+  \begin{tikzpicture}[remember picture, overlay]
+    \node<2>[smartbox] at (current page.center) {%
+      \begin{minipage}{0.4\paperwidth}
+        Sliding average with kernel \(f\):
+        \[ F_f(x) = \frac{\sum_{i=1}^{n} f(x,x_i)}{\int_{-\infty}^{+\infty}\diff{y}\sum_{i=1}^{n} f(y,x_i)} \]
+        Gaussian kernel:
+        \[ g_\sigma(\mu,x) = \frac{1}{\sigma\sqrt{2\pi}} \: e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2} \]
+      \end{minipage}
+    };
+    \node<3>{};% dummy
+  \end{tikzpicture}
+\end{frame}
+
+\subsection{Entropy of Histograms}
+\begin{frame}
+  \frametitle{Entropy of Histograms}
+  \begin{definition}[Discrete Entropy]
+    Let \(\Vec{H}\) be a histogram with \(n\in\IntsN\) bins that have the values (relative frequency counts)
+    \(H_1,\ldots,H_2\in\RealsNN\) such that \(\sum_{i=1}^{n}H_i=1\).  Then the entropy of \(\Vec{H}\) is
+    \begin{equation*}
+      \Entropy(\Vec{H}) = -\sum_{i=1}^{n} H_i \log_2(H_i)
+    \end{equation*}
+    where we use the convention that bins with \(H_i=0\) shall contribute a zero term to the sum.
+  \end{definition}
+  \par\bigskip
+  \begin{itemize}
+  \item Depends strongly on the bin width / count
+  \item Entropy grows exponentially with bin count
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Entropy of Histogram}
+  \begin{center}
+    \InputTikzGraph{0.5\textwidth}{pics/thingy.tikz}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Entropy of Histogram}
+  \begin{center}
+    \InputLuatikzPlot{pics/entropy-regression.pgf}
+  \end{center}
+\end{frame}
+
+\subsection{Entropy of Sliding Averages}
+\begin{frame}
+  \frametitle{Entropy of Sliding Averages}
+  \begin{definition}[Differential Entropy]
+    Let \(f:\Reals\to\RealsNN\) be a non-negative steady function normalized such that
+    \(\int_{-\infty}^{+\infty}\diff{x}f(x)=1\).  The \emph{differential entropy} of \(f\) is defined as
+    \begin{equation*}
+      \Entropy*(f) = -\int_{-\infty}^{+\infty} \diff{x} x\log_2(x)
+    \end{equation*}
+    where we use the convention that the integrand shall be zero for those \(x\in\Reals\) where \(f(x)=0\).
+  \end{definition}
+  \par\bigskip
+  \begin{itemize}
+  \item Originally proposed by \textcite{Shannon1948}
+  \item Not a measure of information \parencite{Jaynes1963}
+  \item Can actually be negative
+  \item Remotely useful transcendental properties \parencite{Cover1991}
+  \end{itemize}
+\end{frame}
+
+\section{Discriminator Model}
+\begin{frame}
+  \frametitle{Discriminator Model}
+  \begin{itemize}
+  \item Receives two feature vectors of layouts \(\Layout_\mathrm{A}\) and \(\Layout_\mathrm{B}\) as inputs
+  \item Outputs a number between \(-1\) and \(+1\)
+  \end{itemize}
+  \begin{equation*}
+    \mathcal{D}(\Layout_\mathrm{A},\Layout_\mathrm{B}) =
+    \begin{cases}
+      <0, & \Layout_\mathrm{A} \text{ is considered better}\\
+      >0, & \Layout_\mathrm{B} \text{ is considered better}\\
+      =0, & \text{neither layout is considered better}
+    \end{cases}
+  \end{equation*}
+  \begin{itemize}
+  \item Siamese neural network \parencite{Bromley1994}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Discriminator Model}
+  \begin{center}
+    \pgfimage[height=2.5in]{pics/nn-structure-total.pdf}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Discriminator Model}
+  \begin{center}
+    \pgfimage[height=2.5in]{pics/nn-structure-shared.pdf}
+  \end{center}
+\end{frame}
+
+\section{Evaluation}
+\begin{frame}
+  \frametitle{Evaluation}
+  \begin{itemize}
+  \item Corpora with tens of thousands of labeled pairs \((\Layout_\mathrm{A},\Layout_\mathrm{B},t)\)
+  \item We ensure that \(t\not\approx0\) (\emph{i.e.}~we don't use borderline cases)
+  \item 20\,\% (chosen randomly) of this data is set aside for testing
+  \item \(\mathcal{D}(\Layout_\mathrm{A},\Layout_\mathrm{B})=p\) is considered a success if and only if
+    \(\sign(p)=\sign(t)\)
+  \item Training and testing are repeated with different partitions (cross validation via random subsampling)
+  \item Reproducible success rates in excess of \(95\,\%\) achieved
+  \end{itemize}
+\end{frame}
+
+\subsection{Accuracy}
+\begin{frame}
+  \frametitle{Accuracy}
+  \InputConfusionMatrix{eval-cross-valid.tex}
+\end{frame}
+
+\subsection{Contribution of Individual Properties}
+\begin{frame}
+  \frametitle{Contribution of Individual Properties}
+  \InputPunctureResult[eval-cross-valid.tex]{eval-puncture.tex}
+\end{frame}
+
+\section{Conclusions {\&} Future Work}
+\subsection{Summary}
+\begin{frame}
+  \frametitle{Summary}
+  \begin{itemize}
+  \item Built framework for flexible experimentation
+  \item Developed several graph generators
+  \item Explored ways of data augmentation
+  \item Investigated several properties (some of them promising)
+  \item \enum{RDF\_LOCAL} is most valuable but also most expensive
+  \item Demonstrated feasibility by training neural network
+  \item All experiments run fully automatic and can be repeated by anybody who wishes to do so
+  \item Download source code at \url{http://klammler.eu/msc/}
+  \end{itemize}
+\end{frame}
+
+\subsection{Open Questions and Future Plans}
+\begin{frame}
+  \frametitle{Open Questions and Future Plans}
+  \begin{itemize}
+  \item Additional Properties
+    \begin{itemize}
+    \item Properties involving \emph{edges}
+    \item Shapelet analysis
+    \item More correlations between graph-theoretical and layout properties
+    \end{itemize}
+  \item More elaborate data analysis
+  \item Comparison with existing measures
+  \item User study
+  \item Extension to more general graph drawings
+  \item Application as a meta-heuristic for a genetic layout algorithm
+  \end{itemize}
+\end{frame}
+
+\section{\bibname}
+\begin{frame}[allowframebreaks]
+  \frametitle{\bibname}
+  \printbibliography
+  \par\bigskip
+  \emph{Please refer to the printed thesis for a complete list of references.}
+\end{frame}
+
+\end{document}

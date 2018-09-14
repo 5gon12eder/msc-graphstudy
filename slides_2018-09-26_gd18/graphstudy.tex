@@ -1,0 +1,77 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+% Copyright (C) 2018 Tamara Mchedlidze <mched@iti.uka.de>
+% Copyright (C) 2018 Alexey Pak <alexey.pak@iosb.fraunhofer.de>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\documentclass{beamer}
+
+\input{preamble.tex}
+%\KITtitleimage[width = 0.95\paperwidth]{pics/titlepicture.png}
+%\logo{\pgfimage[height = 1.5\KITlogoht]{pics/algo-logo.pdf}}
+
+\addbibresource{literature.bib}
+
+\hypersetup{
+  pdfauthor = {M. Klammler, T. Mchedlidze and A. Pak},
+  pdftitle = {Aesthetic Discrimination of Graph Layouts},
+  pdfsubject = {26th International Symposium on Graph Drawing and Network Visualization},
+  pdfkeywords = {}
+}
+
+\title{Aesthetic Discrimination of Graph Layouts}
+\subtitle{26\textsuperscript{th} International Symposium on Graph Drawing and Network Visualization}
+\author{M.\,Klammler, T.\,Mchedlidze and A.\,Pak}
+\institute[KIT {\textperiodcentered} Fraunhofer]{%
+  Karlsruhe Institute of Technology in cooperation with
+  Fraunhofer Institute of Optronics, System Technologies and Image Exploitation
+}
+
+\date{September 2018}
+
+\providecommand*{\XValSuccessMean}{\mbox{\textbf{??}}}
+
+\begin{document}
+
+\begin{frame}
+  \maketitle
+\end{frame}
+
+\begin{frame}
+  \frametitle{\abstractname}
+  \noindent\parbox{\textwidth}{%
+    \footnotesize
+    This paper addresses the following basic question: given two layouts of the same graph, which one is more
+    aesthetically pleasing? We propose a neural network-based discriminator model trained on a labeled dataset that
+    decides which of two layouts has a higher aesthetic quality. The feature vectors used as inputs to the model are
+    based on known graph drawing quality metrics, classical statistics, information-theoretical quantities, and
+    two-point statistics inspired by methods of condensed matter physics. The large corpus of layout pairs used for
+    training and testing is constructed using force-directed drawing algorithms and the layouts that naturally stem from
+    the process of graph generation. It is further extended using data augmentation techniques. Our model demonstrates a
+    mean prediction accuracy of $\XValSuccessMean\percent$, outperforming discriminators based on stress and on the
+    linear combination of popular quality metrics by a small but statistically significant margin.
+  }
+\end{frame}
+
+\section{Motivation}
+\section{Related Work}
+\section{Our Contribution}
+\section{Evaluation}
+\section{Conclusion and Future Work}
+
+\nocite{MScThesis}
+\nocite{Arxiv}
+\nocite{GitHubRepo}
+
+\section{\bibname}
+\begin{frame}[allowframebreaks]
+  \frametitle{\bibname}
+  \printbibliography
+  \par\bigskip
+  \emph{Please refer to the paper for a complete list of references.}
+\end{frame}
+
+\end{document}

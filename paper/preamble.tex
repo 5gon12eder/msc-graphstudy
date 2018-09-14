@@ -1,0 +1,214 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Karlsruhe Institute of Technology
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\makeatletter
+
+\usepackage{etoolbox}
+\usepackage{ifluatex}
+\usepackage{ifpdf}
+\usepackage{ifxetex}
+
+\ifboolexpr{ bool {luatex} or bool {xetex} }{%
+  \usepackage{fontspec}
+  \usepackage{polyglossia}
+  \setmainlanguage{english}
+}{%
+  \usepackage[utf8]{inputenc}
+  \usepackage[english]{babel}
+}
+
+\usepackage{amsmath,amsfonts}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{comment}
+\usepackage{csquotes}
+\usepackage{gnuplot-lua-tikz}
+\usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{ifdraft}
+\usepackage{mathrsfs}
+\usepackage{pifont}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usepackage{tango-colors}
+
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning}
+\usetikzlibrary{external}
+
+\newbool{forgdxviii}
+\newbool{forarxiv}
+
+\ifdef{\OnlyGDXVIII}{\booltrue{forgdxviii}}{}
+\ifdef{\OnlyArxiv}{\booltrue{forarxiv}}{}
+
+\providecommand*{\OnlyGDXVIII}[1]{}
+\providecommand*{\OnlyArxiv}[1]{}
+
+\providecommand*{\TikzExternalMode}{graphics if exists}
+\tikzexternalize[%
+  mode = \TikzExternalMode,
+  up to date check = simple,
+  figure name = cache/image-,
+  aux in dpth = false,
+  disable dependency files,
+]
+
+\newcommand*{\BigO}{\mathcal{O}}
+\newcommand*{\IntsNz}{\mathbb{N}_0}
+\newcommand*{\IntsN}{\mathbb{N}}
+\newcommand*{\IntsZ}{\mathbb{Z}}
+\newcommand*{\Reals}{\mathbb{R}}
+\newcommand*{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand*{\card}[1]{\left\lvert#1\right\rvert}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+\newcommand*{\diff}[1]{\mathrm{d}#1\kern0.3em}
+\newcommand*{\enum}[1]{\mbox{\texttt{#1}}}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\menum}[1]{\mbox{\text{\upshape\ttfamily#1}}}
+\newcommand*{\meta}[1]{\ensuremath{\langle#1\rangle}}
+\newcommand*{\nint}[1]{\left\lfloor#1\right\rceil}
+\newcommand*{\st}{:}
+\newcommand*{\vecnorm}[1]{\left\lVert#1\right\rVert}
+\newcommand*{\vv}[1]{\vec{#1}}
+\newcommand*{\transposed}{^\mathrm{T}}
+
+\newcommand*{\Entropy}{\@ifstar\EntropyDifferential\EntropyDiscrete}
+\newcommand*{\EntropyDiscrete}{\mathscr{E}}
+\newcommand*{\EntropyDifferential}{\mathscr{D}}
+
+\DeclareMathOperator{\DM}{DM}
+\DeclareMathOperator{\GM}{GM}
+\DeclareMathOperator{\SM}{SM}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\length}{length}
+\DeclareMathOperator{\stress}{\mathcal{T}}
+\DeclareMathOperator{\ReLU}{ReLU}
+
+\let\epsilon\varepsilon
+
+\newcommand*{\mathendpunct}[1]{\,#1}
+\newcommand*{\percent}{\,\%}
+
+\newcommand*{\latinphrase}[1]{\emph{#1}}
+
+\newlength{\samplelayoutwidth}
+\newlength{\samplelayoutheight}
+\newbool{tikzgraphpreamble}
+
+\newcommand*{\InputLuatikzPlot}[2][]{%
+  \ifpdf%
+    \tikzsetnextfilename{cache/#2}%
+    \input{pics/#2.pgf}%
+  \else%
+    \pgfimage{cache/#2}%
+  \fi%
+}
+
+\newcommand*{\InputTikzGraph}[3][]{%
+  \ifdraft{%
+    \urldef\inputtikzgraph@url\url{#3}%
+    \begin{tikzpicture}[x=#2, y=#2, #1]%
+      \booltrue{tikzgraphpreamble}%
+      \input{pics/#3.tikz}%
+      \begin{scope}[yscale=\aspectratio]%
+        \draw[use as bounding box] (-0.5, -0.5) rectangle (0.5, 0.5);%
+        \node[font=\tiny] at (0, 0) {\inputtikzgraph@url};%
+      \end{scope}%
+    \end{tikzpicture}%
+  }{%
+    \ifbool{pdf}{%
+      \tikzsetnextfilename{cache/#3}%
+      \tikz[x=#2, y=#2, #1]{\input{pics/#3.tikz}}%
+    }{%
+      \pgfimage[width=#2]{cache/#3}%
+    }%
+  }%
+}
+
+\colorlet{gd-node-color}{TangoSkyBlue2}%
+\colorlet{gd-edge-color}{TangoSkyBlue3}%
+
+\tikzset{
+  vertex/.style = {
+    shape = circle,
+    fill = gd-node-color,
+    inner sep = 0pt,
+    minimum size = 2.25pt,
+  },
+  edge/.style = {
+    draw = gd-edge-color,
+    thin,
+  },
+  Vertex/.style = {
+    font = \footnotesize,
+  },
+}
+
+\newcommand*{\FormatPercentageWithError}[3][2.5em]{%
+  \ifblank{#2}{}{\ensuremath{(\makebox[#1][r]{\ensuremath{#2}}\,\pm\makebox[2em][r]{\ensuremath{#3}}\,)\percent}}%
+}
+
+\newcommand*{\InputCompetingMetrics}[1]{%
+  \begingroup%
+  \newcommand*{\CompetingMetricResult}[5][\@undefined]{%
+    ##1 & \FormatPercentageWithError{##2}{##3} & \FormatPercentageWithError[2em]{##4}{##5}\\
+  }%
+  \begin{tabularx}{\linewidth}{Xr@{\qquad}r}%
+    \toprule%
+    \textit{Metric} & \textit{Success Rate} & \textit{Advantage}\\%
+    \midrule%
+    \input{#1}%
+    \bottomrule%
+  \end{tabularx}%
+  \endgroup%
+}
+
+\newcommand*{\InputPunctureResult}[2][\relax]{%
+  \begingroup%
+  \newcommand*{\PunctureResult}[5][\@undefined]{%
+    ##1 & \FormatPercentageWithError{##2}{##3} & \FormatPercentageWithError{##4}{##5}\\
+  }%
+  \input{#1}%
+  \begin{tabularx}{\linewidth}{Xr@{\qquad}r}%
+    \toprule%
+    \textit{Property} & \textit{Sole Exclusion} & \textit{Sole Inclusion}\\%
+    \midrule%
+    \input{#2}%
+    \midrule%
+    \PunctureResult[\textit{Baseline Using All Properties}]{\XValSuccessMean}{\XValSuccessStdev}{}{}%
+    \bottomrule%
+  \end{tabularx}%
+  \endgroup%
+}
+
+\newcommand*{\HuangWeightResult}[3][]{%
+  \csdef{HuangWeight#1}{$w_{\menum{#1}}=#2\pm#3$}%
+  \ifdef{\TextualHuangWeights}{%
+    \apptocmd{\TextualHuangWeights}{, \csuse{HuangWeight#1}}{}{}%
+  }{%
+    \newcommand*{\TextualHuangWeights}{\csuse{HuangWeight#1}}%
+  }%
+}
+
+\newcommand*{\regression}[3][???]{%
+  \ensuremath{%
+    r = \makebox[2.1em][r]{\ensuremath{#1\percent}}%
+    \quad%
+    f(x) = #2 + #3 \kern2pt x%
+  }%
+}
+
+\newenvironment{explanation}{%
+  \newcommand*{\explain}[1]{\item[{##1}]}%
+  \begin{description}%
+}{%
+  \end{description}%
+}
+
+\makeatother

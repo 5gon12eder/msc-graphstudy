@@ -1,0 +1,111 @@
+// -*- coding:utf-8; mode:javascript; -*-
+
+// Copyright (C) 2018 Karlsruhe Institute of Technology
+// Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+//
+// This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with this program.  If not, see
+// <http://www.gnu.org/licenses/>.
+
+{
+    "treatments" : {
+        "help" : "Strategies for handling arithmetically undefined results",
+        "values" : {
+            "exception" : "throw an exception and give up on the computation",
+            "ignore"    : "pretend the value causing trouble does not exist and carry on with the computation",
+            "replace"   : "replace the result by a sentinel value (usually NaN) and carry on with the computation"
+        }
+    },
+    "algorithms" : {
+        "help" : "Common layouting algorithms.",
+        "values" : {
+            "fmmm"               : "fast multipole multilevel layouting algorithm",
+            "stress"             : "energy-based layout using stress minimization",
+            "davidson_harel"     : "Davidson-Harel layout algorithm",
+            "spring_embedder_kk" : "spring-embedder layout algorithm by Kamada and Kawai",
+            "pivot_mds"          : "pivot MDS (multi-dimensional scaling) layout algorithm"
+        }
+    },
+    "binnings" : {
+        "help" : "Histogram binning strategies.",
+        "values" : {
+            "fixed_width"            : "use a fixed bin width",
+            "fixed_count"            : "use a fixed bin count",
+            "scott_normal_reference" : "use Scott's normal reference rule to select the bin width"
+        }
+    },
+    "distributions" : {
+        "help" : "Real random distributions.",
+        "values" : {
+            "uniform" : "uniform real distribution",
+            "normal"  : "normal (Gaussian) distribution"
+        }
+    },
+    "kernels" : {
+        "help" : "Data aggregation and presentation strategies.",
+        "values" : {
+            "boxed"    : "histogram with equally-sized bins",
+            "gaussian" : "smooth gliding average using a gaussian kernel",
+            "raw"      : "raw event data"
+        }
+    },
+    "terminals" : {
+        "help" : "I/O terminal types.",
+        "values" : {
+            "null"       : "null terminal with semantics similar to /dev/null on POSIX",
+            "stdio"      : "standard input or output terminal",
+            "file"       : "terimal connected to an entry in the file-system",
+            "descriptor" : "terminal connected to an existing open file specified by its numeric descriptor"
+        }
+    },
+    "compressions" : {
+        "help" : "Data compression stratagies.",
+        "values" : {
+            "none"      : "don't use any compression",
+            "gzip"      : "use gzip compression",
+            "bzip2"     : "use bzip2 compression",
+            "automatic" : "guess compression from the file name extension"
+        }
+    },
+    "fileformats" : {
+        "help" : "Graph (and layout) file formats.",
+        "values" : {
+            "gml"           : "Graph Modelling Language: https://en.wikipedia.org/wiki/Graph_Modelling_Language",
+            "rome"          : "Rome-Lib format: http://www.graphdrawing.org/data/",
+            "leda"          : "LEDA Native File Format for Graphs: http://www.algorithmic-solutions.info/leda_guide/graphs/leda_native_graph_fileformat.html",
+            "chaco"         : "https://cfwebprod.sandia.gov/cfdocs/CompResearch/docs/guide.pdf",
+            "pm_diss_graph" : "Graph file format from Petra Mutzel's PhD thesis",
+            "ygraph"        : "http://www3.cs.stonybrook.edu/~algorith/implement/nauty/distrib/makebg.c",
+            "graph6"        : "The Graph6 format represents a (preferable dense or small) simple undirected graph as a string containing printable characters between 0x3F and 0x7E",
+            "matrix_market" : "http://math.nist.gov/MatrixMarket/formats.html",
+            "rudy"          : null,
+            "bench"         : null,
+            "pla"           : null,
+            "gd_challenge"  : "Graph Drawing Challenge: Area Minimization for Orthogonal Grid Layouts http://graphdrawing.de/contest2013/challenge.html",
+            "graphml"       : "Graph Markup Language: http://graphml.graphdrawing.org/",
+            "dot"           : "http://www.graphviz.org/doc/info/lang.html",
+            "gexf"          : "Graph Exchange XML Format: https://gephi.org/gexf/format/",
+            "gdf"           : "GUESS Database File: http://graphexploration.cond.org/manual.html",
+            "tlp"           : "Tulip software graph format: http://tulip.labri.fr/TulipDrupal/?q=tlp-file-format",
+            "dl"            : "UCINET DL format: https://sites.google.com/site/ucinetsoftware/document/ucinethelp.htm",
+            "stp"           : "SteinLib STP Data Format: http://steinlib.zib.de/format.php",
+            "dmf"           : "DIMACS Max Flow Challenge: ftp://dimacs.rutgers.edu/pub/netflow/"
+        }
+    },
+    "projections" : {
+        "help" : "Graphical projection types.",
+        "values" : {
+            "ortho_top"   : "top-view orthographic projection (axonometric)",
+            "ortho_front" : "front-view orthographic projection (axonometric)",
+            "ortho_side"  : "side-view orthographic projection (axonometric)",
+            "isometric"   : "isometric projection (axonometric)"
+        }
+    }
+}

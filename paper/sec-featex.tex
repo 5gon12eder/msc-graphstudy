@@ -1,0 +1,87 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+% Copyright (C) 2018 Tamara Mchedlidze <mched@iti.uka.de>
+% Copyright (C) 2018 Alexey Pak <alexey.pak@iosb.fraunhofer.de>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\section{Feature Vectors}
+\label{sec:featex}
+
+The sizes of quality syndromes are in general graph- and layout-dependent.  A neural network, however, requires a
+fixed-size input.  A collection of syndromes is condensed to this \emph{feature vector} via \emph{feature extraction}.
+Our approach to this step relies on several auxiliary definitions.  Let $S=\{x_i\}_{i=1}^p$ be a syndrome with $p$
+entries.  By $S^\mu$ we denote the arithmetic mean and by $S^\rho$ the root mean square of $S$.  We also define a
+\emph{histogram sequence} $S^\beta=\frac{1}{p}(S_1,\ldots,S_\beta)$ -- normalized counts in a histogram built over $S$
+with $\beta$ bins.  The \emph{entropy}~\cite{Shannon1948} of $S^\beta$ is defined as
+\begin{equation}
+  \label{eqn:entropy}
+  \Entropy(S^\beta) = -\sum_{i=1}^{p} \log_2(S_i) S_i
+  \mathendpunct{.}
+\end{equation}
+We expect the entropy, as a measure of disorder, to be related to the aesthetic quality of a layout and convey important
+information to the discriminator.
+
+\begin{figure}[p]
+  \begin{center}
+    \InputLuatikzPlot{entropy-regression}
+  \end{center}
+  \caption{%
+    Entropy $\mathcal{E}=\mathcal{E}(S^\beta)$ computed for histogram sequences $S^\beta$ defined for different numbers
+    of histogram bins $\beta$.  Different markers (colors) correspond to several layouts of a regular grid-like graph,
+    progressively distorted according to the parameter $r$.
+    \OnlyArxiv{See Fig.~\ref{app:fig:worsening} in the Appendix for the examples of distorted grid layout.}
+    The dependence of $\mathcal{E}$ on $\log_2(\beta)$ is well approximated by a linear function.  Both intercept and
+    slope show a strong correlation with the levels of distortion $r$.
+  }
+  \label{fig:entropy-regression}
+\end{figure}
+
+The entropy $\Entropy(S^\beta)$ is sensitive to the number of bins $\beta$ (cf.~Fig.~\ref{fig:entropy-regression}).  In
+order to avoid influencing the results via arbitrary choices of $\beta$, we compute it for $\beta=8,16,\ldots,512$.
+After that, we perform a linear regression of $\Entropy(S^\beta)$ as a function of $\log_2(\beta)$.  Specifically, we
+find $S^\eta$ and $S^\sigma$ such that $\sum_{\beta}(S^\sigma \log_2\beta+S^\eta-\Entropy(S^\beta))^2$ is minimized.
+The parameters (intercept $S^\eta$ and slope $S^\sigma$) of this regression no longer depend on the histogram size and
+are used as feature vector components.  Fig.~\ref{fig:entropy-regression} illustrates that the dependence of
+$\Entropy(S^\beta)$ on $\log_2(\beta)$ is indeed often close to linear and the regression provides a decent
+approximation.
+
+A discrete histogram over $S$ can be generalized to a continuous \emph{sliding average}
+\begin{equation}
+  S^F(x) = \frac{\sum_{i=1}^{p} F(x,x_i)}{\int_{-\infty}^{+\infty} \diff{y} \sum_{i=1}^p F(y,x_i)}
+  \mathendpunct{.}
+\end{equation}
+A natural choice for the kernel $F(x,y)$ is the Gaussian $F_\sigma(x,y)=\exp\left(-\frac{(x - y)^2}{2\sigma^2}\right)$.
+By analogy to Eq.~\ref{eqn:entropy}, we may now define the \emph{differential entropy}~\cite{Shannon1948} as
+\begin{equation}
+  \Entropy*(S^{F_\sigma}) = -\int_{-\infty}^{+\infty} \diff{x}\log_2(S^{F_\sigma}(x)) \: S^{F_\sigma}(x)
+  \mathendpunct{.}
+\end{equation}
+This entropy via kernel function still depends on parameter $\sigma$ (the filter width).  Computing
+$\Entropy*(S^{F_\sigma})$ for multiple $\sigma$ values as we do for $\Entropy(S^\beta)$ is too expensive.  Instead, we
+have found that using Scott's Normal Reference Rule~\cite{Scott1979} as a heuristic to fix $\sigma$ yields satisfactory
+results, and allows us to define $S^\epsilon = \Entropy*(S^{F_\sigma})$.
+
+Using these definitions, for the most complex syndrome $\menum{RDF\_LOCAL}(d)$ we introduce \enum{RDF\_LOCAL} -- a
+$30$-tuple containing the arithmetic mean, root mean square and the differential entropy of $\menum{RDF\_LOCAL}(2^i)$
+for $i\in(0,\ldots,9)$.  With that\footnote{Values $i < 10$ are sufficient as no graph in our dataset has a diameter
+  exceeding $2^9$.}, $\menum{RDF\_LOCAL} = \left(\enum{RDF\_LOCAL}(2^i)^\mu, \enum{RDF\_LOCAL}(2^i)^\rho,
+\enum{RDF\_LOCAL}(2^i)^\epsilon \right)_{i = 0}^9$.
+
+Finally, we assemble the \ensuremath{\NNSharedInputDims}-dimensional\footnote{%
+  The size is one less than expected from the explanation above because we do not include the arithmetic mean for
+  \enum{EDGE\_LENGTH} as it is constant (due to the layout normalization mentioned earlier) and therefore
+  non-informative.
+} feature vector for a layout $\Gamma$ as
+\begin{equation*}
+  F_\mathrm{layout}(\Gamma) =
+  \menum{PRINVEC1}\cup\menum{PRINVEC2}\cup\menum{RDF\_LOCAL}
+  \cup\bigcup_{S}\left(S^\mu,S^\rho,S^\eta,S^\sigma\right)
+\end{equation*}
+where $S$ ranges over \enum{PRINCOMP1}, \enum{PRINCOMP2}, \enum{ANGULAR}, \enum{EDGE\_LENGTH}, \enum{RDF\_GLOBAL} and
+\enum{TENSION}.
+
+In addition, the discriminator model receives the trivial properties of the underlying graph as the second
+\ensuremath{\NNTotalAuxHiddenDims}-dimensional vector $F_\mathrm{graph}(G)=(\log(n),\log(m))$.

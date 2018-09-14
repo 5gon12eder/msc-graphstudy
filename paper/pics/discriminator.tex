@@ -1,0 +1,128 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Karlsruhe Institute of Technology
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\begin{tikzpicture}
+  [
+    layer/.style = {
+      rectangle,
+      draw,
+      minimum width = 15mm,
+      minimum height = 4mm,
+      text depth = 0.5ex,
+      text height = 1.5ex,
+      font = \scriptsize,
+    },
+    dense/.style = {
+      layer,
+      fill = TangoSkyBlue1!20,
+    },
+    operator/.style = {
+      circle,
+      draw,
+      minimum size = 4mm,
+      font = \scriptsize,
+    },
+    signal/.style = {
+      draw = TangoSkyBlue3,
+      thick,
+      ->,
+    },
+    sigwd/.style = {
+      font = \scriptsize,
+      text = TangoSkyBlue3,
+    },
+    sigwdmark/.style = {
+      draw = TangoSkyBlue3,
+      very thin,
+    },
+    node distance = 5mm,
+  ]
+
+  \newcommand*{\NNUnknownDims}{?}
+  \providecommand*{\NNSharedInputDims}{\NNUnknownDims}
+  \providecommand*{\NNSharedHiddenDims}{\NNUnknownDims}
+  \providecommand*{\NNSharedOutputDims}{\NNUnknownDims}
+  \providecommand*{\NNTotalAuxInputDims}{\NNUnknownDims}
+  \providecommand*{\NNTotalAuxHiddenDims}{\NNUnknownDims}
+  \providecommand*{\NNTotalCatDims}{\NNUnknownDims}
+  \providecommand*{\NNTotalOutputDims}{\NNUnknownDims}
+
+  \coordinate (SM) at (0, 0);
+  \coordinate (GM) at (7.5, -1);
+  \coordinate (label) at (0, -2.25);
+
+  \begin{scope}[shift = (SM), x = 13mm]
+
+    \coordinate (in) at (0.25, 0);
+    \coordinate (mid) at (4.75, 0);
+    \node[layer, rotate = 90] (do1) at (1, 0) {dropout};
+    \node[dense, rotate = 90] (l1) at (2, 0) {dense};
+    \node[layer, rotate = 90] (do2) at (3, 0) {dropout};
+    \node[dense, rotate = 90] (l2) at (4, 0) {dense};
+
+    \draw[signal] (in) to node[name = a]{} (do1);
+    \draw[signal] (do1) to node[name = b]{} (l1);
+    \draw[signal] (l1) to node[name = c]{} (do2);
+    \draw[signal] (do2) to node[name = d]{} (l2);
+    \draw[signal] (l2) to node[name = e]{} (mid);
+
+    \foreach \pos in {a, b, c, d, e} {
+      \draw[sigwdmark] (\pos) +(-1pt, -2pt) -- +(+1pt, +2pt);
+    }
+
+    \node[sigwd, above = 0ex of a] {\ensuremath{\NNSharedInputDims}};
+    \node[sigwd, above = 0ex of b] {\ensuremath{\NNSharedInputDims}};
+    \node[sigwd, above = 0ex of c] {\ensuremath{\NNSharedHiddenDims}};
+    \node[sigwd, above = 0ex of d] {\ensuremath{\NNSharedHiddenDims}};
+    \node[sigwd, above = 0ex of e] {\ensuremath{\NNSharedOutputDims}};
+
+    \node[anchor = east] at (in) {$\vec{v}$};
+    \node[anchor = west] at (mid) {$\vec{\sigma}$};
+
+    \coordinate (smlabel) at ($(in)!0.5!(mid)$);
+
+  \end{scope}
+
+  \begin{scope}[shift = (GM), x = 13mm]
+
+    \coordinate (delta) at (0.75, 1.5);
+    \coordinate (auxin) at (-0.25, 0);
+    \coordinate (out) at (3.25, 1);
+
+    \node[layer, rotate = 90, minimum width = 35mm] (cat) at (1.5, 1) {concatenation};
+    \node[dense, rotate = 90] (aux) at (0.5, 0) {dense};
+    \node[dense, rotate = 90] (l3) at (2.5, 1) {dense};
+
+    \draw[signal] (delta) to node[name = f]{} (cat.north|-delta);
+    \draw[signal] (auxin) to node[name = g]{} (aux);
+    \draw[signal] (aux) to node[name = h]{} (cat.north|-aux);
+    \draw[signal] (cat) to node[name = i]{} (l3);
+    \draw[signal] (l3) to node[name = j]{} (out);
+
+    \foreach \pos in {f, g, h, i, j} {
+      \draw[sigwdmark] (\pos) +(-1pt, -2pt) -- +(+1pt, +2pt);
+    }
+
+    \node[sigwd, above = 0ex of f] {\ensuremath{\NNSharedOutputDims}};
+    \node[sigwd, above = 0ex of g] {\ensuremath{\NNTotalAuxInputDims}};
+    \node[sigwd, above = 0ex of h] {\ensuremath{\NNTotalAuxHiddenDims}};
+    \node[sigwd, above = 0ex of i] {\ensuremath{\NNTotalCatDims}};
+    \node[sigwd, above = 0ex of j] {\ensuremath{\NNTotalOutputDims}};
+
+    \node[anchor = east] at (delta) {$\vec{\sigma}_a-\vec{\sigma}_b$};
+    \node[anchor = east] at (auxin) {$\vec{v}_G$};
+    \node[anchor = west] at (out) {$t$};
+
+    \coordinate (gmlabel) at ($(auxin)!0.5!(out)$);
+
+  \end{scope}
+
+  \node at (smlabel|-label) {(a)};
+  \node at (gmlabel|-label) {(b)};
+
+\end{tikzpicture}

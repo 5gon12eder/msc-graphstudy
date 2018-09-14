@@ -1,0 +1,18 @@
+#! /usr/bin/gnuplot
+#! -*- coding:utf-8; mode:shell-script; -*-
+
+# Copyright (C) 2018 Karlsruhe Institute of Technology
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+load PREAMBLE
+set output OUTFILE
+
+set xrange [0 : *]
+set xlabel "$r / 100$" offset 0,0.5
+set xtics XSTEP offset 0,0.3
+set mxtics XSTEP
+
+plot INFILE using ($1 / 100.0):($2) with lines notitle lc '#204a87' lw 2

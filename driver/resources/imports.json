@@ -1,0 +1,156 @@
+// -*- coding:utf-8; mode:javascript; -*-
+
+// Copyright (C) 2018 Karlsruhe Institute of Technology
+// Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+//
+// This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with this program.  If not, see
+// <http://www.gnu.org/licenses/>.
+
+{
+    "IMPORT" : {
+        "type" : null
+    },
+    "ROME" : {
+        "type" : "TAR",
+        "format" : "graphml",
+        "compression" : "none",
+        "url" : "http://graphdrawing.org/download/rome-graphml.tgz",
+        "checksum" : "sha256:94f0b300a347d4856b37e4650b6cdf6d2999d22159f5cc0d7aa9bedc42b16d89",
+        "pattern" : "*.graphml",
+        "cache" : "rome.tar.gz",
+        "layout" : false
+    },
+    "NORTH" : {
+        "type" : "TAR",
+        "format" : "graphml",
+        "compression" : "none",
+        "url" : "http://graphdrawing.org/download/north-graphml.tgz",
+        "checksum" : "sha256:90d37399676041b07c68006f6a7e1a94c56fab17adea24a732c176a39b9df2a5",
+        "pattern" : "*.graphml",
+        "cache" : "north.tar.gz",
+        "layout" : false
+    },
+    "RANDDAG" : {
+        "type" : "TAR",
+        "format" : "graphml",
+        "compression" : "none",
+        "url" : "http://graphdrawing.org/download/random-dag-graphml.tgz",
+        "checksum" : "sha256:352e8bf350427b285faf7107e214a3d6b5fd96720206cfc09744cab9092ff7a0",
+        "pattern" : "*.graphml",
+        "cache" : "randdag.tar.gz",
+        "layout" : false
+    },
+    "BCSPWR" : {
+        "type" : "URL",
+        "format" : "matrix-market",
+        "compression" : "gzip",
+        "layout" : false,
+        "simplify" : true,
+        "name" : "bcspwr",
+        "cache" : true,
+        "urls" : [
+            // https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/bcspwr/bcspwr.html
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr01.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr02.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr03.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr04.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr05.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr06.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr07.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr08.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr09.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr10.mtx.gz"
+        ]
+    },
+    "GRENOBLE" : {
+        "type" : "URL",
+        "format" : "matrix-market",
+        "compression" : "gzip",
+        "layout" : false,
+        "simplify" : true,
+        "name" : "grenoble",
+        "cache" : true,
+        "urls" : [
+            // https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/grenoble/grenoble.html
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/grenoble/gre__115.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/grenoble/gre__185.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/grenoble/gre_216a.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/grenoble/gre_216b.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/grenoble/gre__343.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/grenoble/gre__512.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/grenoble/gre_1107.mtx.gz"
+        ]
+    },
+    "PSADMIT" : {
+        "type" : "URL",
+        "format" : "matrix-market",
+        "compression" : "gzip",
+        "layout" : false,
+        "simplify" : true,
+        "name" : "psadmit",
+        "cache" : true,
+        "urls" : [
+            // https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/psadmit/psadmit.html
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/psadmit/662_bus.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/psadmit/494_bus.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/psadmit/685_bus.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/psadmit/1138_bus.mtx.gz"
+        ]
+    },
+    "SMTAPE" : {
+        "type" : "URL",
+        "format" : "matrix-market",
+        "compression" : "gzip",
+        "layout" : false,
+        "simplify" : true,
+        "name" : "smtape",
+        "cache" : true,
+        "urls" : [
+            // https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/smtape/smtape.html
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/lund_a.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/lund_b.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/eris1176.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/gent113.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/ibm32.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/curtis54.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/will57.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/will199.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/ash292.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/ash85.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/arc130.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/shl____0.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/shl__200.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/shl__400.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/str____0.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/str__200.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/str__400.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/str__600.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/bp_____0.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/bp___200.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/bp___400.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/bp___600.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/bp___800.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/bp__1000.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/bp__1200.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/bp__1400.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/bp__1600.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/ash219.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/ash958.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/ash331.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/ash608.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/abb313.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/fs_541_1.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/fs_541_2.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/fs_541_3.mtx.gz",
+            "ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/smtape/fs_541_4.mtx.gz"
+        ]
+    }
+}

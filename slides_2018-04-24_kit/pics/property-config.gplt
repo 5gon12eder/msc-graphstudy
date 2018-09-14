@@ -1,0 +1,18 @@
+#! /usr/bin/gnuplot
+#! -*- coding:utf-8; mode:shell-script; -*-
+
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+set terminal tikz tightboundingbox size 35mm, 20mm font ",6"
+set tics nomirror out scale 0.25
+unset ylabel
+unset ytics
+set border 1
+unset grid
+unset key
+set yrange [0 : *]
+
+set style line 1 lt 1 lc rgb '#009682'

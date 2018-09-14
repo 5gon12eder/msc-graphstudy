@@ -1,0 +1,14 @@
+#! /usr/bin/less
+#! -*- coding:utf-8; mode:text; -*-
+
+# Copyright (C) 2018 Karlsruhe Institute of Technology
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+There is nothing to be installed.  Please refer to the README.md document for general information about the package.
+
+The README.md document is written in markdown language.  You can either read it directly or process it to get a nicely
+rendered version in the output format of your choice.  If you do not have a markdown processor handy, you might find the
+online version at https://github.com/5gon12eder/msc-graphstudy/blob/master/README.md convenient.

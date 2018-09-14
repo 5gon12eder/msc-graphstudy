@@ -1,0 +1,145 @@
+#! /bin/bash -eu
+#! -*- coding:utf-8; mode:shell-script; -*-
+
+# Copyright (C) 2017 Moritz Klammler <moritz.klammler@student.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+shopt -s nullglob
+
+default_prefix="${HOME}/var"
+default_tempdir="${TMPDIR-/tmp}"
+
+helptext="usage: get-boost [--tempdir=DIR] [--prefix=DIR] [--read-only] [CONFIG...]
+
+Downloads and builds the Boost libraries currently used by the project in some
+non-standard configurations that are needed for testing and installs them in a
+local directory.
+
+Options:
+
+  --prefix=DIR    installation prefix (default: '${default_prefix}')
+  --tempdir=DIR   use DIR as the working directory (default: '${default_tempdir}')
+  --read-only     make installed files read-only
+  --help          show help text and exit
+  --version       show version text and exit
+
+Available Configurations:
+
+  gcc-release     GNU compiler with libstdc++ in release mode
+  gcc-debug       GNU compiler with libstdc++ in debug mode
+  clang           Clang compiler with libc++ standard library
+
+When run with no arguments, builds all configurations.  Otherwise, only those
+specified."
+
+versiontext="get-boost (Boost 1.67.0)"
+
+boost_dir="boost_1_67_0"
+boost_tar="${boost_dir}.tar.bz2"
+boost_urls=(
+    "https://sourceforge.net/projects/boost/files/boost/1.67.0/${boost_tar}"
+    "https://dl.bintray.com/boostorg/release/1.67.0/source/${boost_tar}"
+)
+boost_sha1="694ae3f4f899d1a80eb7a3b31b33be73c423c1ae"  # SourceForge
+boost_sha256="2684c972994ee57fc5632e03bf044746f6eb45d4920c343937a465fd67a5adba"  # Boost
+
+b2_common_flags=(
+    --build-dir='build-temp'
+    --with-filesystem
+    --with-iostreams
+    --with-program_options
+    --with-system
+)
+
+function b2_gcc_release {
+    b2 "${b2_common_flags[@]}" toolset='gcc' cxxflags='-std=c++17' "$@"
+}
+
+function b2_gcc_debug {
+    b2 "${b2_common_flags[@]}" toolset='gcc' cxxflags='-std=c++17 -D_GLIBCXX_DEBUG' "$@"
+}
+
+function b2_clang {
+    b2 "${b2_common_flags[@]}" toolset='clang' cxxflags='-std=c++17 -stdlib=libc++' linkflags='-lc++ -lc++abi' "$@"
+}
+
+declare -A configurations
+
+configurations[gcc-release]+=b2_gcc_release
+configurations[gcc-debug]+=b2_gcc_debug
+configurations[clang]+=b2_clang
+
+prefix="${default_prefix}"
+tempdir="${default_tempdir}"
+rdonly=0
+
+declare -a selection
+
+function die {
+    echo "get-boost: error: $*" >&2
+    exit 1
+}
+
+for arg in "$@"
+do
+    case "${arg}"
+    in
+        --help)
+            echo "${helptext}"
+            exit
+            ;;
+        --version)
+            echo "${versiontext}"
+            exit
+            ;;
+        --prefix=*)
+            prefix="${arg#--prefix=}"
+            [ -d "${prefix}" ] || die "Not a directory: ${prefix}"
+            ;;
+        --tempdir=*)
+            tempdir="${arg#--tempdir=}"
+            [ -d "${tempdir}" ] || die "Not a directory: ${tempdir}"
+            ;;
+        --read-only)
+            rdonly=1
+            ;;
+        -*)
+            die "Unknown option: ${arg}"
+            ;;
+        *)
+            [ "x${configurations[${arg}]+set}" = xset ] || die "No configuration for: ${arg}"
+            selection+=("${arg}")
+            ;;
+    esac
+done
+unset arg
+
+[ "x${selection+set}" = xset ] || selection=("${!configurations[@]}")
+
+cd "${tempdir}" || die "Cannot enter working-directory: ${tempdir}"
+
+for url in "${boost_urls[@]}"
+do
+    [ -r "${boost_tar}" ] || wget "${url}" || :
+done
+[ -r "${boost_tar}" ] || die "Cannot download Boost"
+
+printf '%s  %s\n' "${boost_sha1}"   "${boost_tar}" | sha1sum   --check --strict || die "Download corrupted (SHA1)"
+printf '%s  %s\n' "${boost_sha256}" "${boost_tar}" | sha256sum --check --strict || die "Download corrupted (SHA256)"
+
+for cfg in "${selection[@]}"
+do
+    targetprefix="${prefix}/${cfg}"
+    if [ -d "${targetprefix}/" ]
+    then
+        chmod -R +w "${targetprefix}/" 2>/dev/null || :
+        rm -rf "${targetprefix}/" || die "Cannot remove existing installation: ${targetprefix}/"
+    fi
+    rm -rf "${boost_dir}" && tar -xf "${boost_tar}" || die "Cannot extract Boost"
+    ( cd "${boost_dir}/" && ${configurations[$cfg]} --prefix="${targetprefix}" stage )
+    ( cd "${boost_dir}/" && ${configurations[$cfg]} --prefix="${targetprefix}" install )
+    if [ ${rdonly} -gt 0 ]; then chmod -R -w "${targetprefix}/"; fi
+    rm -rf "${boost_dir}/"
+done

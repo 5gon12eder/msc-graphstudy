@@ -1,0 +1,350 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\makeatletter
+
+\usetheme{KIT}
+
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\usepackage{amsmath,amsfonts}
+%\usepackage{slidecite}
+\usepackage{csquotes}
+\usepackage{ifdraft}
+\usepackage{etoolbox}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{multicol}
+\usepackage{gnuplot-lua-tikz}
+\usetikzlibrary{positioning}
+\usepackage{libertine}
+\setmainlanguage{english}
+
+\usepackage[%
+  backend = biber,
+  citestyle = authoryear,
+  bibstyle = chem-acs,
+  alldates = iso8601,
+  giveninits = true,
+]{biblatex}
+
+\usenavigationsymbols
+\setcounter{tocdepth}{2}
+
+\setbeamercolor*{bibliography entry author}{fg=KITblack}
+\setbeamercolor*{bibliography entry title}{fg=KITblack}
+\setbeamercolor*{bibliography entry journal}{fg=KITblack}
+\setbeamercolor*{bibliography entry note}{fg=KITblack}
+
+\setbeamercolor{structure}{fg=KITgreen}
+%\setbeamercolor*{palette secondary}{fg=KITgreen}
+%\setbeamercolor*{palette tertiary}{fg=KITgreen}
+
+\AtBeginSection[]{%
+  \begin{frame}<beamer>
+    \frametitle{\contentsname}
+    \begin{multicols}{2}
+      \tableofcontents[currentsection,hideothersubsections]
+    \end{multicols}
+  \end{frame}
+}
+
+\newcommand*{\Reals}[1][]{\ifblank{#1}{\mathbb{R}}{\mathbb{R}_{#1}}}
+\newcommand*{\RealsPos}{\Reals[>0]}
+\newcommand*{\RealsNN}{\Reals[\geq0]}
+\newcommand*{\IntsZ}{\mathbb{Z}}
+\newcommand*{\IntsN}{\mathbb{N}}
+\newcommand*{\IntsNz}{\mathbb{N}_0}
+\newcommand*{\BitZero}{\text{\texttt{0}}}
+\newcommand*{\BitOne}{\text{\texttt{1}}}
+\newcommand*{\Bits}{\{\BitZero,\BitOne\}}
+
+\let\vec\relax
+\let\Vec\relax
+\let\implies\Rightarrow
+\let\impliedby\Leftarrow
+\let\equivalent\Leftrightarrow
+\newcommand*{\suchthat}{:}
+\newcommand*{\degree}{^\circ}
+\let\conjunction\cap
+\let\disjunction\cup
+\newcommand*{\diff}[1]{\mathrm{d}#1\kern0.3em}
+
+\newcommand*{\Layout}{\Gamma}
+\newcommand*{\Graph}{G}
+\newcommand*{\GraphV}{V}
+\newcommand*{\GraphE}{E}
+\newcommand*{\vecz}{0}
+
+\newcommand*{\GraphGVE}{\Graph=(\GraphV,\GraphE)}
+
+\newcommand*{\CMake}{\mbox{CMake}}
+\newcommand*{\CXX}{\mbox{C++}}
+\newcommand*{\JavaScript}{\mbox{JavaScript}}
+\newcommand*{\Keras}{\mbox{Keras}}
+\newcommand*{\Python}{\mbox{Python}}
+\newcommand*{\SQLite}{\mbox{SQLite}}
+\newcommand*{\TensorFlow}{\mbox{TensorFlow}}
+\newcommand*{\XSLT}{\mbox{XSLT}}
+
+\newcommand*{\Entropy}{\@ifstar\EntropyDifferential\EntropyDiscrete}
+\newcommand*{\EntropyDiscrete}{S}
+\newcommand*{\EntropyDifferential}{\bar{S}}
+
+\DeclareMathOperator{\BigO}{\mathcal{O}}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\edgelen}{length}
+\DeclareMathOperator{\mean}{mean}
+\DeclareMathOperator{\rms}{rms}
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\stdevp}{stdevp}
+\DeclareMathOperator{\stdev}{stdev}
+\DeclareMathOperator{\stress}{stress}
+
+\DeclareMathOperator*{\Conjunction}{\bigcap}
+\DeclareMathOperator*{\Disjunction}{\bigcup}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\newcommand*{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand*{\card}[1]{\left\lvert#1\right\rvert}
+\newcommand*{\vecnorm}[1]{\left\lVert#1\right\rVert}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+\newcommand*{\nint}[1]{\left\lfloor#1\right\rceil}
+\newcommand*{\multiset}[1]{\left[#1\right]}
+
+\newcommand{\bra}[2][\relax]{%
+  \ifx\relax#1\relax%
+    \left\langle#2\right|%
+  \else%
+    \left\langle#2\middle|#1\right|%
+  \fi%
+}
+
+\newcommand{\ket}[2][\relax]{%
+  \ifx\relax#1\relax%
+    \left|#2\right\rangle%
+  \else%
+    \left|#1\middle|#2\right\rangle%
+  \fi%
+}
+
+\newcommand{\braket}[3][\relax]{%
+  \ifx\relax#1\relax%
+    \left\langle#2\middle|#3\right\rangle%
+  \else%
+    \left\langle#2\middle|#1\middle|#3\right\rangle%
+  \fi%
+}
+
+\newcommand*{\enum}[1]{\mbox{\upshape\ttfamily#1}}
+\newcommand*{\menum}[1]{\mbox{\text{\upshape\ttfamily#1}}}
+\newcommand*{\QuasiNd}{\enum{QUASI\(\langle{n}\rangle\)D}}
+\newcommand*{\TorusN}{\enum{TORUS\(\langle{n}\rangle\)}}
+\newcommand*{\code}[1]{\mbox{\texttt{#1}}}
+
+\newbool{tikzgraphpreamble}
+\newlength{\samplelayoutwidth}
+\newlength{\samplelayoutheight}
+
+\newlength{\vertexsize}
+\setlength{\vertexsize}{2pt}
+
+\tikzset{
+  Vertex/.style = {
+    font = \footnotesize,
+  },
+  vertex/.style = {
+    shape = circle,
+    fill = KITgreen,
+    inner sep = 0pt,
+    minimum size = \vertexsize,
+  },
+  edge/.style = {
+    draw = KITgreen,
+    thin,
+  },
+  tikzgraphbbox/.style = {
+    fill = \ifdraft{yellow!10}{none},
+  },
+  princomp/.style = {
+    draw = red,
+    line width = 1.0pt,
+    double distance = 2.0pt,
+    line cap = round,
+    line join = round,
+  },
+  princomp1st/.style = { princomp },
+  princomp2nd/.style = { princomp },
+  smartbox/.style = {
+    fill = KITyellow!10,
+    draw = KITyellow,
+    inner sep = 1ex,
+    preaction = {draw, line width = 5pt, white},
+  },
+  tooltip/.style = {
+    text = KITlilac,
+    font = \footnotesize,
+  },
+  toolarrow/.style = {
+    draw = KITlilac,
+    thick,
+    ->,
+    shorten > = 0.5ex,
+  },
+}
+
+\newcommand*{\toolmark}[3][]{%
+  \tikz[remember picture, baseline = (#2.base)]{\node[inner sep = \z@](#2){\only<#1>{\color{KITlilac}}\ensuremath{#3}};}%
+}
+
+\ifdraft{%
+  \newcommand*{\InputTikzGraph}{\@ifstar\InputTikzGraph@Dummy\InputTikzGraph@Dummy}
+}{%
+  \newcommand*{\InputTikzGraph}{\@ifstar\InputTikzGraph@Big\InputTikzGraph@NotBig}
+}
+
+\newcommand*{\InputTikzGraph@NotBig}[3][]{\tikz[x=#2, y=-#2, #1]{\input{#3}}}
+\newcommand*{\InputTikzGraph@Big}[3][]{\tikz[x=#2, y=-#2, #1]{\setlength{\vertexsize}{1pt}\input{#3}}}
+
+\newcommand*{\InputTikzGraph@Dummy}[3][]{%
+  \urldef\inputtikzgraph@url\url{#3}%
+  \begin{tikzpicture}[x=#2, y=#2, #1]
+    \booltrue{tikzgraphpreamble}
+    \input{#3}
+    \begin{scope}[yscale=\aspectratio]
+      \draw[use as bounding box] (-0.5, -0.5) rectangle (0.5, 0.5);
+      \node[font=\tiny] at (0, 0) {\inputtikzgraph@url};
+    \end{scope}
+  \end{tikzpicture}
+}
+
+\newcommand*{\UpdateSampleLayoutHeight}[1]{%
+  \booltrue{tikzgraphpreamble}
+  \input{#1}
+  \setlength{\samplelayoutheight}{\aspectratio\samplelayoutwidth}
+  \boolfalse{tikzgraphpreamble}
+}
+
+\newcommand*{\AtBeginSampleLayout}{%
+  \path[tikzgraphbbox, use as bounding box]
+       (-0.5\samplelayoutwidth, -0.5\samplelayoutheight) rectangle (+0.5\samplelayoutwidth, +0.5\samplelayoutheight);
+}
+
+\newcommand*{\LayWorseDemo}[2][WORSE]{%
+  \begin{frame}
+    \frametitle{Layout Worsening (\enum{#1})}
+    \setlength{\samplelayoutwidth}{0.6\textwidth}
+    \UpdateSampleLayoutHeight{pics/#2-00000.tikz}
+    \begin{center}
+      \only< 1>{\InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-00000.tikz}}%
+      \only< 2>{\InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-01000.tikz}}%
+      \only< 3>{\InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-02000.tikz}}%
+      \only< 4>{\InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-03000.tikz}}%
+      \only< 5>{\InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-04000.tikz}}%
+      \only< 6>{\InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-05000.tikz}}%
+      \only< 7>{\InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-06000.tikz}}%
+      \only< 8>{\InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-07000.tikz}}%
+      \only< 9>{\InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-08000.tikz}}%
+      \only<10>{\InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-09000.tikz}}%
+      \only<11>{\InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-10000.tikz}}%
+    \end{center}
+  \end{frame}
+}
+
+\newcommand*{\LayInterDemo}[2][INTER]{%
+  \begin{frame}
+    \frametitle{Layout Interpolation (\enum{#1})}
+    \setlength{\samplelayoutwidth}{0.6\textwidth}
+    \begin{center}
+      \only< 1>{\InputTikzGraph{\samplelayoutwidth}{pics/#2-00000.tikz}}%
+      \only< 2>{\InputTikzGraph{\samplelayoutwidth}{pics/#2-01000.tikz}}%
+      \only< 3>{\InputTikzGraph{\samplelayoutwidth}{pics/#2-02000.tikz}}%
+      \only< 4>{\InputTikzGraph{\samplelayoutwidth}{pics/#2-03000.tikz}}%
+      \only< 5>{\InputTikzGraph{\samplelayoutwidth}{pics/#2-04000.tikz}}%
+      \only< 6>{\InputTikzGraph{\samplelayoutwidth}{pics/#2-05000.tikz}}%
+      \only< 7>{\InputTikzGraph{\samplelayoutwidth}{pics/#2-06000.tikz}}%
+      \only< 8>{\InputTikzGraph{\samplelayoutwidth}{pics/#2-07000.tikz}}%
+      \only< 9>{\InputTikzGraph{\samplelayoutwidth}{pics/#2-08000.tikz}}%
+      \only<10>{\InputTikzGraph{\samplelayoutwidth}{pics/#2-09000.tikz}}%
+      \only<11>{\InputTikzGraph{\samplelayoutwidth}{pics/#2-10000.tikz}}%
+    \end{center}
+  \end{frame}
+}
+
+\newcommand*{\InputLuatikzPlot}[2][]{\input{#2}}
+
+\newcommand*{\regression}[3][f]{\ensuremath{#1(x)=#2+#3x}}
+
+\newcommand*{\PropertyDemo}[3][PROPERTY]{%
+  \begin{frame}
+    \frametitle{#3 (\enum{#1})}
+    \begin{tabular}{ccc}
+      \InputTikzGraph{30mm}{pics/demograph-a.tikz}&
+      \InputTikzGraph{30mm}{pics/demograph-b.tikz}&
+      \InputTikzGraph{30mm}{pics/demograph-c.tikz}\\[2ex]
+      \InputLuatikzPlot{pics/#2-a.pgf}&
+      \InputLuatikzPlot{pics/#2-b.pgf}&
+      \InputLuatikzPlot{pics/#2-c.pgf}
+    \end{tabular}
+  \end{frame}
+}
+
+\newlength{\xval@hunderter}
+\newlength{\xval@hunderter@pm}
+\newcommand*{\InputConfusionMatrix}[1]{%
+  \begingroup%
+    \setlength{\parindent}{\z@}%
+    \settowidth{\xval@hunderter}{\ensuremath{100.00\,\%}}%
+    \settowidth{\xval@hunderter@pm}{\ensuremath{\pm100.00\,\%}}%
+    \newcommand*{\FormatMeanStdev}[2]{%
+      \makebox[\xval@hunderter][r]{\ensuremath{##1\,\%}}%
+      \makebox[\xval@hunderter@pm][r]{\ensuremath{\pm\kern0.2em##2\,\%}}%
+    }%
+    \newcommand*{\FormatCell}[1]{\FormatMeanStdev{\csuse{XVal##1Mean}}{\csuse{XVal##1Stdev}}}%
+    \newcommand*{\AltLine}[2]{\multicolumn{4}{l}{\textit{##1:\hfill##2}}}%
+    \input{#1}%
+    \begin{tabularx}{\linewidth}{X|rr|r}%
+      \toprule%
+                            & \textit{Cond.~Neg.}   & \textit{Cond.~Pos.}   & \textit{$\Sigma$}\\%
+      \midrule%
+      \textit{Pred.~Neg.}   & \FormatCell{TrueNeg}  & \FormatCell{FalseNeg} & \FormatCell{PredNeg}\\%
+      \textit{Pred.~Pos.}   & \FormatCell{FalsePos} & \FormatCell{TruePos}  & \FormatCell{PredPos}\\%
+      \midrule%
+      \textit{$\Sigma$}     & \FormatCell{CondNeg}  & \FormatCell{CondPos}  & \FormatMeanStdev{100.00}{0.00}\\%
+      \bottomrule
+      \multicolumn{4}{l}{}\\
+      \AltLine{Success Rate}{\FormatCell{Success}}\\%
+      \AltLine{Failure Rate}{\FormatCell{Failure}}\\[1ex]%
+      \AltLine{Average Number of Tests}{\ensuremath{\approx\XValCountApprox}}\\%
+      \AltLine{Number of Repetitions}{\ensuremath{\XValTestRuns}}\\%
+    \end{tabularx}%
+  \endgroup%
+}
+
+\newcommand*{\InputPunctureResult}[2][\relax]{%
+  \begingroup%
+  \newcommand*{\PunctureResult}[5][\@undefined]{%
+    ##1&
+    \ifblank{##2}{\multicolumn{2}{c}{}}{\ensuremath{##2\,\%}&\ensuremath{##3\,\%}}&
+    \ifblank{##4}{\multicolumn{2}{c}{}}{\ensuremath{##4\,\%}&\ensuremath{##5\,\%}}\\
+  }%
+  \input{#1}%
+  \begin{tabularx}{\linewidth}{X@{\qquad}r@{\makebox[1.5em][r]{$\pm$}}rr@{\makebox[1.5em][r]{$\pm$}}r}%
+    \toprule%
+    \textit{Property} & \multicolumn{2}{r}{\textit{Sole Exclusion}} & \multicolumn{2}{r}{\textit{Sole Inclusion}}\\%
+    \midrule%
+    \input{#2}%
+    \midrule%
+    \PunctureResult[\textit{Baseline Using All Properties}]{\XValSuccessMean}{\XValSuccessStdev}{}{}%
+    \bottomrule%
+  \end{tabularx}%
+  \endgroup%
+}
+
+\makeatother

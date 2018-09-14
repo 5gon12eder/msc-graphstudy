@@ -1,0 +1,96 @@
+#! /usr/bin/python3
+#! -*- coding:utf-8; mode:python; -*-
+
+# Copyright (C) 2018 Karlsruhe Institute of Technology
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+#
+# This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with this program.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+from sys import hexversion as PYTHON_HEXVERSION
+if PYTHON_HEXVERSION < 0x30602f0:
+    raise Exception("Your Python interpreter is too old; Python 3.6 or newer is required for this program to run")
+
+import argparse
+import datetime
+import json
+import os
+import sys
+import textwrap
+
+from maintainer import *
+
+PROGRAM_NAME = 'build'
+
+def main(args):
+    ns = parse_cmd_line_args(args)
+    mainctx = Main(PROGRAM_NAME)
+    mainctx.msg_on_success = "Done building and testing project"
+    mainctx.msg_on_error = "Error building and testing project"
+    with mainctx:
+        build_project(ns)
+    return mainctx.status
+
+def build_project(ns):
+    builder = Builder(keep_going=ns.keep_going, quiet=ns.quiet, dry=ns.dry_run)
+    configurations = ns.configs if ns.configs else sorted(list_all_configurations(builder.vpathroot))
+    builder(configurations)
+
+class Builder(ForEachCfg):
+
+    def _perform_task(self, cfgname, builddir=None, vardepsdir=None):
+        varlibsdir = os.path.join(vardepsdir, 'lib')
+        testdriverfile = os.path.join(builddir, CONFIG_TEST_FILE)
+        report("Reading test driver file {!r} ...".format(CONFIG_TEST_FILE))
+        with open(testdriverfile, 'r') as istr:
+            commands = json.load(istr)
+        for cmd in commands:
+            self._run_build_tool(cmd, ldpath=varlibsdir)
+
+def list_all_configurations(vpathroot):
+    for dirent in os.scandir(vpathroot):
+        if dirent.is_dir():
+            yield dirent.name
+        else:
+            report("Skipping {!r} which is not a directory".format(dirent.path))
+
+def parse_cmd_line_args(args):
+    ap = argparse.ArgumentParser(
+        prog=PROGRAM_NAME,
+        usage='%(prog)s [CONFIG...]',
+        add_help=False,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent("""\
+        Builds all selected configurations; or all that have been set up if none is
+        specified.
+
+        This script is intended to be used by maintainers in order to verify that all
+        configurations build correctly.  It is probably not very useful for other
+        people.
+
+        This script must be run from the top-level source directory.
+        """),
+        epilog=textwrap.dedent("""\
+        environment variables:
+          MSC_VPATH_BUILD_ROOT  root directory for build directories
+          MSC_VAR_DEPS_ROOT     root directory for custom-built dependencies
+        """),
+    )
+    ap.add_argument('configs', metavar='CONFIG', type=str, nargs='*', help="configurations to build")
+    ap.add_argument('-k', '--keep-going', action='store_true', help="continue with other configurations after failures")
+    ap.add_argument('-t', '--dry-run', action='store_true', help="don't execute CMake/CTest commands, just print them")
+    ap.add_argument('-q', '--quiet', action='store_true', help="swallow output of executed commands")
+    ap.add_argument('--version', action='version', version='?', help="show version information and exit")
+    ap.add_argument('--help', action='help', help="show usage information and exit")
+    return ap.parse_args(args)
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))

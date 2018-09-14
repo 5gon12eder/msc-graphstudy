@@ -1,0 +1,20 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\begin{tikzpicture}
+  \node[Vertex] (C) at (0, 0) {C};
+  \node[Vertex] (R) at (-1, -1) {H\textsubscript{3}C};
+  \node[Vertex] (O) at (0, 1) {O};
+  \node[Vertex] (OH) at (1, -1) {OH};
+
+  \coordinate (aux1) at (-0.05, 0);
+  \coordinate (aux2) at (+0.05, 0);
+
+  \draw[edge] (R) -- (C) -- (OH);
+  \draw[edge] (aux1|-C.north) -- (aux1|-O.south);
+  \draw[edge] (aux2|-C.north) -- (aux2|-O.south);
+\end{tikzpicture}

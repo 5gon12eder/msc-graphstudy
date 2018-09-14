@@ -1,0 +1,454 @@
+/* -*- coding:utf-8; mode:css; -*- */
+
+/* Copyright (C) 2018 Karlsruhe Institute of Technology                                                               */
+/* Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>                                                */
+/*                                                                                                                    */
+/* This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public  */
+/* License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any     */
+/* later version.                                                                                                     */
+/*                                                                                                                    */
+/* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the         */
+/* implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   */
+/* more details.                                                                                                      */
+/*                                                                                                                    */
+/* You should have received a copy of the GNU General Public License along with this program.  If not, see            */
+/* <http://www.gnu.org/licenses/>.                                                                                    */
+
+/* SHARED */
+
+.pretty, .thumbnail {
+    box-shadow: 2px 3px 5px 4px #eeeeec;
+}
+
+.nocss {
+    display: none;
+}
+
+
+/* TEXT */
+
+body {
+    background-color: #ffffff;
+    margin: 0;
+    padding: 2ex 2em 6ex 2em;
+    color: #000000;
+    font-family: monospace;
+    font-size: 11pt;
+}
+
+
+/* LINKS */
+
+a:link, a:visited, a:focus {
+    color: #3465a4;
+    text-decoration: inherit;
+}
+
+a:hover, a:active {
+    color: #729fcf;
+    text-decoration: underline;
+}
+
+
+/* BOXES */
+
+.alert {
+    color: #cc0000;
+    font-weight: bold;
+}
+
+
+/* TABLES */
+
+table.horizontal th {
+    padding-right: 0.5em;
+    text-align: left;
+}
+
+table.horizontal td {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    text-align: left;
+}
+
+table.pretty {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+table.pretty th, table.pretty td {
+    border: 1px solid #4e9a06;
+    margin: 0;
+    padding: 0.3ex 0.5em 0.2ex 0.5em;
+}
+
+table.pretty th {
+    background-color: #8ae234;
+    font-weight: bold;
+}
+
+table.pretty td {
+    text-align: right;
+}
+
+table.pretty tr:hover {
+    font-weight: bold;
+}
+
+table.sql td {
+    white-space: nowrap;
+}
+
+table.thumbgrid td {
+    padding: 10px;
+}
+
+th.clicksort, th.hide, th.show {
+    cursor: pointer;
+}
+
+th.clicksort:after, th.hide:after, th.show:after {
+    margin-left: 0.25em;
+    color: rgb(78, 154, 6);
+}
+
+th.clicksort:hover:after, th.hide:hover:after, th.show:hover:after {
+    color: inherit;
+}
+
+th.clicksort:after {
+    content: '\2195';
+}
+
+th.clicksort[data-sort-reversed='0']:after {
+    content: '\2193';
+}
+
+th.clicksort[data-sort-reversed='1']:after {
+    content: '\2191';
+}
+
+th.hide:after {
+    content: '\2a2f';
+}
+
+th.show:after {
+    content: '\2026';
+}
+
+td.hidden {
+    padding: 0;
+    background-color: #eeeeec;
+}
+
+th.hidden *, td.hidden * {
+    display: none;
+}
+
+tr:target {
+    animation: row-flash 1s ease 1;
+    font-weight: bold;
+}
+
+@keyframes row-flash {
+      0% { text-shadow: 0px 0px 15px #888a85; }
+    100% { text-shadow: none; }
+}
+
+
+/* IMAGES */
+
+img.pretty {
+    width: auto;
+    height: auto;
+    max-width: 800px;
+    max-height: 600px;
+}
+
+.thumbnail {
+    padding: 5px;
+}
+
+
+/* INPUTS */
+
+button,
+input[type='button'],
+input[type='number'],
+input[type='submit'],
+input[type='text'],
+select
+{
+    height: 4ex;
+    min-width: 8em;
+}
+
+input[type='checkbox'] {
+    margin-right: 0.5em;
+}
+
+
+/* NAVIGATION */
+
+a.anchor {
+    margin-left: 0.25em;
+    visibility: hidden;
+}
+
+*:hover > a.anchor {
+    visibility: visible;
+}
+
+ul.top-navigation {
+    margin: 0ex 0em 5ex 0em;
+    padding: 0;
+}
+
+ul.top-navigation > li {
+    margin: 0ex 0.5em 0ex 0em;
+    padding: 0;
+    display: inline-block;
+    list-style: none;
+}
+
+ul.top-navigation > li:before {
+    margin-right: 0.2em;
+    content: '[';
+}
+
+ul.top-navigation > li:after {
+    margin-left: 0.2em;
+    content: ']';
+}
+
+ul.top-navigation li.current {
+    font-weight: bold;
+}
+
+ul.top-navigation li ul.top-navigation-sub {
+    display: none;
+}
+
+ul.top-navigation li:hover ul.top-navigation-sub {
+    display: block;
+    position: absolute;
+}
+
+ul.top-navigation-sub {
+    margin: 0;
+    padding: 1ex 0.5em 1ex;
+    background-color: white;
+    /* min-width: 6em; */
+    box-shadow: 2px 3px 5px 4px #eeeeec;
+}
+
+ul.top-navigation-sub li {
+    list-style: none;
+    padding: 0ex 0.5em;
+    font-weight: normal;
+}
+
+ul.top-navigation-sub li.current {
+    font-weight: bold;
+}
+
+
+/* WORSE & INTER LAYOUTS */
+
+ul.glider {
+    position: relative;
+    max-width: 800px;
+    height: 0;
+    border-bottom: thin dashed;
+    margin: 4ex 0em;
+    padding: 0;
+}
+
+ul.glider li {
+    display: inline-block;
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    top: 0%;
+    transform: translate(-50%, -50%);
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    background-color: #3465a4;
+}
+
+ul.glider li:hover {
+    background-color: #729fcf;
+}
+
+ul.glider li a {
+    width: 100%;
+    height: 100%;
+    display: block;
+    text-decoration: none;
+}
+
+ul.glider li .preview {
+    display: none;
+    padding: 5px;
+    background-color: white;
+}
+
+ul.glider li:hover .preview {
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: 2em;
+}
+
+
+/* LAYOUT COMPARISON DEMO */
+
+div.layout-comparison {
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 3ex;
+}
+
+div.layout-pair {
+    text-align: center;
+    display: flex;
+    padding: 0;
+    margin-bottom: 2ex;
+}
+
+div.layout-pair div.layout {
+    flex: 1;
+    margin: 10%;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+div.layout-pair div.layout img {
+    flex: 1;
+    margin: 0;
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+}
+
+.ruler {
+    position: relative;
+    display: inline-block;
+    width: 90%;
+    height: 3ex;
+    color: #cc0000;
+    padding: 0;
+    margin-top: 4ex;
+    border-top: 1px solid #cc0000;
+}
+
+.ruler .tick, .ruler .label, .ruler .pin {
+    padding: 0;
+    display: inline-block;
+    position: absolute;
+    top: 0%;
+}
+
+.ruler .tick  {
+    transform: translate(-50%, -50%);
+    font-size: x-small;
+}
+
+.ruler .label {
+    transform: translate(-50%, 50%);
+}
+
+.ruler .pin {
+    transform: translate(-50%, -105%);
+    font-size: xx-large;
+}
+
+
+/* DYNAMIC SCROLLING */
+
+#scroll-for-more {
+    position: fixed;
+    bottom: 1ex;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    background-color: #e9b96e;
+    border: 1px solid #c17d11;
+    color: #8f5902;
+    padding: 1ex 1em;
+}
+
+#scroll-for-more:before, #scroll-for-more:after {
+    content: '\25BD';
+}
+
+#scroll-for-more:before {
+    margin-right: 1em;
+}
+
+#scroll-for-more:after {
+    margin-left: 1em;
+}
+
+#vertical-fill {
+    height: 500px;
+}
+
+.wannabe-layout-comparison {
+    display: none;
+}
+
+
+/* SPECIAL TEST CASE SELECTION */
+
+.special-test-case-selection select {
+    min-width: 13em;
+    margin-right: 1em;
+}
+
+.special-test-case-selection input[type='submit'] {
+    padding-left: 0;
+    padding-right: 0;
+    min-width: unset;
+}
+
+form.special-test-case-selection {
+    margin-top: 3ex;
+    margin-bottom: 5ex;
+}
+
+
+/* KERNELS */
+
+ul.kernels {
+    padding: 0;
+}
+
+ul.kernels li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kernel-symbol {
+    color: #f57900;
+}
+
+ul.kernels li:hover > .kernel-symbol {
+    font-weight: bold;
+}
+
+
+/* MISCELLANEOUS */
+
+.informal-property-name:before {
+    content: '[';
+    padding-right: 0.15em;
+}
+
+.informal-property-name:after {
+    content: ']';
+    padding-left: 0.15em;
+}

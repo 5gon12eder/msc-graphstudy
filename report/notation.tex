@@ -1,0 +1,82 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\addchap{Notation}
+
+%% Vectors, matrices, sets and other non-scalar quantities are typeset as bold symbols like \(\vec{p}\) or \(\Vec{V}\)
+%% where lower-case symbols are preferred for vectors and upper-case symbols are preferred for matrices and sets.  For
+%% algorithms, we use upper-case calligraphic symbols such as \(\mathcal{A}\).
+
+We write \(\IntsZ\) for the set of integers (positive, negative and zero alike), \(\IntsN=\{1,2,\ldots\}\) for the set
+of positive (\acs{ad}~natural) integers and \(\IntsNz=\{0,1,2,\ldots\}\) for the set of non-negative integers (including
+zero).  The set of real numbers is written as \(\Reals\) with an optional subscript to limit the range.  For example,
+\(\RealsPos\) refers to the positive and \(\RealsNN\) to the non-negative real numbers.
+
+For a set \(\Vec{X}\) and integer \(k\in\IntsN\) the expression \(\Vec{X}^k\) denotes the \(k\)-fold Cartesian product
+\(\Vec{X}\times\cdots\times\Vec{X}\) or, in other words, all \(k\)-tuples \((x_1,\ldots,x_k)\) with \(x_i\in\Vec{X}\)
+for \(i\in\{1,\ldots,k\}\).  The expression \(\Vec{X}^+\) denotes the union over all \(\Vec{X}^n\) for positive
+\(n\in\IntsN\) and \(\Vec{X}^*\) the union over all \(\Vec{X}^n\) for non-negative \(n\in\IntsNz\), which includes the
+empty tuple.
+
+We use the notation \(\{\ldots\}\) for ordinary sets and \(\multiset{\ldots}\) for multisets.  (Unlike an ordinary set,
+a multiset may contain duplicate elements.)  For a finite (multi-)set \(\Vec{S}\) we write \(\card{\Vec{S}}\) to denote
+the number of elements in \(\Vec{S}\).  The symbol \enquote{\(\emptyset\)} refers to the empty (multi-)set.
+
+We use the infix operators \enquote{\(\conjunction\)} and \enquote{\(\disjunction\)} for the conjunction (intersection)
+and disjunction (union) of sets and likewise \enquote{\(\land\)} and \enquote{\(\lor\)} for the conjunction (AND) and
+disjunction (OR) of logical values respectively.\footnote{%
+  Both uses are Boolean algebra but people seem to prefer different symbols anyway.
+}
+The infix operator \enquote{\(\setminus\)} is used for differences of sets, therefore the expression
+\(\Vec{A}\setminus\Vec{B}\) refers to all elements that are in set \(\Vec{A}\) but are not in set \(\Vec{B}\).  Logical
+negation is written using the prefix operator \enquote{\(\lnot\)}.  The expression \(\lnot(x=y)\) is a convoluted way to
+write \({x}\neq{y}\).  Finally, we use the symbol \enquote{\(\implies\)} to denote implication (in either direction) and
+\enquote{\(\equivalent\)} to denote equivalence.  \({P}\implies{Q}\) means \enquote{\(P\) is a sufficient condition for
+  \(Q\)} and is equivalent to \(\lnot{P}\lor{Q}\) whereas \({P}\equivalent{Q}\) means \enquote{\(P\) is a necessary
+  \emph{and} sufficient condition for \(Q\)} and is equivalent to \(({P}\implies{Q})\land({P}\impliedby{Q})\).
+
+The quantors \enquote{\(\forall\)} and \enquote{\(\exists\)} are to be read as \enquote{for all} and \enquote{there
+  exists} respectively.  When applied to the empty set, the former is always true while the latter is always false.  We
+use a colon to mean \enquote{such that}.  For example, the expression
+\(\{n\in\IntsNz\suchthat\exists{}m\in\IntsNz\suchthat{}n=m^2\}\) is a somewhat overly complicated way to define the set
+of square integers\footfullcite{OEISA000290} \(\{0,1,4,9,16,25,\ldots\}\).
+
+The expression \(\argmax_{x\in\Reals}\{f(x)\}\) is to be understood as that \(x\in\Reals\) for which \(f(x)\) is a
+maximum.  \(\argmin\) is defined analogously.  For example, \(\argmin_{0\leq{x}\leq2\pi}\{\cos(x)\}=\pi\) because
+\(\cos(\pi)=\min_{0\leq{x}\leq2\pi}\{\cos(x)\}=-1\).
+
+For \(x\in\Reals\) we write \(\abs{x}\) for the magnitude of \(x\).  The expressions \(\floor{x}\) (floor) and
+\(\ceil{x}\) (ceiling) denote the largest / smallest integer that is not greater / less than \(x\) respectively.  The
+expression \(\nint{x}\) denotes the \emph{nearest} integer to \(x\) which is commonly defined as \enquote{round to
+  even}\footfullcite{MathWorldNinit}.  The function \(\sign\) (signum) is defined as \(\sign(x)=+1\) if \(x>0\) or
+\(\sign(x)=-1\) if \(x<0\) or \(\sign(x)=0\) if \(x=0\).
+
+Occasionally, we will write informal expressions like \(0<\epsilon\ll1\) which are to be read as \enquote{\(\epsilon\)
+  is greater than zero but \emph{much less} than one} where it is intentionally left unspecified what \enquote{much
+  less} means exactly.
+
+We use bra/ket-notation~\cite{Dirac1939} for vector products.  For a Hilbert space \(\Vec{V}\) and vector
+\(\vec{v}\in\Vec{V}\) the expression \(\bra{\vec{v}}\) denotes \(\vec{v}\) itself while \(\ket{\vec{v}}\) is the
+(conjugate) transpose of \(\vec{v}\).  Therefore, the expression \(\braket{\vec{u}}{\vec{v}}\) refers to the inner
+(scalar) and the expression \(\ket{\vec{u}}\bra{\vec{v}}\) to the outer (tensor) product of the vectors \(\vec{u}\) and
+\(\vec{v}\).  Finally, we write \(\vecnorm{\vec{v}}\) to denote the vector norm \(\sqrt{\braket{\vec{v}}{\vec{v}}}\) of
+\(\vec{v}\).
+
+For an undirected graph \(\GraphGVE\) and \(v\in\GraphV\) the expression \(\deg(v)\) refers to the \emph{degree}
+(number of incident edges) of vertex \(v\).
+
+We use the symbol \enquote{\(\bot\)} to denote missing or undefined values.
+
+We write \(x\gets{}f(42)\) to denote the assignment of the value of the expression \enquote{\(f(42)\)} to the variable
+\(x\) in algorithm listings while trying to avoid variabe reassignment as much as possible.
+
+To describe the asymptotic complexity of algorithms, we use the common \enquote{\(\BigO\)} notation.  For function
+\(f:\IntsN\to\Reals\) the Landau symbol \(\BigO(f)\) refers to the set of all functions \(g:\IntsN\to\Reals\) for which
+there exist constants \(n_0\in\IntsN\) and \(c\in\Reals\) such that \(\abs{g(n)/c}\leq{}f(n)\) for all \(n\geq{}n_0\).
+That is to say, \(g\) is \emph{asymptotically dominated} by \(f\).  Like most authors, we usually cannot be bothered to
+write the \enquote{argument} of the Landau symbol as a function as in \(\BigO(x\mapsto{}x^2)\) as it would be correct
+and will simply write \(\BigO(x^2)\) instead.

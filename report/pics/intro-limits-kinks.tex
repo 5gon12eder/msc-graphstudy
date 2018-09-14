@@ -1,0 +1,27 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\begin{tikzpicture}
+  \node[vertex] (C) at (0, 0) {};
+  \node[vertex] (R) at (-1, -1) {};
+  \node[vertex] (H1) at (-0.5, -1.0) {};
+  \node[vertex] (H2) at (-1.0, -1.5) {};
+  \node[vertex] (H3) at (-1.5, -1.0) {};
+  \node[vertex] (O2) at (0, 1) {};
+  \node[vertex] (O1) at (1, -1) {};
+  \coordinate (GND) at (1, -1.30);
+
+  \draw[edge] (R) -- (R|-C) -- (C) -- (O1|-C) -- (O1);
+  \draw[edge] (C) -- (O2);
+  \draw[edge] (R) -- (H1);
+  \draw[edge] (R) -- (H2);
+  \draw[edge] (R) -- (H3);
+  \draw[edge] (O1) -- (GND);
+  \draw[edge] (GND) +(-0.21, -0.00) -- +(+0.21, -0.00);
+  \draw[edge] (GND) +(-0.14, -0.07) -- +(+0.14, -0.07);
+  \draw[edge] (GND) +(-0.07, -0.14) -- +(+0.07, -0.14);
+\end{tikzpicture}

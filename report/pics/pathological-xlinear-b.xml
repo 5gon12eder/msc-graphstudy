@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>                                            -->
+<!--                                                                                                                 -->
+<!-- Copying and distribution of this file, with or without modification, are permitted in any medium without        -->
+<!-- royalty provided the copyright notice and this notice are preserved.  This file is offered as-is, without any   -->
+<!-- warranty.                                                                                                       -->
+
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+
+  <key id="x" for="node" attr.name="x" attr.type="double" />
+  <key id="y" for="node" attr.name="y" attr.type="double" />
+
+  <graph id="G" edgedefault="undirected">
+
+    <node id="v1"><data key="x">0.0</data><data key="y">1.0</data></node>
+    <node id="v2"><data key="x">0.0</data><data key="y">2.0</data></node>
+    <node id="v3"><data key="x">0.0</data><data key="y">3.0</data></node>
+    <node id="v4"><data key="x">0.0</data><data key="y">4.0</data></node>
+    <node id="v5"><data key="x">5.0</data><data key="y">4.0</data></node>
+    <node id="v6"><data key="x">5.0</data><data key="y">3.0</data></node>
+    <node id="v7"><data key="x">5.0</data><data key="y">2.0</data></node>
+    <node id="v8"><data key="x">5.0</data><data key="y">1.0</data></node>
+
+    <edge id="e01" source="v1" target="v5" />
+    <edge id="e02" source="v2" target="v6" />
+    <edge id="e03" source="v3" target="v7" />
+    <edge id="e04" source="v4" target="v8" />
+
+    <edge id="e05" source="v1" target="v2" />
+    <edge id="e06" source="v2" target="v3" />
+    <edge id="e07" source="v3" target="v4" />
+
+    <edge id="e08" source="v5" target="v6" />
+    <edge id="e09" source="v6" target="v7" />
+    <edge id="e10" source="v7" target="v8" />
+
+  </graph>
+
+</graphml>

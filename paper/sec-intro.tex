@@ -1,0 +1,69 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+% Copyright (C) 2018 Tamara Mchedlidze <mched@iti.uka.de>
+% Copyright (C) 2018 Alexey Pak <alexey.pak@iosb.fraunhofer.de>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\section{Introduction}
+\label{sec:intro}
+
+What makes a drawing of a graph aesthetically pleasing? This admittedly vague question is central to the field of Graph
+Drawing which has over its history suggested numerous answers.  Borrowing ideas from Mathematics, Physics, Arts, etc.,
+many researchers have tried to formalize the elusive concept of aesthetics.
+
+In particular, dozens of formulas collectively known as \emph{drawing aesthetics} (or, more precisely, \emph{quality
+  metrics}~\cite{EadesH0K17}) have been proposed that attempt to capture in a single number how beautiful, readable and
+clear a drawing of an abstract graph is.  Of those, simple metrics such as the number of edge crossings, minimum
+crossing angle, vertex distribution or angular resolution parameters, are obviously incapable \latinphrase{per se} of
+providing the ultimate aesthetic statement.  Advanced metrics may represent, for example, the energy of a corresponding
+system of physical bodies~\cite{eades84,FruchtermanR91}.  This approach underlies many popular graph drawing
+algorithms~\cite{Tamassia2013} and often leads to pleasing results in practice.  However, it is known that low values of
+energy or stress do not always correspond to the highest degree of symmetry~\cite{Welch2017} which is an important
+aesthetic criterion~\cite{PurchaseCM96}.
+
+Another direction of research aims to narrow the scope of the original question to specific application domains,
+focusing on the purpose of a drawing or possible user actions it may facilitate (\emph{tasks}).  The target parameters
+-- readability and the clarity of representation -- may be assessed via user performance studies.  However, even in this
+case such aesthetic notions as symmetry still remain important~\cite{PurchaseCM96}.  In general, aesthetically pleasing
+designs are known to positively affect the apparent and the actual usability~\cite{Norman02,TractinskyKI00} of
+interfaces and induce positive mental states of users, enhancing their problem-solving abilities~\cite{Fredrickson98}.
+
+In this work, we offer an alternative perspective on the aesthetics of graph drawings.  First, we address a slightly
+modified question: \enquote{Of two given drawings of the same graph, which one is more aesthetically pleasing?}.  With
+that, we implicitly admit that \enquote{the ultimate} quality metric may not exist and one can hope for at most a
+(partial) ordering.  Instead of a metric, we therefore search for a binary \emph{discriminator function} of graph
+drawings.  As limited as it is, it could be useful for practical applications such as picking the best answer out of
+outputs of several drawing algorithms or resolving local minima in layout optimization.
+
+Second, like Huang et al.~\cite{Huang2013}, we believe that by combining multiple metrics computed for each drawing, one
+has a better chance of capturing complex aesthetic properties.  We thus also consider a \enquote{meta-algorithm} that
+aggregates several \enquote{input} metrics into a single value.  However, unlike the recipe by Huang et al., we do not
+specify the form of this combination \latinphrase{a priori} but let an artificial neural network \enquote{learn} it
+based on a sample of labeled training data.  In the recent years, machine learning techniques have proven useful in such
+aesthetics-related tasks as assessing the appeal of 3D shapes~\cite{DevLL16} or cropping photos~\cite{Nishiyama09}.  Our
+network architecture is based on a so-called \emph{Siamese neural network}~\cite{Bromley1994} -- a generic model
+specifically designed for binary functions of same-kind inputs.
+
+Finally, we acknowledge that any simple or complex input metric may become crucial to the answer in some cases that are
+hard to predict \latinphrase{a priori}.  We therefore implement as many input metrics as we can and relegate their
+ranking to the model.  In addition to those known from the literature, we implement a few novel metrics inspired by
+statistical tools used in Condensed Matter Physics and Crystallography, which we expect to be helpful in capturing the
+symmetry, balance, and salient structures in large graphs.  These metrics are based on so-called \emph{syndromes} --
+variable-size multi-sets of numbers computed for a graph or its drawing (e.g.~vertex coordinates or pairwise distances).
+In order to reduce these heterogeneous multi-sets to a fixed-size \emph{feature vector} (input to the discriminator
+model), we perform a \emph{feature extraction} process which may involve steps such as creating histograms or performing
+regressions.
+
+In our experiments, our discriminator model outperforms the known (metric-based) algorithms and achieves an average
+accuracy of $\XValSuccessMean\percent$ when identifying the \enquote{better} graph drawing out of a pair.  The project
+source code including the data generation procedure is available online~\cite{GitHubRepo}.
+
+The remainder of this paper is structured as follows.  In section~\ref{sec:relwork} we briefly overview the
+state-of-the-art in quantifying graph layout aesthetics.  Section~\ref{sec:syndromes} discusses the used syndromes of
+aesthetic quality, section~\ref{sec:featex} feature extraction, and section~\ref{sec:model} the discriminator model.
+The dataset used in our experiments is described in section~\ref{sec:data}.  The results and the comparisons with the
+known metrics are presented in section~\ref{sec:eval}.  Section~\ref{sec:conclusion} finalizes the paper and provides an
+outlook for future work.

@@ -1,0 +1,13 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\draw[edge] (0, 0) grid[step = 1.0] (5, 5);
+\foreach \i in {0, ..., 5} {
+  \foreach \j in {0, ..., 5} {
+    \node[vertex] at (\i, \j) {};
+  }
+}

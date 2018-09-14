@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- Copyright (C) 2017 Moritz Klammler <moritz.klammler@student.kit.edu>                                            -->
+<!--                                                                                                                 -->
+<!-- Copying and distribution of this file, with or without modification, are permitted in any medium without        -->
+<!-- royalty provided the copyright notice and this notice are preserved.  This file is offered as-is, without any   -->
+<!-- warranty.                                                                                                       -->
+
+<!-- This graph / layout resembles the "Haus vom Nikolaus" (https://de.wikipedia.org/wiki/Haus_vom_Nikolaus).  -->
+
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+
+  <key id="x" for="node" attr.name="x" attr.type="double" />
+  <key id="y" for="node" attr.name="y" attr.type="double" />
+
+  <graph id="mansion" edgedefault="undirected">
+
+    <node id="v1"><data key="x">  0.0</data><data key="y">100.0</data></node>
+    <node id="v2"><data key="x">100.0</data><data key="y">100.0</data></node>
+    <node id="v3"><data key="x">100.0</data><data key="y">  0.0</data></node>
+    <node id="v4"><data key="x">  0.0</data><data key="y">  0.0</data></node>
+    <node id="v5"><data key="x"> 50.0</data><data key="y">-50.0</data></node>
+
+    <edge id="e1" source="v1" target="v2" />
+    <edge id="e2" source="v2" target="v3" />
+    <edge id="e3" source="v3" target="v4" />
+    <edge id="e4" source="v4" target="v1" />
+    <edge id="e5" source="v3" target="v5" />
+    <edge id="e6" source="v4" target="v5" />
+    <edge id="e7" source="v1" target="v3" />
+    <edge id="e8" source="v2" target="v4" />
+
+  </graph>
+
+</graphml>

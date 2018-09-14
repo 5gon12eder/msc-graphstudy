@@ -1,0 +1,61 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+% Copyright (C) 2018 Tamara Mchedlidze <mched@iti.uka.de>
+% Copyright (C) 2018 Alexey Pak <alexey.pak@iosb.fraunhofer.de>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\section{Discriminator Model}
+\label{sec:model}
+
+Feature extractors such as those introduced in the previous section reduce an arbitrary graph $G$ and its arbitrary
+layout $\Gamma$ to fixed-size vectors $F_\mathrm{graph}(G)$ and $F_\mathrm{layout}(\Gamma)$.  Given a graph $G$ and a
+pair of its alternative layouts $\Gamma_a$ and $\Gamma_b$, the discriminator function $\DM$ receives the feature vectors
+$\vec{v}_a=F_\mathrm{layout}(\Gamma_a)$, $\vec{v}_b=F_\mathrm{layout}(\Gamma_b)$ and $\vec{v}_G=F_\mathrm{graph}(G)$ and
+outputs a scalar value
+\begin{equation}
+  t = \DM(\vec{v}_G,\vec{v}_a,\vec{v}_b) \in [-1, 1]
+  \mathendpunct{.}
+\end{equation}
+The interpretation is as follows: if $t<0$, then the model believes that $\Gamma_a$ is \enquote{prettier} than
+$\Gamma_b$; if $t>0$, then it prefers $\Gamma_b$.  Its magnitude $\abs{t}$ encodes the confidence level of the decision
+(the higher $\abs{t}$, the more solid the answer).
+
+For the implementation of the function $\DM$ we have chosen a practically convenient and flexible model structure known
+as \emph{Siamese neural networks}, originally proposed by Bromley and others~\cite{Bromley1994} that is defined as
+\begin{equation}
+ \DM(\vec{v}_G,\vec{v}_a,\vec{v}_b) = \GM(\vec{\sigma}_a-\vec{\sigma}_b,\vec{v}_G)
+\end{equation}
+where $\vec{\sigma}_a=\SM(\vec{v}_a)$ and $\vec{\sigma}_b=\SM(\vec{v}_b)$.  The \emph{shared model} $\SM$ and the
+\emph{global model} $\GM$ are implemented as multi-layer neural networks with a simple structure shown in
+Fig.~\ref{fig:nn-structure}.  The network was implemented using the \emph{Keras}~\cite{Keras} framework with the
+\emph{TensorFlow}~\cite{TensorFlow} library as back-end.
+
+\begin{figure}
+  \begin{center}
+    \input{pics/discriminator.tex}
+  \end{center}
+  \caption{
+    Structure of the neural networks $\SM(\vec{v})$ (a) and $\GM(\vec{\sigma}_a-\vec{\sigma}_b,\vec{v}_G)$ (b).  Shaded
+    blocks denote standard network layers, and the numbers on the arrows denote the dimensionality of the respective
+    representations.
+  }
+  \label{fig:nn-structure}
+\end{figure}
+
+The $\SM$ network (Fig.~\ref{fig:nn-structure}(a)) consists of two \enquote{dense} (fully-connected) layers, each
+preceded by a \enquote{dropout} layer (discarding $50\percent$ and $25\percent$ of the signals, respectively).  Dropout
+is a stochastic regularization technique intended to avoid overfitting that was first proposed by Srivastava and
+others~\cite{Srivastava2014}.
+
+In the $\GM$ network (Fig.~\ref{fig:nn-structure}(b)), the graph-related feature vector $\vec{v}_G$ is passed through an
+auxiliary dense layer, and concatenated with the difference signal $(\vec{\sigma}_a-\vec{\sigma}_b)$ obtained from the
+output vectors of $\SM$ for the two layouts.  The final dense layer produces the scalar output value.  The first and the
+auxiliary layers use linear activation functions, the hidden layer uses $\ReLU$~\cite{Hahnloser2000} and the final layer
+hyperbolic tangent activation.  Following the standard practice, the inputs to the network are normalized by subtracting
+the mean and dividing by the standard deviation of the feature computed over the complete dataset.
+
+In total, the $\DM$ model has \ensuremath{\NNTotalTrainableParams} free parameters, trained via stochastic gradient
+descent-based optimization of the mean squared error (MSE) loss function.

@@ -1,0 +1,141 @@
+// -*- coding:utf-8; mode:javascript; -*-
+
+// Copyright (C) 2018 Karlsruhe Institute of Technology
+// Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+// Copyright (C) 2016 Moritz Klammler <moritz.klammler@student.kit.edu>
+//
+// This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with this program.  If not, see
+// <http://www.gnu.org/licenses/>.
+
+// This file defines the micro-benchmarks.  It consists of a single Json object with one attribute per benchmark.  The
+// key is the name of the benchmark and the value is its definition.  The definition is itself a Json object that may
+// have the following attributes.
+//
+//  - `description` (optional) -- a short description of the benchmark
+//  - `command` (mandatory) -- command-line to execute the benchmark
+//
+// The `command` attribute must have as value an array of strings.  The first element in that array is the file-name of
+// the executable and the remaining elements are passed to it as command-line argumetns.
+//
+// The command must produce on standard output the following message
+//
+//     <mean> <stdev> <n>
+//
+// which will be consumed by the driver script.  The standard error and standard input streams are connected to
+// `/dev/null`.
+//
+// As you will probably have guessed by now, you can -- as an extension to the official Json format -- also use comments
+// in this file.  This functionality is rather limited, however.  Only line-comments that are on a line of their own are
+// allowed.  Everything else is still a syntax error.
+
+{
+
+    "load-graph" : {
+        "description" : "load graph (N = 1k, M = 10k) from file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-load",
+            "--nodes=1000", "--edges=10000", "--compress=none"
+        ]
+    },
+
+    "load-graph-gz" : {
+        "description" : "load graph (N = 1k, M = 10k) from file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-load",
+            "--nodes=1000", "--edges=10000", "--compress=gzip"
+        ]
+    },
+
+    "load-graph-bz2" : {
+        "description" : "load graph (N = 1k, M = 10k) from file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-load",
+            "--nodes=1000", "--edges=10000", "--compress=bzip2"
+        ]
+    },
+
+    "load-layout" : {
+        "description" : "load layout (N = 1k, M = 10k) from file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-load",
+            "--layout", "--nodes=1000", "--edges=10000", "--compress=none"
+        ]
+    },
+
+    "load-layout-gz" : {
+        "description" : "load layout (N = 1k, M = 10k) from file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-load",
+            "--layout", "--nodes=1000", "--edges=10000", "--compress=gzip"
+        ]
+    },
+
+    "load-layout-bz2" : {
+        "description" : "load layout (N = 1k, M = 10k) from file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-load",
+            "--layout", "--nodes=1000", "--edges=10000", "--compress=bzip2"
+        ]
+    },
+
+    "store-graph" : {
+        "description" : "store graph (N = 1k, M = 10k) to file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-store",
+            "--nodes=1000", "--edges=10000", "--compress=none"
+        ]
+    },
+
+    "store-graph-gz" : {
+        "description" : "store graph (N = 1k, M = 10k) to file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-store",
+            "--nodes=1000", "--edges=10000", "--compress=gzip"
+        ]
+    },
+
+    "store-graph-bz2" : {
+        "description" : "store graph (N = 1k, M = 10k) to file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-store",
+            "--nodes=1000", "--edges=10000", "--compress=bzip2"
+        ]
+    },
+
+    "store-layout" : {
+        "description" : "store layout (N = 1k, M = 10k) to file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-store",
+            "--layout", "--nodes=1000", "--edges=10000", "--compress=none"
+        ]
+    },
+
+    "store-layout-gz" : {
+        "description" : "store layout (N = 1k, M = 10k) to file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-store",
+            "--layout", "--nodes=1000", "--edges=10000", "--compress=gzip"
+        ]
+    },
+
+    "store-layout-bz2" : {
+        "description" : "store layout (N = 1k, M = 10k) to file (normalized to N + M)",
+        "command" : [
+            "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-store",
+            "--layout", "--nodes=1000", "--edges=10000", "--compress=bzip2"
+        ]
+    },
+
+    "xxx-sleepy" : {
+        "description" : "sleep for 1 microsecond",
+        "command" : [ "${PROJECT_BINARY_DIR}/test/perf/micro/perf-micro-sleepy" ]
+    }
+}

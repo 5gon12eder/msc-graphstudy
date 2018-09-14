@@ -1,0 +1,41 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+% Copyright (C) 2018 Tamara Mchedlidze <mched@iti.uka.de>
+% Copyright (C) 2018 Alexey Pak <alexey.pak@iosb.fraunhofer.de>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+In this paper we propose a machine learning-based discriminator model that selects the more aesthetically pleasing
+drawing from a pair of graph layouts.  Our model picks the \enquote{better} layout in more than $96\percent$ cases and
+outperforms known stress-based and linear combination-based models.  To the best of our knowledge, this is the first
+application of machine learning methods to this question.  Previously, such techniques have proven successful in a range
+of complex issues involving aesthetics, prior knowledge, and unstated rules in object recognition, industrial design,
+and digital arts.  As our model uses a simple network architecture, investigating the performance of more complex
+networks is warranted.
+
+Previous efforts were focused on determining the aesthetic quality of a layout as a weighted average of individual
+quality metrics.  We extend these ideas and findings in the sense that we do not assume any particular form of
+dependency between the overall aesthetic quality and the individual quality metrics.
+
+Going beyond simple quality metrics, we define quality syndromes that capture arrays of information about graphs and
+layouts.  In particular, we borrow the notion of RDF from Statistical Physics and Crystallography; RDF-based features
+demonstrate the strongest potential in extracting the aesthetic quality of a layout.  We expect RDFs (describing the
+microscopic structure of materials) to be the most relevant for large graphs.  It is tempting to investigate whether
+further tools from physics can be useful in capturing drawing aesthetics.
+
+From multiple syndromes, we construct fixed-size feature vectors using common statistical tools.  Our feature vector
+does not contain any information on crossings or crossing angles, nevertheless its performance is superior with respect
+to the weighted averages-based model which accounts for both.  It would be interesting to investigate whether including
+these and other features further improves the performance of the neural network-based model.
+
+In order to train and evaluate the model, we have assembled a relatively large corpus of labeled pairs of layouts, using
+available and generated graphs and exploiting the assumption that layouts produced by force-directed algorithms and
+native graph layouts are aesthetically pleasing and that disturbing them reduces the aesthetic quality.  We admit that
+this study should ideally be repeated with human-labeled data.  However, this requires that a dataset be collected with
+a size similar to ours, which is a challenging task.  Creating such a dataset may become a critically important
+accomplishment in the graph drawing field.

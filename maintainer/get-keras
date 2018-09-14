@@ -1,0 +1,93 @@
+#! /bin/bash -eu
+#! -*- coding:utf-8; mode:shell-script; -*-
+
+# Copyright (C) 2017 Moritz Klammler <moritz.klammler@student.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+shopt -s nullglob
+
+default_tempdir="${TMPDIR-/tmp}"
+
+helptext="usage: get-keras [--tempdir=DIR] [--prefix=DIR]
+
+Downloads builds and installs the Keras library used for machine learning.
+This script will only install the Keras front-end but won't install TensorFlow
+or any other back-ends.  This has to be done separately, using the preferred
+means of the host system.  See https://keras.io/ for more information.
+
+Options:
+
+  --prefix=DIR    installation prefix (default: install in home directory)
+  --tempdir=DIR   use DIR as the working directory (default: '${default_tempdir}')
+  --force         always force a new clone
+  --no-force      reverts the effect of a previous '--force' option
+  --help          show help text and exit
+  --version       show version text and exit
+"
+
+versiontext="get-keras"
+
+keras_dir="keras"
+keras_giturl='https://github.com/keras-team/keras.git'
+keras_gittag='HEAD'
+
+unset prefix
+tempdir="${default_tempdir}"
+force=0
+
+function die {
+    echo "get-keras: error: $@" >&2
+    exit 1
+}
+
+for arg in "$@"
+do
+    case "${arg}"
+    in
+        --help)
+            echo "${helptext}"
+            exit
+            ;;
+        --version)
+            echo "${versiontext}"
+            exit
+            ;;
+        --prefix=*)
+            prefix="${arg#--prefix=}"
+            [ -d "${prefix}" ] || die "Not a directory: ${prefix}"
+            ;;
+        --tempdir=*)
+            tempdir="${arg#--tempdir=}"
+            [ -d "${tempdir}" ] || die "Not a directory: ${tempdir}"
+            ;;
+        --force)
+            force=1
+            ;;
+        --no-force)
+            force=0
+            ;;
+        -*)
+            die "Unknown option: ${arg}"
+            ;;
+        *)
+            die "Too many arguments"
+            ;;
+    esac
+done
+unset arg
+
+cd "${tempdir}" || die "Cannot enter working-directory: ${tempdir}/"
+[ ${force} -eq 0 ] || rm -rf "${keras_dir}" || die "Cannot clean up existing directory"
+[ -d "${keras_dir}" ] || git clone "${keras_giturl}" "${keras_dir}"
+cd "${keras_dir}/" || die "Cannot enter directory: ${tempdir}/${keras_dir}/"
+git pull --rebase || die "Cannot pull latest version"
+git checkout "${keras_gittag}" || die "Cannot checkout desired tag ${keras_gittag}"
+
+if [ "x${prefix+set}" = xset ]
+then
+    python3 setup.py install --prefix="${prefix}"
+else
+    python3 setup.py install --home="${HOME}"
+fi

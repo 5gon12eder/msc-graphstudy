@@ -1,0 +1,18 @@
+#! /usr/bin/gnuplot
+#! -*- coding:utf-8; mode:shell-script; -*-
+
+# Copyright (C) 2018 Karlsruhe Institute of Technology
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+load PREAMBLE
+set output OUTFILE
+
+set xrange [-0.1 : 2.1]
+set xlabel "$\\phi / \\pi$" offset 0,0.5
+set xtics 0, 0.5, 2 offset 0,0.3
+set format x '%.1f'
+
+plot INFILE using ($1 / pi):($2) with lines notitle lc '#204a87' lw 2

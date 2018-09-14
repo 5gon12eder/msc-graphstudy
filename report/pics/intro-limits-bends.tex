@@ -1,0 +1,44 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\begin{tikzpicture}
+  \node[vertex] (C) at (0, 0) {};
+  \node[vertex] (R) at (-1, -1) {};
+  \node[vertex] (H1) at (-0.5, -1.0) {};
+  \node[vertex] (H2) at (-1.0, -1.5) {};
+  \node[vertex] (H3) at (-1.5, -1.0) {};
+  \node[vertex] (O2) at (0, 1) {};
+  \node[vertex] (O1) at (1, -1) {};
+  \node[vertex] (H4) at (1.5, -1) {};
+
+  \coordinate[yshift = +0.35cm] (ctrl1) at (R);
+  \coordinate[yshift = +0.35cm] (ctrl2) at (H1);
+  \coordinate[yshift = -0.25cm] (ctrl3) at (H1);
+  \coordinate[xshift = +0.25cm] (ctrl4) at (H2);
+  \coordinate[xshift = -0.25cm] (ctrl5) at (H2);
+  \coordinate[yshift = -0.25cm] (ctrl6) at (H3);
+  \coordinate[yshift = +0.50cm] (ctrl7) at (H3);
+  \coordinate[xshift = -1.00cm] (ctrl8) at (C);
+
+  %% \draw[red, ultra thin] (R) -- (ctrl1);
+  %% \draw[red, ultra thin] (H1) -- (ctrl2);
+  %% \draw[red, ultra thin] (H1) -- (ctrl3);
+  %% \draw[red, ultra thin] (H2) -- (ctrl4);
+  %% \draw[red, ultra thin] (H2) -- (ctrl5);
+  %% \draw[red, ultra thin] (H3) -- (ctrl6);
+  %% \draw[red, ultra thin] (H3) -- (ctrl7);
+  %% \draw[red, ultra thin] (C) -- (ctrl8);
+
+  \draw[edge] (R)  .. controls (ctrl1) and (ctrl2) ..
+              (H1) .. controls (ctrl3) and (ctrl4) ..
+              (H2) .. controls (ctrl5) and (ctrl6) ..
+              (H3) .. controls (ctrl7) and (ctrl8) ..
+              (C) -- ++(0.5, 0) arc[start angle=90, end angle=0, radius=0.5] --
+              (O1) .. controls +(0, -0.5) .. (H4);
+  \draw[edge] (C) .. controls (0.0, 0.25) and (-0.5, 0.25) .. (0, 0.5) .. controls (0.5, 0.75) and (0, 0.75) .. (O2);
+
+\end{tikzpicture}

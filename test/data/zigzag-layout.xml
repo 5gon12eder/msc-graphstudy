@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- Copyright (C) 2017 Moritz Klammler <moritz.klammler@student.kit.edu>                                            -->
+<!--                                                                                                                 -->
+<!-- Copying and distribution of this file, with or without modification, are permitted in any medium without        -->
+<!-- royalty provided the copyright notice and this notice are preserved.  This file is offered as-is, without any   -->
+<!-- warranty.                                                                                                       -->
+
+<!-- This graph / layout consists of a zig-zag line.  -->
+
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+
+  <key id="x" for="node" attr.name="x" attr.type="double" />
+  <key id="y" for="node" attr.name="y" attr.type="double" />
+
+  <graph id="zigzag" edgedefault="undirected">
+
+    <node id="v01"><data key="x">  0.0</data><data key="y">  0.0</data></node>
+    <node id="v02"><data key="x">100.0</data><data key="y">100.0</data></node>
+    <node id="v03"><data key="x">200.0</data><data key="y">  0.0</data></node>
+    <node id="v04"><data key="x">300.0</data><data key="y">100.0</data></node>
+    <node id="v05"><data key="x">400.0</data><data key="y">  0.0</data></node>
+    <node id="v06"><data key="x">500.0</data><data key="y">100.0</data></node>
+    <node id="v07"><data key="x">600.0</data><data key="y">  0.0</data></node>
+    <node id="v08"><data key="x">700.0</data><data key="y">100.0</data></node>
+    <node id="v09"><data key="x">800.0</data><data key="y">  0.0</data></node>
+    <node id="v10"><data key="x">900.0</data><data key="y">100.0</data></node>
+
+    <edge id="e01" source="v01" target="v02" />
+    <edge id="e02" source="v02" target="v03" />
+    <edge id="e03" source="v03" target="v04" />
+    <edge id="e04" source="v04" target="v05" />
+    <edge id="e05" source="v05" target="v06" />
+    <edge id="e06" source="v06" target="v07" />
+    <edge id="e07" source="v07" target="v08" />
+    <edge id="e08" source="v08" target="v09" />
+    <edge id="e09" source="v09" target="v10" />
+
+  </graph>
+
+</graphml>

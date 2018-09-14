@@ -1,0 +1,806 @@
+#! /usr/bin/python3
+#! -*- coding:utf-8; mode:python; -*-
+
+# Copyright (C) 2018 Moritz Klammler <moritz@klammler.eu>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+# Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+# WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS
+# OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+import argparse
+import collections
+import contextlib
+import datetime
+import fnmatch
+import hashlib
+import itertools as it
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import textwrap
+
+PROGRAM = 'copyright'
+DEFAULT_TEXT_WIDTH = 120
+ANSI_COLOR = None
+VERBOSITY = None
+
+class CopyrightNotice(object):
+
+    def __init__(self, lizenz=None, attributions=None):
+        if lizenz is not None and not isinstance(lizenz, str):
+            raise TypeError("License specification must be string")
+        if lizenz is not None and lizenz not in LICENSES:
+            raise ValueError(repr(lizenz))
+        self.__lizenz = lizenz
+        self.__attributions = list()
+        if attributions is not None:
+            for ayi in attributions:
+                if not isinstance(ayi, AuthorYearInfo):
+                    raise TypeError("Attribution must be of type {!r}".format(AuthorYearInfo.__name__))
+                self.__attributions.append(ayi)
+
+    def __bool__(self):
+        return self.__lizenz is not None
+
+    def __str__(self):
+        attrs = "attribution" if len(self.__attributions) == 1 else "attributions"
+        if self.__lizenz is None:
+            if not self.__attributions:
+                return "no copyright statement"
+            else:
+                return "no license ({:,d} {attrs:s})".format(len(self.__attributions), attrs=attrs)
+        else:
+            return "{:s} license ({:,d} {attrs:s})".format(self.__lizenz, len(self.__attributions), attrs=attrs)
+
+    def __eq__(self, other):
+        return self.__lizenz == other.__lizenz and self.__attributions == other.__attributions
+
+    @property
+    def lizenz(self):
+        return self.__lizenz
+
+    @property
+    def attributions(self):
+        return iter(self.__attributions)
+
+    @property
+    def stanza(self):
+        return LICENSE_STANZAS.get(self.__lizenz, DEFAULT_STANZA)
+
+    def has_attributions(self):
+        return bool(self.__attributions)
+
+    @classmethod
+    def parse(cls, text, filename=None, firstline=None):
+        filtertrue = lambda seq : filter(None, seq)
+        if isinstance(text, list) and all(isinstance(s, str) for s in text):
+            lines = text
+        elif isinstance(text, str):
+            lines = text.splitlines()
+        else:
+            raise TypeError("Can only parse (arbitrarily nested) lists of strings")
+        attributions = list()
+        stanza = DEFAULT_STANZA
+        for (i, line) in enumerate(lines):
+            lineno = None if firstline is None else firstline + i
+            if "COPYRIGHT (C)" not in line.upper():
+                stanza = " ".join(it.chain.from_iterable(filtertrue(lines[j].split() for j in range(i, len(lines)))))
+                break
+            m = PATTERN_COPYRIGHT_AUTHOR_YEAR.match(line)
+            if m:
+                attributions.append(AuthorYearInfo(author=m.group('author').strip(), year=m.group('year').strip()))
+            else:
+                notice("Cannot parse author & year info", filename=filename, line=lineno)
+        lizenz = guess_license_from_stanza(stanza)
+        return cls(lizenz, attributions)
+
+    def to_object(self):
+        return {
+            'license' : self.__lizenz,
+            'attributions' : [ "{:s} {:s}".format(ayi.year, ayi.author) for ayi in self.__attributions ],
+        }
+
+    @classmethod
+    def from_object(cls, obj):
+        if not isinstance(obj, dict):
+            raise TypeError("Expected object")
+        if obj.keys() != { 'license', 'attributions' }:
+            raise TypeError("Expected keys 'license' and 'attributions'")
+        if not isinstance(obj['license'], str):
+            raise TypeError("Expected 'license' to be string")
+        if not isinstance(obj['attributions'], list) and all(isinstance(s, str) for s in obj['attributions']):
+            raise TypeError("Expected 'attributions' to be array of strings")
+        if obj['license'] not in LICENSES:
+            raise ValueError("Unknown license {!r}".format(obj['license']))
+        def extract_attributions():
+            for string in obj['attributions']:
+                m = PATTERN_MANIFEST_AUTHOR_YEAR.fullmatch(string)
+                if not m:
+                    raise ValueError("Cannot parse author & year info from {!r}".format(string))
+                yield AuthorYearInfo(author=m.group('author').strip(), year=m.group('year').strip())
+        return cls(lizenz=obj['license'], attributions=extract_attributions())
+
+
+class FileFormat(object):
+
+    def __init__(self, before : str = None, after : str = None, patterns : list = None, shebang : bool = None):
+        assert shebang is None or type(shebang) is bool
+        self.__before = None if before is None else str(before)
+        self.__after  = None if after  is None else str(after)
+        self.__patterns = frozenset() if patterns is None else frozenset(patterns)
+        self.__shebang = shebang if shebang is not None else before == '#' and after is None
+
+    @property
+    def shebang(self):
+        return self.__shebang
+
+    @property
+    def before(self):
+        return self.__before
+
+    @property
+    def after(self):
+        return self.__after
+
+    def matchedby(self, filename):
+        return any(fnmatch.fnmatch(filename, pattern) for pattern in self.__patterns)
+
+    def iscomment(self, line):
+        line = line.strip()
+        if not line or self.__before is None is self.__after:
+            return None
+        elif self.__before and not line.startswith(self.__before):
+            return False
+        elif self.__after and not line.endswith(self.__after):
+            return False
+        else:
+            return True
+
+    def uncomment(self, line):
+        (first, last) = (0, len(line))
+        if line and self.__before:
+            assert line.startswith(self.__before)
+            first += len(self.__before)
+            while first < len(line) and ispunct(line[first]): first += 1
+            while first < len(line) and isspace(line[first]): first += 1
+        if line and self.__after:
+            assert line.endswith(self.__after)
+            last -= len(self.__after)
+            while last > 0 and ispunct(line[last - 1]): last -= 1
+            while last > 0 and isspace(line[last - 1]): last -= 1
+        if 0 <= first < last <= len(line):
+            return line[first : last]
+        return ""
+
+    def comment(self, line, width=None):
+        """
+        >>> FileFormat(before='/*', after='*/').comment("no comment")
+        '/* no comment */'
+        >>> FileFormat(before='//').comment("no comment")
+        '// no comment'
+        >>> FileFormat(after='!').comment("no comment")
+        'no comment !'
+        >>> FileFormat().comment("no comment")
+        'no comment'
+        >>> FileFormat(bfore='', after='').comment("no comment")
+        ' no comment '
+
+        """
+        if any(c in line for c in '\n\r'):
+            raise ValueError("Line cannot contain \\n or \\r")
+        innerwidth = None if width is None else self.get_comment_text_width(width)
+        if width is not None:
+            length = len(line)
+            if self.__before is not None:
+                length += len(self.__before) + 1
+            if self.__after is not None:
+                length += len(self.__after) + 1
+            if length >= width:
+                raise ValueError("Line is too long")
+        if self.__before is not None and self.__after is not None:
+            return "{:s} {:{width}s} {:s}".format(self.__before, line, self.__after, width=innerwidth)
+        elif self.__before is not None:
+            return "{:s} {:s}".format(self.__before, line).rstrip()
+        elif self.__after is not None:
+            return "{:{width}s} {:s}".format(line, self.__after, width=innerwidth)
+        else:
+            return line.rstrip()
+
+    def get_comment_text_width(self, width=None):
+        if width is None:
+            width = DEFAULT_TEXT_WIDTH
+        if self.__before is not None:
+            width -= len(self.__before) + 1
+        if self.__after is not None:
+            width -= len(self.__after) + 1
+        assert width > 0
+        return width
+
+
+BACKUP_SUFFIX = '~' if os.name == 'posix' else '.backup'
+
+WELL_KNOWN_NOCOPY_FILE_PATTERNS = [
+    'AUTHORS',
+    'COPYING',
+    'COPYING_*',
+    'ChangeLog',
+    'LICENSE',
+]
+
+DEFAULT_STANZA = [ "All rights reserved." ]
+
+RAW_LICENSE_STANZA_GNU_ALL_PERMISSIVE = """\
+Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+"""
+
+RAW_LICENSE_STANZA_MIT = """\
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+
+RAW_LICENSE_STANZA_GPL3PLUS = """\
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see
+<http://www.gnu.org/licenses/>.
+"""
+
+RAW_LICENSE_STANZA_GFDL = """\
+Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation
+License, Version 1.3 or any later version published by the Free Software Foundation; with no Invariant Sections, no
+Front-Cover Texts, and no Back-Cover Texts.
+
+A copy of the license is included in the section entitled "GNU Free Documentation License".
+"""
+
+RAW_LICENSE_STANZA_CC4_BY_NC_ND = """\
+This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+(https://creativecommons.org/licenses/by-nc-nd/4.0/).
+"""
+
+LICENSES = frozenset([ 'all-permissive', 'MIT', 'GPL 3+', 'GFDL 1.3+', 'CC BY-NC-ND 4.0' ])
+LICENSE_STANZAS = dict()
+LICENSE_COLORS = dict()
+
+FILE_FORMATS = {
+    'awk' : FileFormat(before='#', patterns=[ '*.awk', '*.gawk' ]),
+    'bibtex' : [
+        FileFormat(before='%',        patterns=[ '*.bib' ]),
+        FileFormat(before='@comment', patterns=[ '*.bib' ]),
+        FileFormat(before='@Comment', patterns=[ '*.bib' ]),
+        FileFormat(before='@COMMENT', patterns=[ '*.bib' ]),
+    ],
+    'c' : [
+        FileFormat(before='/*', after='*/', patterns=[ '*.c', '*.h', '*.h.in' ]),
+        FileFormat(before='//', after=None, patterns=[ '*.c', '*.h', '*.h.in' ]),
+    ],
+    'c++' : [
+        FileFormat(before='//', after=None, patterns=[ '*.cxx', '*.hxx', '*.txx' ]),
+        FileFormat(before='/*', after='*/', patterns=[ '*.cxx', '*.hxx', '*.txx' ]),
+    ],
+    'cmake' : FileFormat(before='#', patterns=[ '*.cmake', 'CMakeLists.txt' ]),
+    'conf' : FileFormat(before='#', patterns=[ '*.cfg', '*.conf', '*.config', '.gitignore', '*.conf.in' ]),
+    'css' : FileFormat(before='/*', after='*/', patterns=[ '*.css' ]),
+    'html' : FileFormat(before='<!--', after='-->', patterns=[ '*.html', '*.htm' ]),
+    'javascript' : [
+        FileFormat(before='//', after=None, patterns=[ '*.js' ]),
+        FileFormat(before='/*', after='*/', patterns=[ '*.js' ]),
+    ],
+    'json' : FileFormat(patterns=[ '*.json' ]),
+    'latex' : FileFormat(before='%', patterns=[ '*.tex', '*.sty', '*.cls', '*.def' ]),
+    'makefile' : FileFormat(before='#', patterns=[ '*.mk' ]),
+    'markdown' : FileFormat(before='<!--', after='-->', patterns=[ '*.md', '*.txt' ]),
+    'python' : FileFormat(before='#', patterns=[ '*.py' ]),
+    'shell-script' : FileFormat(before='#', patterns=[ '*.sh', '*.bash' ]),
+    'sql' : FileFormat(before='--', patterns=[ '*.sql' ]),
+    'tex' : FileFormat(before='%', patterns=[ '*.tex' ]),
+    'text' : [
+        FileFormat(patterns=[ '*.txt' ], shebang=True),
+        FileFormat(before='#', patterns=[ '*.txt' ]),
+    ],
+    'xml' : FileFormat(before='<!--', after='-->', patterns=[ '*.xml', '*.xsl' ]),
+}
+
+FILE_FORMATS.update({
+    'conf-{:s}'.format(suffix) : FileFormat(before='#')
+    for suffix in [ 'colon', 'desktop', 'javaprop', 'space', 'toml', 'unix', 'xdefaults' ]
+})
+
+BYTE_PATTERN_MODE_LINE = re.compile(
+    rb'-[*]-\s+coding\s*:\s*(?P<coding>[a-z0-9-]+)\s*;\s+mode\s*:\s*(?P<mode>[a-z0-9+-]+)\s*;\s+-[*]-'
+)
+
+BYTE_PATTERN_XML_LINE = re.compile(
+    rb'''<[?]xml\s+version\s*=\s*['"][0-9.]+['"]\s+encoding\s*=\s*['"](?P<encoding>[A-Z0-9-]+)['"]\s*[?]>''',
+    flags=re.IGNORECASE
+)
+
+BYTE_PATTERN_DOCTYPE_LINE = re.compile(
+    rb'<!DOCTYPE\s+(?P<type>[a-z0-9.-]+)(\s+.*|>)', flags=re.IGNORECASE
+)
+
+PATTERN_COPYRIGHT_AUTHOR_YEAR = re.compile(r'Copyright \(C\) (?P<year>[0-9 ,-]+)\s+(?P<author>.*)', flags=re.IGNORECASE)
+
+PATTERN_MANIFEST_AUTHOR_YEAR = re.compile(r'(?P<year>[0-9 ,-]+)\s+(?P<author>.*)', flags=re.IGNORECASE)
+
+AuthorYearInfo = collections.namedtuple('AuthorYearInfo', [ 'author', 'year' ])
+
+Region = collections.namedtuple('Region', [ 'first', 'last' ])
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        prog=PROGRAM,
+        description="Check and optionally update copyright notices in source files.",
+    )
+    ap.add_argument('filenames', metavar='FILE', type=check_filename, nargs='*', help="regular file to check")
+    ap.add_argument('-C', '--directory', metavar='DIR', help="enter directory DIR before doing anything")
+    ap.add_argument('-m', '--manifest', metavar='FILE', help="write (read) licensing information to (from) file")
+    ap.add_argument('-u', '--update', action='store_true', help="update copyright notices according to manifest")
+    ap.add_argument('-c', '--check', action='store_true', help="validate copyright notices against manifest")
+    ap.add_argument(
+        '-s', '--strict', action='store_true',
+        help="insist on a copyright notice to be present in each and every file"
+    )
+    ap.add_argument(
+        '-w', '--width', type=int, default=DEFAULT_TEXT_WIDTH,
+        help="text width to use for wrapping copyright notices (default: %(default)s)"
+    )
+    ap.add_argument(
+        '-l', '--license', dest='lizenz', metavar='NAME', choices=LICENSES,
+        help="use license NAME for files not mentioned in the manifest"
+    )
+    ap.add_argument(
+        '-a', '--author', metavar='NAME', type=str, action='append',
+        help="use author NAME for files not mentioned in the manifest (can be repeated; must match '--year')"
+    )
+    ap.add_argument(
+        '-y', '--year', metavar='YEAR', type=int, action='append',
+        help="use year YEAR for files not mentioned in the manifest (can be repeated; must match '--author')"
+    )
+    ap.add_argument(
+        '-b', '--brief', action='store_const', dest='verbosity', const=-1, default=0,
+        help="only produce output if there is a potential problem"
+    )
+    ap.add_argument(
+        '-q', '--quiet', action='store_const', dest='verbosity', const=-2, default=0,
+        help="only produce output if there is a hard error"
+    )
+    ap.add_argument(
+        '--color', metavar='WHEN', type=parse_ansi_color_choice,
+        help="whether to use ANSI terminal color ('always', 'never', 'auto')"
+    )
+    os.environ['COLUMNS'] = str(shutil.get_terminal_size().columns)
+    ns = ap.parse_args()
+    handle_ansi_color_choice(ns.color)
+    handle_verbosity_choice(ns.verbosity)
+    if ns.directory is not None and ns.manifest and ns.manifest != '-' and not os.path.isabs(ns.manifest):
+        fatal(
+            "Please be specific whether you mean --manifest={!r} or --manifest={!r}"
+            .format(os.path.abspath(ns.manifest), os.path.abspath(os.path.join(ns.directory, ns.manifest)))
+        )
+    xlen = lambda seq : len(seq) if seq is not None else None
+    if (ns.author is None) != (ns.year is None) or xlen(ns.author) != xlen(ns.year):
+        fatal("Each {!r} option must be matched by exactly one {!r} option".format('--author', '--year'))
+    attributions = [
+        AuthorYearInfo(author=str(author), year=str(year)) for (author, year) in zip(ns.author, ns.year)
+    ] if (ns.author is not None and ns.year is not None) else None
+    notice = CopyrightNotice(ns.lizenz, attributions)
+    if ns.directory is not None:
+        os.chdir(ns.directory)
+    manifest = dict()
+    if ns.manifest is not None and (ns.check or ns.update):
+        manifest = load_manifest(ns.manifest)
+    fileitems = list(yield_file_items(ns.filenames))
+    (without, issues) = process_files(
+        fileitems, manifest=manifest, notice=notice, check=ns.check, update=ns.update, width=ns.width
+    )
+    if ns.manifest is not None and not (ns.check or ns.update):
+        store_manifest(manifest, filename=ns.manifest)
+    if issues > 0:
+        fatal("{:,d} files have problems".format(issues))
+    if ns.strict:
+        if without > 0:
+            fatal("{:,d} files have no copyright notice (required due to option {!r})".format(without, '--strict'))
+        else:
+            info("All files have a copyright notice (required due to option {!r})".format('--strict'), bold=True)
+
+def store_manifest(manifest, filename):
+    assert manifest is not None
+    assert filename is not None
+    dictionary = { key : val.to_object() for (key, val) in manifest.items() if val }
+    info("Writing manifest with {:d} entries to file {!r} ...".format(len(dictionary), filename))
+    with contextlib.nullcontext(sys.stdout) if not filename or filename == '-' else open(filename, 'w') as ostr:
+        json.dump(dictionary, ostr, sort_keys=True, indent=4)
+        ostr.write('\n')
+
+def load_manifest(filename):
+    assert filename is not None
+    info("Loading manifest from file {!r} ...".format(filename))
+    with contextlib.nullcontext(sys.stdin) if not filename or filename == '-' else open(filename, 'r') as istr:
+        dictionary = json.load(istr)
+    try:
+        if not isinstance(dictionary, dict):
+            raise TypeError("Expected an object")
+        if not all(isinstance(key, str) for key in dictionary.keys()):
+            raise TypeError("Keys of JSON objects must be JSON strings")
+        manifest = { key : CopyrightNotice.from_object(val) for (key, val) in dictionary.items() }
+    except (TypeError, ValueError) as e:
+        fatal("Cannot load manifest file", filename=filename)
+    else:
+        info("Loaded manifest with {:d} entries".format(len(manifest)))
+        return manifest
+
+def process_files(fileitems, manifest=None, notice=None, check=False, update=False, width=None):
+    newmanifest = dict()
+    oldmanifest = dict()
+    if manifest is not None:
+        oldmanifest.update(manifest)
+    without = 0
+    issues = 0
+    for (filename, filetype) in fileitems:
+        basename = os.path.basename(filename)
+        expected = oldmanifest.get(filename, notice)
+        actual = newmanifest[filename] = process_file(
+            filename, filetype=filetype, notice=expected, update=update, width=width
+        )
+        if not check and not update:
+            flinfo = lambda *args, **kwargs : info(
+                *args, **kwargs, filename=filename, color=LICENSE_COLORS.get(actual.lizenz)
+            )
+            if actual:
+                flinfo("File uses {!s}".format(actual))
+            elif any(fnmatch.fnmatch(basename, pattern) for pattern in WELL_KNOWN_NOCOPY_FILE_PATTERNS):
+                flinfo("File uses {!s} which is okay for this file".format(actual))
+            else:
+                flinfo("File uses {!s}".format(actual), level=-1)
+                without += int(not bool(actual))
+        if check:
+            if actual != expected:
+                issues += 1
+                bemoan_mismatch(expected, actual, filename)
+    if manifest is not None:
+        manifest.update(newmanifest)
+    return (without, issues)
+
+def process_file(filename, filetype=None, notice=None, update=False, width=None):
+    try:
+        with open(filename, 'r') as istr:
+            lines = list(map(saferstrip, istr.readlines()))
+    except OSError as e:
+        fatal("Cannot read file", e.strerror, filename=filename)
+    except UnicodeDecodeError as e:
+        fatal("Cannot read file", str(e), filename=filename)
+    ff = get_file_format(filetype, filename=filename, firstline=(lines[0] if lines else None))
+    if ff is None:
+        fatal("Cannot figure out file type (comment style)", filename=filename)
+    region = find_copyright_notice(lines, ff, filetype=filetype)
+    ehnter = CopyrightNotice() if region is None else CopyrightNotice.parse(
+        list(map(ff.uncomment, lines[region.first : region.last])), filename=filename, firstline=(region.first + 1)
+    )
+    if update:
+        update_copyright_notice(lines, ff, region=region, notice=(notice or None), width=width)
+        update_file(lines, filename)
+    return ehnter
+
+def find_copyright_notice(lines, ff, filetype=None):
+    first = 0
+    # Skip over XML directive
+    if first < len(lines) and filetype == 'xml' and lines[first].startswith('<?xml'):
+        first += 1
+    # Skip over doctype declaration
+    if first < len(lines) and filetype == 'html' and lines[first].startswith('<!DOCTYPE'):
+        first += 1
+    # Skip over shebang and mode lines
+    while first < len(lines) and ((ff.shebang and lines[first].startswith('#!')) or '-*-' in lines[first]):
+        first += 1
+    # Skip over blank lines
+    while first < len(lines) and not lines[first]:
+        first += 1
+    # Expect copyright notice ...
+    if first >= len(lines) or not ff.iscomment(lines[first]) or "COPYRIGHT (C)" not in lines[first].upper():
+        return None
+    last = first
+    # ... to continue until the end of the commented block
+    while last < len(lines) and lines[last] and ff.iscomment(lines[last]):
+        last += 1
+    return Region(first, last)
+
+def update_copyright_notice(lines, ff, region=None, notice=None, width=None):
+    assert ff is not None
+    if region is not None:
+        (first, last) = region
+        while first > 0 and not lines[first - 1]:
+            first -= 1
+        while last < len(lines) and not lines[last]:
+            last += 1
+        del lines[first : last]
+    inspos = 0
+    while inspos < len(lines) and lines[inspos].startswith('<?xml'):
+        inspos += 1
+    while inspos < len(lines) and lines[inspos].startswith('<!DOCTYPE'):
+        inspos += 1
+    while inspos < len(lines) and ((ff.shebang and lines[inspos].startswith('#!')) or '-*-' in lines[inspos]):
+        inspos += 1
+    while inspos < len(lines) and not lines[inspos]:
+        del lines[inspos]
+    def insert(line=""):
+        nonlocal inspos
+        lines.insert(inspos, line)
+        inspos += 1
+    insert()
+    if notice is not None:
+        if not notice.has_attributions():
+            ayi = get_default_attribution()
+            insert(ff.comment("Copyright (C) {!s} {!s}".format(ayi.year, ayi.author), width=width))
+        for ayi in notice.attributions:
+            insert(ff.comment("Copyright (C) {!s} {!s}".format(ayi.year, ayi.author), width=width))
+        tw = textwrap.TextWrapper(width=(ff.get_comment_text_width(width) - 1))
+        for par in notice.stanza:
+            insert(ff.comment("", width=width))
+            for line in tw.wrap(par):
+                insert(ff.comment(line, width=width))
+        insert()
+
+def bemoan_mismatch(expected, actual, filename):
+    if expected is None: expected = CopyrightNotice()
+    if actual   is None: actual   = CopyrightNotice()
+    notice("Expected {!s} but found {!s}".format(expected, actual), filename=filename)
+    for (i, ayi) in enumerate(expected.attributions, start=1):
+        info("Expected: #{:d} {:s} {:s}".format(i, ayi.year, ayi.author), filename=filename)
+    for (i, ayi) in enumerate(actual.attributions, start=1):
+        info("Actual:   #{:d} {:s} {:s}".format(i, ayi.year, ayi.author), filename=filename)
+
+def guess_license_from_stanza(stanza, *, _hashes={ }):
+    if not _hashes:
+        _hashes.update({ hash_stanza(val) : key for (key, val) in LICENSE_STANZAS.items() })
+    assert len(_hashes) == len(LICENSE_STANZAS)
+    thishash = hash_stanza(stanza)
+    return _hashes.get(thishash)
+
+def hash_stanza(texts):
+    characters = ''.join(filter(str.isalnum, map(str.lower, yield_characters(texts)))).encode('utf-8')
+    md = hashlib.md5()
+    md.update(characters)
+    return md.digest()
+
+def cook_stanza(rawtext):
+    lines = rawtext.splitlines()
+    paragraphs = list()
+    for (notblank, somelines) in it.groupby(lines, key=bool):
+        if notblank:
+            paragraphs.append(" ".join(somelines))
+    return paragraphs
+
+def yield_characters(texts):
+    if isinstance(texts, str):
+        for c in texts:
+            yield c
+    else:
+        for text in texts:
+            for c in yield_characters(text):
+                yield c
+
+def yield_file_items(filenames):
+    if filenames:
+        for filename in filenames:
+            yield (filename, guess_file_mode(filename))
+    else:
+        for filename in git_ls_files():
+            filemode = guess_file_mode(filename)
+            if filemode is not None:
+                yield (filename, filemode)
+            else:
+                notice("Skipping file of unknown type", filename=filename)
+
+def git_ls_files():
+    command = [ os.getenv('GIT', default='git'), 'ls-files' ]
+    result = subprocess.run(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=None)
+    if result.returncode != 0:
+        fatal("Cannot list version-controlled files")
+    try: stdout = result.stdout.decode()
+    except UnicodeDecodeError: fatal("Cannot decode standard output of Git command")
+    for filename in filter(is_regular_file, map(str.strip, stdout.splitlines())):
+        yield filename
+
+def is_regular_file(filename):
+    return os.path.isfile(filename) and not os.path.islink(filename)
+
+def guess_file_mode(filename):
+    b2t = lambda b : b.decode('ascii', errors='replace').lower().strip()
+    try:
+        with open(filename, 'rb') as istr:
+            for (i, line) in enumerate(it.islice(it.takewhile(bool, map(bytes.strip, istr)), 0, 3)):
+                m = BYTE_PATTERN_MODE_LINE.search(line)
+                if m:
+                    return b2t(m.group('mode'))
+                if i == 0:
+                    m = BYTE_PATTERN_XML_LINE.fullmatch(line)
+                    if m: return 'xml'
+                    m = BYTE_PATTERN_DOCTYPE_LINE.fullmatch(line)
+                    if m: return b2t(m.group('type'))
+    except OSError as e:
+        fatal("Cannot read file, leave alone figure out it's type", e.strerror, filename=filename)
+    basename = os.path.basename(filename)
+    modes = { m for (m, ff) in yield_all_file_format_items() if ff.matchedby(basename) }
+    if len(modes) == 1:
+        return next(iter(modes))
+
+def update_file(lines, filename):
+    backupname = make_backup_file_name(filename)
+    shutil.copy(filename, backupname)
+    with open(filename, 'w') as ostr:
+        for line in lines:
+            ostr.write(line)
+            ostr.write('\n')
+
+def make_backup_file_name(filename):
+    if filename.endswith(BACKUP_SUFFIX):
+        fatal("Looks like a backup file", filename)
+    return filename + BACKUP_SUFFIX
+
+def check_filename(text):
+    if not text or text.strip() != text or text == '-' or text.endswith(BACKUP_SUFFIX):
+        raise argparse.ArgumentTypeError("Not a reasonable file name: {!r}".format(text))
+    return text
+
+def isspace(c):
+    assert isinstance(c, str) and len(c) == 1
+    return c.isspace()
+
+def ispunct(c):
+    assert isinstance(c, str) and len(c) == 1
+    if not c.isprintable():
+        return False
+    elif c.isspace():
+        return False
+    elif c.isalnum():
+        return False
+    else:
+        return True
+
+def get_default_attribution():
+    year = str(datetime.datetime.now().year)
+    user = dict()
+    for key in [ 'user.name', 'user.email' ]:
+        command = [ os.getenv('GIT', default='git'), 'config', key ]
+        result = subprocess.run(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=None)
+        if result.returncode != 0:
+            fatal("Cannot query Git for {!r} setting".format(key))
+        try:
+            user[key] = result.stdout.decode().strip()
+        except UnicodeDecodeError:
+            fatal("Cannot decode standard output of Git command")
+    (name, email) = (user.get('user.name'), user.get('user.email'))
+    if name and email:
+        author = "{:s} <{:s}>".format(name, email)
+    elif name:
+        author = name
+    else:
+        fatal("Cannot figure out default contributor from Git config")
+    return AuthorYearInfo(year=year, author=author)
+
+def get_file_format(filetype, filename=None, firstline=None):
+    obtained = FILE_FORMATS.get(filetype)
+    if isinstance(obtained, FileFormat):
+        return obtained
+    if obtained is None:
+        if firstline.startswith('#!'):
+            return FileFormat(before='#')
+        return None
+    if filename is not None:
+        basename = os.path.basename(filename)
+        candidates = { ff for ff in obtained if ff.matchedby(basename) }
+        if len(candidates) == 1:
+            return next(iter(candidates))
+    if firstline is not None:
+        candidates = { ff for ff in obtained if ff.iscomment(firstline) }
+        if len(candidates) == 1:
+            return next(iter(candidates))
+    if obtained:
+        next(iter(obtained))
+
+def yield_all_file_format_items():
+    for (key, val) in FILE_FORMATS.items():
+        if isinstance(val, FileFormat):
+            yield (key, val)
+        else:
+            for ff in val:
+                yield (key, ff)
+
+def info(*parts, filename=None, line=None, column=None, color=None, bold=False, level=0):
+    if level > VERBOSITY:
+        return
+    location = ':'.join(map(str, it.takewhile(bool, [ filename, line, column ])))
+    text = ': '.join(map(str, filter(bool, [ PROGRAM, location, *parts ])))
+    (csi, csf) = ('', '')
+    if use_color(sys.stderr):
+        if color is not None:
+            assert isinstance(color, int) and 0 < color <= 9
+            csi += '\033[{:d}m'.format(30 + color)
+        if bold:
+            csi += '\033[1m'
+        if csi:
+            csf = '\033[m'
+    print(csi, text, csf, sep='', file=sys.stderr)
+
+def fatal(*args, **kwargs):
+    info('error', *args, **kwargs, bold=True, level=-2)
+    raise SystemExit(True)
+
+def notice(*args, **kwargs):
+    info(*args, **kwargs, level=-1)
+
+def use_color(terminal):
+    if ANSI_COLOR is not None:
+        return ANSI_COLOR
+    return (os.name == 'posix' and terminal.isatty())
+
+def handle_ansi_color_choice(choice=None):
+    global ANSI_COLOR
+    if choice is not None:
+        ANSI_COLOR = choice
+
+def parse_ansi_color_choice(when):
+    when = when.lower()
+    if when in { 'never', 'off', 'no', 'false', '0' }:
+        return False
+    if when in { 'always', 'on', 'yes', 'true', '1' }:
+        return True
+    if when in { 'auto' }:
+        return None
+    raise argparse.ArgumentTypeError("Invalid choice")
+
+def handle_verbosity_choice(choice=None):
+    global VERBOSITY
+    if choice is not None:
+        VERBOSITY = choice
+
+saferstrip = lambda s : s.rstrip(' \t\n\r')
+
+LICENSE_COLORS['all-permissive']  = 5  # purple
+LICENSE_COLORS['MIT']             = 1  # red
+LICENSE_COLORS['GPL 3+']          = 2  # green
+LICENSE_COLORS['GFDL 1.3+']       = 2  # green
+LICENSE_COLORS['CC BY-NC-ND 4.0'] = 4  # blue
+
+assert LICENSE_COLORS.keys() == LICENSES
+
+LICENSE_STANZAS['all-permissive']  = cook_stanza(RAW_LICENSE_STANZA_GNU_ALL_PERMISSIVE)
+LICENSE_STANZAS['MIT']             = cook_stanza(RAW_LICENSE_STANZA_MIT)
+LICENSE_STANZAS['GPL 3+']          = cook_stanza(RAW_LICENSE_STANZA_GPL3PLUS)
+LICENSE_STANZAS['GFDL 1.3+']       = cook_stanza(RAW_LICENSE_STANZA_GFDL)
+LICENSE_STANZAS['CC BY-NC-ND 4.0'] = cook_stanza(RAW_LICENSE_STANZA_CC4_BY_NC_ND)
+
+assert LICENSE_STANZAS.keys() == LICENSES
+
+if __name__ == '__main__':
+    main()

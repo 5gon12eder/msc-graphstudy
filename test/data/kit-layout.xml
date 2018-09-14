@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- Copyright (C) 2017 Moritz Klammler <moritz.klammler@student.kit.edu>                                            -->
+<!--                                                                                                                 -->
+<!-- Copying and distribution of this file, with or without modification, are permitted in any medium without        -->
+<!-- royalty provided the copyright notice and this notice are preserved.  This file is offered as-is, without any   -->
+<!-- warranty.                                                                                                       -->
+
+<!-- This graph / layout resembles the logo of the Karlsruhe Institute of Technology (www.kit.edu).  -->
+
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+
+  <key id="x" for="node" attr.name="x" attr.type="double" />
+  <key id="y" for="node" attr.name="y" attr.type="double" />
+
+  <graph id="kit" edgedefault="undirected">
+
+    <node id="K00"><data key="x"> 15.100</data><data key="y"> -0.000</data></node>
+    <node id="K01"><data key="x">  2.100</data><data key="y">-13.900</data></node>
+    <node id="K02"><data key="x">  2.100</data><data key="y">-21.900</data></node>
+    <node id="K03"><data key="x"> 14.700</data><data key="y">-35.800</data></node>
+    <node id="K04"><data key="x"> 26.000</data><data key="y">-35.800</data></node>
+    <node id="K05"><data key="x"> 11.500</data><data key="y">-17.800</data></node>
+    <node id="K06"><data key="x"> 26.000</data><data key="y"> -0.000</data></node>
+
+    <node id="I00"><data key="x"> 28.000</data><data key="y"> -0.000</data></node>
+    <node id="I01"><data key="x"> 37.800</data><data key="y"> -0.000</data></node>
+    <node id="I02"><data key="x"> 37.800</data><data key="y">-35.800</data></node>
+    <node id="I03"><data key="x"> 28.000</data><data key="y">-35.800</data></node>
+
+    <node id="T00"><data key="x"> 47.000</data><data key="y"> -0.000</data></node>
+    <node id="T01"><data key="x"> 47.000</data><data key="y">-27.800</data></node>
+    <node id="T02"><data key="x"> 40.100</data><data key="y">-27.800</data></node>
+    <node id="T03"><data key="x"> 40.100</data><data key="y">-35.800</data></node>
+    <node id="T04"><data key="x"> 63.700</data><data key="y">-35.800</data></node>
+    <node id="T05"><data key="x"> 63.700</data><data key="y">-27.800</data></node>
+    <node id="T06"><data key="x"> 56.800</data><data key="y">-27.800</data></node>
+    <node id="T07"><data key="x"> 56.800</data><data key="y"> -0.000</data></node>
+
+    <node id="F00"><data key="x">  2.100</data><data key="y"> -0.000</data></node>
+
+    <node id="F01"><data key="x">-33.699</data><data key="y">  0.249</data></node>
+    <node id="F02"><data key="x">-33.639</data><data key="y"> -2.083</data></node>
+    <node id="F03"><data key="x">-33.428</data><data key="y"> -4.405</data></node>
+    <node id="F04"><data key="x">-33.066</data><data key="y"> -6.709</data></node>
+    <node id="F05"><data key="x">-32.554</data><data key="y"> -8.985</data></node>
+
+    <node id="F06"><data key="x">-30.479</data><data key="y">-14.841</data></node>
+    <node id="F07"><data key="x">-29.443</data><data key="y">-16.931</data></node>
+    <node id="F08"><data key="x">-28.274</data><data key="y">-18.949</data></node>
+    <node id="F09"><data key="x">-26.976</data><data key="y">-20.886</data></node>
+    <node id="F10"><data key="x">-25.554</data><data key="y">-22.735</data></node>
+
+    <node id="F11"><data key="x">-21.207</data><data key="y">-27.174</data></node>
+    <node id="F12"><data key="x">-19.388</data><data key="y">-28.634</data></node>
+    <node id="F13"><data key="x">-17.478</data><data key="y">-29.972</data></node>
+    <node id="F14"><data key="x">-15.485</data><data key="y">-31.184</data></node>
+    <node id="F15"><data key="x">-13.417</data><data key="y">-32.262</data></node>
+
+    <node id="F16"><data key="x"> -7.606</data><data key="y">-34.459</data></node>
+    <node id="F17"><data key="x"> -5.341</data><data key="y">-35.018</data></node>
+    <node id="F18"><data key="x"> -3.045</data><data key="y">-35.428</data></node>
+    <node id="F19"><data key="x"> -0.727</data><data key="y">-35.688</data></node>
+    <node id="F20"><data key="x">  1.602</data><data key="y">-35.797</data></node>
+
+    <edge id="00" source="K00" target="K01" />
+    <edge id="01" source="K01" target="K02" />
+    <edge id="02" source="K02" target="K03" />
+    <edge id="03" source="K03" target="K04" />
+    <edge id="04" source="K04" target="K05" />
+    <edge id="05" source="K05" target="K06" />
+    <edge id="06" source="K06" target="K00" />
+
+    <edge id="07" source="I00" target="I01" />
+    <edge id="08" source="I01" target="I02" />
+    <edge id="09" source="I02" target="I03" />
+    <edge id="10" source="I03" target="I00" />
+
+    <edge id="11" source="T00" target="T01" />
+    <edge id="12" source="T01" target="T02" />
+    <edge id="13" source="T02" target="T03" />
+    <edge id="14" source="T03" target="T04" />
+    <edge id="15" source="T04" target="T05" />
+    <edge id="16" source="T05" target="T06" />
+    <edge id="17" source="T06" target="T07" />
+    <edge id="18" source="T07" target="T00" />
+
+    <edge id="19" source="F00" target="F01" />
+    <edge id="20" source="F01" target="F02" />
+    <edge id="21" source="F02" target="F03" />
+    <edge id="22" source="F03" target="F04" />
+    <edge id="23" source="F04" target="F05" />
+    <edge id="24" source="F05" target="F00" />
+
+    <edge id="25" source="F00" target="F06" />
+    <edge id="26" source="F06" target="F07" />
+    <edge id="27" source="F07" target="F08" />
+    <edge id="28" source="F08" target="F09" />
+    <edge id="29" source="F09" target="F10" />
+    <edge id="30" source="F10" target="F00" />
+
+    <edge id="31" source="F00" target="F11" />
+    <edge id="32" source="F11" target="F12" />
+    <edge id="33" source="F12" target="F13" />
+    <edge id="34" source="F13" target="F14" />
+    <edge id="35" source="F14" target="F15" />
+    <edge id="36" source="F15" target="F00" />
+
+    <edge id="37" source="F00" target="F16" />
+    <edge id="38" source="F16" target="F17" />
+    <edge id="39" source="F17" target="F18" />
+    <edge id="40" source="F18" target="F19" />
+    <edge id="41" source="F19" target="F20" />
+    <edge id="42" source="F20" target="F00" />
+
+  </graph>
+
+</graphml>

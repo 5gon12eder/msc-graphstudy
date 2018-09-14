@@ -1,0 +1,94 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+% Copyright (C) 2018 Tamara Mchedlidze <mched@iti.uka.de>
+% Copyright (C) 2018 Alexey Pak <alexey.pak@iosb.fraunhofer.de>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+%% If you whish to build a 'draft' version of the paper, please don't edit this file (at least, don't commit the
+%% change).  Instead, create (if it doesn't exist already) the file `preamble-local.tex` in the same directory and put
+%% the definition `\def\GlobalClassOptions{draft}` into it.  TeX will then pick up the definition and build the 'draft'
+%% version as desired without colbbering any version-controlled file.  (Never ever commit `preamble-local.tex` to Git;
+%% it is for /your/ local settings only.)
+
+\providecommand*{\GlobalClassOptions}{}
+\InputIfFileExists{preamble-local.tex}{}{}
+
+\documentclass[\GlobalClassOptions]{llncs}
+\input{preamble.tex}
+
+\title{Aesthetic Discrimination of Graph Layouts}
+\author{
+  Moritz Klammler\inst{1}\and
+  Tamara Mchedlidze\inst{1}\and
+  Alexey Pak\inst{2}}
+
+\institute{
+  Karlsruhe Institute of Technology, 76131 Karlsruhe, Germany\and
+  Fraunhofer Institute of Optronics, System Technologies and Image Exploitation,
+  Fraunhoferstra{\ss}e 1, 76131 Karlsruhe, Germany\\
+  \email{moritz@klammler.eu},
+  \email{mched@iti.uka.de},
+  \email{alexey.pak@iosb.fraunhofer.de}
+}
+
+\AtBeginDocument{
+  \input{nn-info.tex}
+  \input{eval-cross-valid.tex}
+  \input{eval-huang-weights.tex}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  This paper addresses the following basic question: given two layouts of the same graph, which one is more
+  aesthetically pleasing? We propose a neural network-based discriminator model trained on a labeled dataset that
+  decides which of two layouts has a higher aesthetic quality. The feature vectors used as inputs to the model are based
+  on known graph drawing quality metrics, classical statistics, information-theoretical quantities, and two-point
+  statistics inspired by methods of condensed matter physics. The large corpus of layout pairs used for training and
+  testing is constructed using force-directed drawing algorithms and the layouts that naturally stem from the process of
+  graph generation. It is further extended using data augmentation techniques. Our model demonstrates a mean prediction
+  accuracy of $\XValSuccessMean\percent$, outperforming discriminators based on stress and on the linear combination of
+  popular quality metrics by a small but statistically significant margin.
+
+  \OnlyGDXVIII{%
+    The full version of the paper including the appendix with additional illustrations is available at
+    \url{https://arxiv.org/abs/1809.01017}.
+  }
+  \OnlyArxiv{%
+    This paper appears in the Proceedings of the 26\textsuperscript{th} International Symposium on Graph Drawing and
+    Network Visualization (GD~2018).
+  }
+
+  \keywords{%
+    graph drawing\and
+    graph drawing aesthetics\and
+    machine lear\-ning\and
+    neural networks\and
+    graph drawing syndromes
+  }
+\end{abstract}
+
+\input{sec-intro.tex}
+\input{sec-relwork.tex}
+\input{sec-syndromes.tex}
+\input{sec-featex.tex}
+\input{sec-model.tex}
+\input{sec-data.tex}
+\input{sec-eval.tex}
+\input{sec-conc.tex}
+
+\bibliographystyle{splncs04}
+\bibliography{literature-bibtex}
+
+\ifforarxiv
+  \clearpage
+  \appendix\relax
+  \input{appendix.tex}
+\fi
+
+\end{document}

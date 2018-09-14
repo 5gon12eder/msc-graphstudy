@@ -1,0 +1,309 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\makeatletter
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{gnuplot-lua-tikz}
+
+\newcommand*{\email}[1]{\mbox{\texttt{\href{mailto:#1}{#1}}}}
+
+\newcommand*{\Reals}[1][]{\ifblank{#1}{\mathbb{R}}{\mathbb{R}_{#1}}}
+\newcommand*{\RealsPos}{\Reals[>0]}
+\newcommand*{\RealsNN}{\Reals[\geq0]}
+\newcommand*{\IntsZ}{\mathbb{Z}}
+\newcommand*{\IntsN}{\mathbb{N}}
+\newcommand*{\IntsNz}{\mathbb{N}_0}
+\newcommand*{\BitZero}{\text{\texttt{0}}}
+\newcommand*{\BitOne}{\text{\texttt{1}}}
+\newcommand*{\Bits}{\{\BitZero,\BitOne\}}
+
+\let\vec\relax
+\let\Vec\relax
+\let\implies\Rightarrow
+\let\impliedby\Leftarrow
+\let\equivalent\Leftrightarrow
+\newcommand*{\suchthat}{:}
+\newcommand*{\degree}{^\circ}
+\let\conjunction\cap
+\let\disjunction\cup
+\newcommand*{\diff}[1]{\mathrm{d}#1\kern0.3em}
+
+\newcommand*{\Layout}{\Gamma}
+\newcommand*{\Graph}{G}
+\newcommand*{\GraphV}{V}
+\newcommand*{\GraphE}{E}
+\newcommand*{\vecz}{0}
+
+\newcommand*{\GraphGVE}{\Graph=(\GraphV,\GraphE)}
+
+\newcommand*{\CMake}{\mbox{CMake}}
+\newcommand*{\CXX}{\mbox{C++}}
+\newcommand*{\JavaScript}{\mbox{JavaScript}}
+\newcommand*{\Keras}{\mbox{Keras}}
+\newcommand*{\Python}{\mbox{Python}}
+\newcommand*{\SQLite}{\mbox{SQLite}}
+\newcommand*{\TensorFlow}{\mbox{TensorFlow}}
+
+\newcommand*{\Entropy}{\@ifstar\EntropyDifferential\EntropyDiscrete}
+\newcommand*{\EntropyDiscrete}{S}
+\newcommand*{\EntropyDifferential}{\bar{S}}
+
+\DeclareMathOperator{\BigO}{\mathcal{O}}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\edgelen}{length}
+\DeclareMathOperator{\mean}{mean}
+\DeclareMathOperator{\rms}{rms}
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\stdevp}{stdevp}
+\DeclareMathOperator{\stdev}{stdev}
+\DeclareMathOperator{\stress}{stress}
+
+\DeclareMathOperator*{\Conjunction}{\bigcap}
+\DeclareMathOperator*{\Disjunction}{\bigcup}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\newcommand*{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand*{\card}[1]{\left\lvert#1\right\rvert}
+\newcommand*{\vecnorm}[1]{\left\lVert#1\right\rVert}
+\newcommand*{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand*{\ceil}[1]{\left\lceil#1\right\rceil}
+\newcommand*{\nint}[1]{\left\lfloor#1\right\rceil}
+\newcommand*{\multiset}[1]{\left[#1\right]}
+
+\newcommand{\bra}[2][\relax]{%
+  \ifx\relax#1\relax%
+    \left\langle#2\right|%
+  \else%
+    \left\langle#2\middle|#1\right|%
+  \fi%
+}
+
+\newcommand{\ket}[2][\relax]{%
+  \ifx\relax#1\relax%
+    \left|#2\right\rangle%
+  \else%
+    \left|#1\middle|#2\right\rangle%
+  \fi%
+}
+
+\newcommand{\braket}[3][\relax]{%
+  \ifx\relax#1\relax%
+    \left\langle#2\middle|#3\right\rangle%
+  \else%
+    \left\langle#2\middle|#1\middle|#3\right\rangle%
+  \fi%
+}
+
+\newcommand*{\enum}[1]{\mbox{\upshape\ttfamily#1}}
+\newcommand*{\menum}[1]{\mbox{\text{\upshape\ttfamily#1}}}
+\newcommand*{\QuasiNd}{\enum{QUASI\(\langle{n}\rangle\)D}}
+\newcommand*{\TorusN}{\enum{TORUS\(\langle{n}\rangle\)}}
+\newcommand*{\code}[1]{\mbox{\texttt{#1}}}
+
+\renewcommand*{\acroenparen}[1]{(\emph{#1})}
+
+\newcommand*{\latintext}[1]{\emph{\textlatin{#1}}}
+
+\newcommand*{\InputTikz}[2][]{\tikz[#1]{\input{#2}}}
+
+\ifdraft{%
+  \newcommand*{\InputTikzGraph}{\@ifstar\InputTikzGraph@Dummy\InputTikzGraph@Dummy}
+}{%
+  \newcommand*{\InputTikzGraph}{\@ifstar\InputTikzGraph@Big\InputTikzGraph@NotBig}
+}
+
+\newcommand*{\InputTikzGraph@NotBig}[3][]{\tikz[x=#2, y=#2, #1]{\input{#3}}}
+\newcommand*{\InputTikzGraph@Big}[3][]{\tikz[x=#2, y=#2, #1]{\setlength{\vertexsize}{2pt}\input{#3}}}
+
+\newcommand*{\InputTikzGraph@Dummy}[3][]{%
+  \urldef\inputtikzgraph@url\url{#3}%
+  \begin{tikzpicture}[x=#2, y=#2, #1]
+    \booltrue{tikzgraphpreamble}
+    \input{#3}
+    \begin{scope}[yscale=\aspectratio]
+      \draw[use as bounding box] (-0.5, -0.5) rectangle (0.5, 0.5);
+      \node[font=\tiny] at (0, 0) {\inputtikzgraph@url};
+    \end{scope}
+  \end{tikzpicture}
+}
+
+\newlength{\samplelayoutwidth}
+\newlength{\samplelayoutheight}
+\newbool{tikzgraphpreamble}
+
+\newcommand*{\UpdateSampleLayoutHeight}[1]{%
+  \booltrue{tikzgraphpreamble}
+  \input{#1}
+  \setlength{\samplelayoutheight}{\aspectratio\samplelayoutwidth}
+  \boolfalse{tikzgraphpreamble}
+}
+
+\newcommand*{\AtBeginSampleLayout}{%
+  \path[tikzgraphbbox, use as bounding box]
+       (-0.5\samplelayoutwidth, -0.5\samplelayoutheight) rectangle (+0.5\samplelayoutwidth, +0.5\samplelayoutheight);
+}
+
+\newcommand*{\WorseLayoutDemo}[2][WORSE]{%
+  \begin{figure}
+    \begin{center}
+      \setlength{\samplelayoutwidth}{0.45\textwidth}
+      \UpdateSampleLayoutHeight{pics/#2-00000.tikz}
+      \begin{tabular}{c@{\qquad}c}
+        \InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-00000.tikz}&
+        \InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-00500.tikz}\\[1ex]
+        \(r=0\,\%\) & \(r=5\,\%\)\\[3ex]
+        \InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-01000.tikz}&
+        \InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-02000.tikz}\\[1ex]
+        \(r=10\,\%\) & \(r=20\,\%\)\\[3ex]
+        \InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-05000.tikz}&
+        \InputTikzGraph[execute at begin picture = \AtBeginSampleLayout]{\samplelayoutwidth}{pics/#2-10000.tikz}\\[1ex]
+        \(r=50\,\%\) & \(r=100\,\%\)
+      \end{tabular}
+    \end{center}
+    \caption[Example \enum{#1} application]{%
+      \enum{#1} application illustrated on a regular grid for increasing rates of degradation.
+    }
+    \label{fig:worsening-#2}
+  \end{figure}
+}
+
+\newcommand*{\InterLayoutDemoPics}[2][INTER]{%
+  \begin{center}
+    \setlength{\samplelayoutwidth}{0.45\textwidth}
+    \begin{tabular}{c@{\qquad}c}
+      \InputTikzGraph{\samplelayoutwidth}{pics/#2-00000.tikz}&
+      \InputTikzGraph{\samplelayoutwidth}{pics/#2-02000.tikz}\\[1ex]
+      \(r=0\,\%\) & \(r=20\,\%\)\\[3ex]
+      \InputTikzGraph{\samplelayoutwidth}{pics/#2-04000.tikz}&
+      \InputTikzGraph{\samplelayoutwidth}{pics/#2-06000.tikz}\\[1ex]
+      \(r=40\,\%\) & \(r=60\,\%\)\\[3ex]
+      \InputTikzGraph{\samplelayoutwidth}{pics/#2-08000.tikz}&
+      \InputTikzGraph{\samplelayoutwidth}{pics/#2-10000.tikz}\\[1ex]
+      \(r=80\,\%\) & \(r=100\,\%\)
+    \end{tabular}
+  \end{center}
+}
+
+\newcommand*{\PropertyDemo}[2][]{%
+  \begin{center}
+    \setlength{\samplelayoutwidth}{0.25\textwidth}
+    \begin{tabular}{c@{\qquad}c@{\qquad}c}
+      \InputTikzGraph*{\samplelayoutwidth}{pics/demograph-a.tikz}&
+      \InputTikzGraph*{\samplelayoutwidth}{pics/demograph-b.tikz}&
+      \InputTikzGraph*{\samplelayoutwidth}{pics/demograph-c.tikz}\\[1ex]
+      \InputLuatikzPlot[width=\samplelayoutwidth, #1]{pics/#2-a.pgf}&
+      \InputLuatikzPlot[width=\samplelayoutwidth, #1]{pics/#2-b.pgf}&
+      \InputLuatikzPlot[width=\samplelayoutwidth, #1]{pics/#2-c.pgf}
+    \end{tabular}
+  \end{center}
+}
+
+\newlength{\vertexsize}
+\setlength{\vertexsize}{3pt}
+\tikzset{
+  Vertex/.style = {
+    font = \footnotesize,
+  },
+  vertex/.style = {
+    shape = circle,
+    fill,
+    inner sep = 0pt,
+    minimum size = \vertexsize,
+  },
+  edge/.style = {
+    draw,
+    thin,
+  },
+  tikzgraphbbox/.style = {
+    fill = \ifdraft{yellow!10}{none},
+  },
+  princomp/.style = {
+    draw = white,
+    double = black,
+    line width = 1.0pt,
+    double distance = 2.0pt,
+    line cap = round,
+    line join = round,
+  },
+  princomp1st/.style = { princomp },
+  princomp2nd/.style = { princomp },
+}
+
+\SetKwBlock{Routine}{Routine}{End}
+\SetKwComment{comment}{}{}
+\SetKwInput{KwConstant}{Constants}
+\SetKwProg{SubRoutine}{SubRoutine}{}{End}
+\SetKw{KwAnd}{and}
+\SetKw{KwBreak}{break}
+\SetKw{KwOr}{or}
+\SetKw{KwYield}{yield}
+
+% https://tex.stackexchange.com/a/251936
+\DefineBibliographyStrings{english}{%
+  andothers = {\em et\addabbrvspace al\adddot}
+}
+
+\newlength{\xval@hunderter}
+\newlength{\xval@hunderter@pm}
+\newcommand*{\InputConfusionMatrix}[1]{%
+  \begingroup%
+    \setlength{\parindent}{\z@}%
+    \settowidth{\xval@hunderter}{\ensuremath{100.00\,\%}}%
+    \settowidth{\xval@hunderter@pm}{\ensuremath{\pm100.00\,\%}}%
+    \newcommand*{\FormatMeanStdev}[2]{%
+      \makebox[\xval@hunderter][r]{\ensuremath{##1\,\%}}%
+      \makebox[\xval@hunderter@pm][r]{\ensuremath{\pm\kern0.2em##2\,\%}}%
+    }%
+    \newcommand*{\FormatCell}[1]{\FormatMeanStdev{\csuse{XVal##1Mean}}{\csuse{XVal##1Stdev}}}%
+    \newcommand*{\AltLine}[2]{\multicolumn{4}{l}{\textit{##1:\hfill##2}}}%
+    \input{#1}%
+    \begin{tabularx}{\linewidth}{X|rr|r}%
+      \toprule%
+                            & \textit{Cond.~Neg.}   & \textit{Cond.~Pos.}   & \textit{$\Sigma$}\\%
+      \midrule%
+      \textit{Pred.~Neg.}   & \FormatCell{TrueNeg}  & \FormatCell{FalseNeg} & \FormatCell{PredNeg}\\%
+      \textit{Pred.~Pos.}   & \FormatCell{FalsePos} & \FormatCell{TruePos}  & \FormatCell{PredPos}\\%
+      \midrule%
+      \textit{$\Sigma$}     & \FormatCell{CondNeg}  & \FormatCell{CondPos}  & \FormatMeanStdev{100.00}{0.00}\\%
+      \bottomrule
+      \multicolumn{4}{l}{}\\
+      \AltLine{Success Rate}{\FormatCell{Success}}\\%
+      \AltLine{Failure Rate}{\FormatCell{Failure}}\\[1ex]%
+      \AltLine{Average Number of Tests}{\ensuremath{\approx\XValCountApprox}}\\%
+      \AltLine{Number of Repetitions}{\ensuremath{\XValTestRuns}}\\%
+    \end{tabularx}%
+  \endgroup%
+}
+
+\newcommand*{\InputPunctureResult}[2][\relax]{%
+  \begingroup%
+  \newcommand*{\PunctureResult}[5][\@undefined]{%
+    ##1&
+    \ifblank{##2}{\multicolumn{2}{c}{}}{\ensuremath{##2\,\%}&\ensuremath{##3\,\%}}&
+    \ifblank{##4}{\multicolumn{2}{c}{}}{\ensuremath{##4\,\%}&\ensuremath{##5\,\%}}\\
+  }%
+  \input{#1}%
+  \begin{tabularx}{\linewidth}{X@{\qquad}r@{\makebox[1.5em][r]{$\pm$}}rr@{\makebox[1.5em][r]{$\pm$}}r}%
+    \toprule%
+    \textit{Property} & \multicolumn{2}{r}{\textit{Sole Exclusion}} & \multicolumn{2}{r}{\textit{Sole Inclusion}}\\%
+    \midrule%
+    \input{#2}%
+    \midrule%
+    \PunctureResult[\textit{Baseline Using All Properties}]{\XValSuccessMean}{\XValSuccessStdev}{}{}%
+    \bottomrule%
+  \end{tabularx}%
+  \endgroup%
+}
+
+\newcommand*{\InputLuatikzPlot}[2][]{\input{#2}}
+
+\newcommand*{\regression}[3][f]{\ensuremath{#1(x)=#2+#3x}}
+
+\makeatother

@@ -1,0 +1,228 @@
+/* -*- coding:utf-8; mode:c; -*- */
+
+/* Copyright (C) 2018 Karlsruhe Institute of Technology                                                               */
+/* Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>                                                */
+/*                                                                                                                    */
+/* This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public  */
+/* License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any     */
+/* later version.                                                                                                     */
+/*                                                                                                                    */
+/* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the         */
+/* implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   */
+/* more details.                                                                                                      */
+/*                                                                                                                    */
+/* You should have received a copy of the GNU General Public License along with this program.  If not, see            */
+/* <http://www.gnu.org/licenses/>.                                                                                    */
+
+/**
+ * @file config.h
+ *
+ * @brief
+ *     Global configuration definitions.
+ *
+ * This file should be `#include`d at the very beginning of every translation unit.
+ *
+ */
+
+/** @brief String literal with the package's copyright year(s).  */
+#define MSC_PACKAGE_YEAR "@MSC_PACKAGE_YEAR@"
+
+/** @brief String literal with the package's copyright author(s).  */
+#define MSC_PACKAGE_AUTHOR "@MSC_PACKAGE_AUTHOR@"
+
+/** @brief String literal with the package's bug report address.  */
+#define MSC_PACKAGE_BUGREPORT "@MSC_PACKAGE_BUGREPORT@"
+
+/** @brief String literal with the package's web site.  */
+#define MSC_PACKAGE_URL "@MSC_PACKAGE_URL@"
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<math.h>` header defindes the constants `M_PI`, `M_E`, &hellip; or to 0 otherwise.
+ *
+ * @see https://www.gnu.org/software/libc/manual/html_node/Mathematical-Constants.html
+ * @see https://docs.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2008/4hwaceh6(v=vs.90)
+ *
+ */
+#define HAVE_MATH_CONSTANTS @HAVE_MATH_CONSTANTS@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `extern char **environ` symbol is available or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/
+ *
+ */
+#define HAVE_POSIX_ENVIRON @HAVE_POSIX_ENVIRON@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<stdlib.h>` header exists and provides the POSIX `getenv` function or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/getenv.html
+ *
+ */
+#define HAVE_POSIX_GETENV @HAVE_POSIX_GETENV@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<stdlib.h>` header exists and provides the POSIX `setenv` function or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/setenv.html
+ *
+ */
+#define HAVE_POSIX_SETENV @HAVE_POSIX_SETENV@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<stdlib.h>` header exists and provides the POSIX `unsetenv` function or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/unsetenv.html
+ *
+ */
+#define HAVE_POSIX_UNSETENV @HAVE_POSIX_UNSETENV@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<unistd.h>` header exists and provides the POSIX `fileno` function or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/fileno.html
+ *
+ */
+#define HAVE_POSIX_FILENO @HAVE_POSIX_FILENO@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<sys/stat.h>` and `<fcntl.h>` headers exist and (together) provide the POSIX `open`
+ *     function or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/open.html
+ *
+ */
+#define HAVE_POSIX_OPEN @HAVE_POSIX_OPEN@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<fcntl.h>` headerd exists and defined the POSIX macros `O_RDONLY`, `O_WRONLY`, `O_RDWR`
+ *     and `O_PATH` as well as the macros for following &ldquo;important flags&rdquo;: `O_APPEND`, `O_CLOEXEC`,
+ *     `O_CREAT`, `O_DIRECTORY`, `O_EXCL`, `O_NOFOLLOW`, `O_TRUNC`
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/open.html
+ *
+ */
+#define HAVE_POSIX_OPEN_FLAGS @HAVE_POSIX_OPEN_FLAGS@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<unistd.h>` header exists and provides the POSIX `close` function or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/close.html
+ *
+ */
+#define HAVE_POSIX_CLOSE @HAVE_POSIX_CLOSE@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<unistd.h>` header exists and provides the POSIX `write` function or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/write.html
+ *
+ */
+#define HAVE_POSIX_WRITE @HAVE_POSIX_WRITE@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<unistd.h>` header exists and provides the POSIX `dup` function or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/dup.html
+ *
+ */
+#define HAVE_POSIX_DUP @HAVE_POSIX_DUP@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<unistd.h>` header exists and provides the POSIX `dup2` function or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/dup2.html
+ *
+ */
+#define HAVE_POSIX_DUP2 @HAVE_POSIX_DUP2@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<sys/resource.h>` header exists and provides the POSIX `getrlimit` function or to 0
+ *     otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/getrlimit.html
+ *
+ */
+#define HAVE_POSIX_GETRLIMIT @HAVE_POSIX_GETRLIMIT@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<sys/resource.h>` header exists and provides the POSIX `setrlimit` function or to 0
+ *     otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/setrlimit.html
+ *
+ */
+#define HAVE_POSIX_SETRLIMIT @HAVE_POSIX_SETRLIMIT@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<unistd.h>` header exists and provides the `STDIN_FILENO` macro or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
+ *
+ */
+#define HAVE_POSIX_STDIN_FILENO @HAVE_POSIX_STDIN_FILENO@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<unistd.h>` header exists and provides the `STDOUT_FILENO` macro or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
+ *
+ */
+#define HAVE_POSIX_STDOUT_FILENO @HAVE_POSIX_STDOUT_FILENO@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<unistd.h>` header exists and provides the `STDERR_FILENO` macro or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
+ *
+ */
+#define HAVE_POSIX_STDERR_FILENO @HAVE_POSIX_STDERR_FILENO@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<unistd.h>` header exists and provides the POSIX `isatty` function or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/009695399/functions/isatty.html
+ *
+ */
+#define HAVE_POSIX_ISATTY @HAVE_POSIX_ISATTY@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<stropts.h>` header exists and provides the POSIX `ioctl` function or to 0 otherwise.
+ *
+ * @see http://pubs.opengroup.org/onlinepubs/009695399/functions/ioctl.html
+ *
+ */
+#define HAVE_POSIX_IOCTL @HAVE_POSIX_IOCTL@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<sys/ioctl.h>` header exists and provides the Linux `TIOCGWINSZ` macro or to 0 otherwise.
+ *
+ */
+#define HAVE_LINUX_TIOCGWINSZ @HAVE_LINUX_TIOCGWINSZ@
+
+/**
+ * @brief
+ *     `#define` to 1 if the `<sys/ioctl.h>` header exists and provides the Linux `winsize` type or to 0 otherwise.
+ *
+ */
+#define HAVE_LINUX_WINSIZE @HAVE_LINUX_WINSIZE@

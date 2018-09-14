@@ -1,0 +1,99 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+% Copyright (C) 2018 Tamara Mchedlidze <mched@iti.uka.de>
+% Copyright (C) 2018 Alexey Pak <alexey.pak@iosb.fraunhofer.de>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\section{Training and Testing Data}
+\label{sec:data}
+
+For training, all machine learning methods require datasets representing the variability of possible inputs.  Our $\DM$
+model needs a dataset containing graphs, their layouts, and known aesthetic orderings of layout pairs.  We have
+assembled such a dataset using two types of sources.  First, we used the collections of the well-known graph archives
+\enum{ROME}, \enum{NORTH} and \enum{RANDDAG} which are published on \url{graphdrawing.org} as well as the NIST's
+\enquote{Matrix Market}~\cite{MatrixMarket}.  \OnlyArxiv{See Fig.~\ref{app:fig:archives} in the Appendix for examples.}
+
+Second, we have generated random graphs using the algorithms listed below.  As a by-product, some of them produce
+layouts that stem naturally from the generation logic.  We refer to these as \emph{native} layouts (see~\cite{Moritz18}
+for details).  \OnlyArxiv{Sample graphs with native layouts (where available) are shown in Fig.~\ref{app:fig:generators}
+  in the Appendix.}
+
+\begin{explanation}
+\explain{\enum{GRID}} Regular $n\times{}m$ grids.  Native layouts: regular rectangular grids.
+
+\explain{\enum{TORUS1}} Same as \enum{GRID}, but the first and the last \enquote{rows} are connected to form a $1$-torus
+(a cylinder).  No native layouts.
+
+\explain{\enum{TORUS2}} Same as \enum{TORUS1}, but also the first and the last \enquote{columns} are connected to form a
+$2$-torus (a doughnut).  No native layouts.
+
+\explain{\enum{LINDENMAYER}} Uses a stochastic L-system~\cite{Lindenmayer1990} to derive increasingly complex graphs by
+performing random replacements of individual vertices with more complicated substructures such as an $n$-ring or an
+$n$-clique.  \OnlyArxiv{Fig.~\ref{app:fig:lindenmayer-subgens} in the Appendix shows all the implemented replacement
+  rules.} Produces a planar native layout.
+
+\explain{\enum{QUASI\meta{n}D} for $n\in\{3,\ldots,6\}$} Projection of a primitive cubic lattice in an
+$n$-di\-men\-sio\-nal space onto a $2$-dimensional plane intersecting that space at a random angle.  The native layout
+follows from the construction.
+
+\explain{\enum{MOSAIC1}} Starts with a regular polygon and randomly divides faces according to a set of simple rules
+until the desired graph size is reached.  The rules include adding a vertex connected to all vertices of the face;
+subdividing each edge and adding a vertex that connects to each subdivision vertex; subdividing each edge and connecting
+them to a cycle.  \OnlyArxiv{These operations are visualized in Fig.~\ref{app:fig:mosaic-subgens} in the Appendix.} The
+native layout follows from the construction.
+
+\explain{\enum{MOSAIC2}} Applies a randomly chosen rule of \enum{MOSAIC1} to every face, with the goal of obtaining more
+symmetric graphs.
+
+\explain{\enum{BOTTLE}} Constructs a graph as a three-dimensional mesh over a random solid of revolution.  The native
+layout is an axonometric projection.
+\end{explanation}
+
+\noindent
+For each graph, we have computed force-directed layouts using the FM\textsuperscript{3}~\cite{Hachul2005} and
+stress-minimization~\cite{Kamada1989} algorithms.  We assume these and native layouts to be generally aesthetically
+pleasing and call them all \emph{proper} layouts of a graph.
+
+Furthermore, we have generated \latinphrase{a priori} un-pleasing (\emph{garbage}) layouts as follows.  Given a graph
+$G=(V,E)$, we generate a random graph $G'=(V',E')$ with $\card{V'}=\card{V}$ and $\card{E'}=\card{E}$ and compute a
+force-directed layout for $G'$.  The coordinates found for the vertices $V'$ are then assigned to $V$.  We call these
+\enquote{phantom} layouts due to the use of a \enquote{phantom} graph $G'$.  We find that phantom layouts look less
+artificial than purely random layouts when vertex positions are sampled from a uniform or a normal distribution.  This
+might be due to the fact that $G$ and $G'$ have the same density and share some beneficial aspects of the force-directed
+method (such as mutual repelling of nodes).  \OnlyArxiv{See Fig.~\ref{app:fig:layouts} in the Appendix for the examples
+  of regular and garbage layouts.}
+
+For training and testing of the discriminator model we need a corpus of labeled pairs -- triplets
+$(\Gamma_a,\Gamma_b,t)$ where $\Gamma_a$ and $\Gamma_a$ are two different layouts for the same graph and $t\in [-1,1]$
+is a value indicating the relative aesthetic quality of $\Gamma_a$ and $\Gamma_b$.  A negative (positive) value for $t$
+expresses that the quality of $\Gamma_a$ is superior (inferior) compared to $\Gamma_b$ and the magnitude of $t$
+expresses the confidence of this prediction.  We only use pairs with sufficiently large $\abs{t}$.
+
+As manually-labelled data were unavailable, we have fixed the values of $t$ as follows.  First, we paired a proper and a
+garbage layout of a graph.  The assumption is that the former is always more pleasing (i.e.~$t=\pm1$).  Second, in order
+to obtain more nuanced layout pairs and to increase the amount of data, we have employed the well-known technique of
+\emph{data augmentation} as follows.
+
+\paragraph{Layout Worsening:}
+Given a proper layout $\Gamma$, we apply a transformation designed to gradually reduce its aesthetic quality that is
+modulated by some parameter $r\in[0,1]$, resulting in a transformed layout $\Gamma'_r$.  By varying the degree $r$ of
+the distortion, we may generate a sequence of layouts ordered by their anticipated aesthetic value: a layout with less
+distortion is expected to be more pleasing than a layout with more distortion when starting from a presumably decent
+layout.  We have implemented the following worsening techniques.  \enum{PERTURB}: add Gaussian noise to each node's
+coordinates.  \enum{FLIP\_NODES}: swap coordinates of randomly selected node pairs.  \enum{FLIP\_EDGES}: same as
+\enum{FLIP\_NODES} but restricted to connected node pairs.  \enum{MOVLSQ}: apply an affine deformation based on moving
+least squares suggested (although for a different purpose) by Schaefer et al.~\cite{Schaefer2006}.  In essence, all
+vertices are shifted according to some smoothly varying coordinate mapping.  \OnlyArxiv{Illustrations of these worsening
+  algorithms can be found in Fig.~\ref{app:fig:worsening} in the Appendix}.
+
+\paragraph{Layout Interpolation:}
+As the second data augmentation technique, we linearly interpolated the positions of corresponding vertices between the
+proper and garbage layouts of the same graph.  The resulting label $t$ is then proportional to the difference in the
+interpolation parameter.
+
+\par\bigskip\noindent
+In total, using all the methods described above, we have been able to collect a database of about
+\ensuremath{\NNCorpusSizeApprox} labeled layout pairs.

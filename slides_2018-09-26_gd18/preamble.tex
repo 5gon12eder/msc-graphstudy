@@ -1,0 +1,59 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Karlsruhe Institute of Technology
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\makeatletter
+
+\usetheme{KIT}
+
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\usepackage{amsmath,amsfonts}
+%\usepackage{slidecite}
+\usepackage{csquotes}
+\usepackage{ifdraft}
+\usepackage{etoolbox}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{multicol}
+\usepackage{gnuplot-lua-tikz}
+\usetikzlibrary{positioning}
+\usepackage{libertine}
+\setmainlanguage{english}
+
+\usepackage[%
+  backend = biber,
+  citestyle = authoryear,
+  bibstyle = chem-acs,
+  alldates = iso8601,
+  giveninits = true,
+]{biblatex}
+
+\usenavigationsymbols
+\setcounter{tocdepth}{2}
+
+\setbeamercolor*{bibliography entry author}{fg=KITblack}
+\setbeamercolor*{bibliography entry title}{fg=KITblack}
+\setbeamercolor*{bibliography entry journal}{fg=KITblack}
+\setbeamercolor*{bibliography entry note}{fg=KITblack}
+
+\setbeamercolor{structure}{fg=KITgreen}
+%\setbeamercolor*{palette secondary}{fg=KITgreen}
+%\setbeamercolor*{palette tertiary}{fg=KITgreen}
+
+\AtBeginSection[]{%
+  \begin{frame}<beamer>
+    \frametitle{\contentsname}
+    \begin{multicols}{2}
+      \tableofcontents[currentsection,hideothersubsections]
+    \end{multicols}
+  \end{frame}
+}
+
+\newcommand*{\percent}{\,\%}
+
+\makeatother

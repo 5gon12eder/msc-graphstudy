@@ -1,0 +1,39 @@
+#! /usr/bin/gnuplot
+#! -*- coding:utf-8; mode:shell-script; -*-
+
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+set terminal tikz tightboundingbox plotsize 120mm, 90mm font ",8"
+set output 'entropy-regression.pgf'
+
+set xrange [* : *]
+set yrange [* : *]
+
+set xtics 1
+set ytics 1
+
+set xlabel "$\\log_2(h)$"
+set ylabel "$\\Entropy/\\text{bit}$"
+
+set key left Left reverse
+
+load 'entropy-regression-native.gplt'
+load 'entropy-regression-fmmm.gplt'
+load 'entropy-regression-worse.gplt'
+load 'entropy-regression-phantom.gplt'
+
+plot f_native(x) linecolor  black   notitle,                                                                            \
+     f_phantom(x) linecolor black   notitle,                                                                            \
+     f_fmmm(x)   linecolor  black   notitle,                                                                            \
+     f_worse(x)  linecolor  black   notitle,                                                                            \
+     'entropy-regression-native.txt'  with points linecolor black pt 1\
+         title sprintf("\\regression[\\menum{NATIVE}]{%.2f}{%.2f}", c0_native, c1_native),                              \
+     'entropy-regression-fmmm.txt'    with points linecolor black pt 2                                                  \
+         title sprintf("\\regression[\\menum{FMMM}]{%.2f}{%.2f}", c0_fmmm, c1_fmmm),                                    \
+     'entropy-regression-worse.txt'   with points linecolor black pt 4\
+         title sprintf("\\regression[\\menum{WORSE}]{%.2f}{%.2f}", c0_worse, c1_worse),                                 \
+     'entropy-regression-phantom.txt' with points linecolor black pt 6\
+         title sprintf("\\regression[\\menum{PHANTOM}]{%.2f}{%.2f}", c0_phantom, c1_phantom)

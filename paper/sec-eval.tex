@@ -1,0 +1,137 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+% Copyright (C) 2018 Tamara Mchedlidze <mched@iti.uka.de>
+% Copyright (C) 2018 Alexey Pak <alexey.pak@iosb.fraunhofer.de>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\section{Evaluation}
+\label{sec:eval}
+
+The performance of the discriminator model was evaluated using \emph{cross-validation} with $\XValTestRuns$-fold random
+subsampling~\cite{Kohavi1995}.  In each round, $20\percent$ of graphs (with all their layouts) were chosen randomly and
+were set aside for testing, and the model was trained using the remaining layout pairs.  Of $N$ labeled pairs used for
+testing, in each round we computed the number $N_\mathrm{correct}$ of pairs for which the model properly predicted the
+aesthetic preference, and derived the accuracy (success rate) $A=N_\mathrm{correct}/N$.  The standard deviation of $A$
+over the $\XValTestRuns$ runs was taken as the uncertainty of the results.  With the average number of test samples of
+$N=\XValCountApprox$, the eventual success rate was $\boldsymbol{A=(\XValSuccessMean\pm\XValSuccessStdev)\percent}$.
+
+\subsection{Comparison With Other Metrics}
+
+In order to assess the relative standing of the suggested method, we have implemented two known aesthetic metrics
+(\emph{stress} and the \emph{combined metric} by Huang et al.~\cite{HuangHL16}) and evaluated them over the same
+dataset.  The metric values were trivially converted to the respective discriminator function outputs.
+
+Stress $\stress$ of a layout $\Gamma$ of a simple connected graph $G=(V,E)$ was defined by Kamada and
+Kawai~\cite{Kamada1989} as
+\begin{equation}
+  \stress(\Gamma) = \sum_{i=1}^{n-1} \sum_{j=i+1}^{n}
+  k_{ij} \left( \dist_\Gamma(v_i,v_j) - L \dist_G(v_i,v_j) \right)^2
+  \mathendpunct{,}
+  \label{eq:stress}
+\end{equation}
+where $L$ denotes the desirable edge length and $k_{ij}=K/\dist_G(v_i,v_j)^2$ is the strength of a \enquote{spring}
+attached to $v_i$ and $v_j$.  The constant $K$ is irrelevant in the context of discriminator functions and can be set to
+any value.
+
+As observed by Welch and Kobourov~\cite{Welch2017}, the numeric value of stress depends on the layout scale via the
+constant $L$ in the Eq.~\ref{eq:stress} which complicates comparisons.  Their suggested solution was for each layout to
+find $L$ that minimizes $\stress$ (e.g.~using binary search).  In our implementation, we applied a similar technique
+based on fitting and minimizing a quadratic function to the stress computed at three scales.  We refer to this quantity
+as \enum{STRESS}.
+
+The combined metric proposed by Huang et al.~\cite{HuangHL16} (referred to as \enum{COMB}) is a weighted average of four
+simpler quality metrics: the number of edge crossings (\enum{CC}), the minimum crossing angle between any two edges in
+the drawing (\enum{CR}), the minimum angle between two adjacent edges (\enum{AR}), and the standard deviation computed
+over all edge lengths (\enum{EL}).
+
+The average is computed over the so-called $z$-scores of the above metrics.  Each $z$-score is found by subtracting the
+mean and dividing by the standard deviation of the metric for all layouts of a given graph to be compared with each
+other.  More formally, let $G$ be a graph and $\Gamma_1,\ldots,\Gamma_k$ be its $k$ layouts to be compared pairwise.
+Let $M(\Gamma_i)$ be the value of metric $M$ for $\Gamma_i$ and $\mu_M$ and $\sigma_M$ be the mean and the standard
+deviation of $M(\Gamma_i)$ for $i\in\{1,\ldots,k\}$.  Then
+\begin{equation}
+  z_M^{(i)} = \frac{M(\Gamma_i) - \mu_M}{\sigma_M}
+\end{equation}
+is the $z$-score for metric $M$ and layout $\Gamma_i$.  The combined metric then is
+\begin{equation}
+  \menum{COMB}(\Gamma_j) = \sum_{M} w_M \: z_{M}^{(j)}
+  \mathendpunct{.}
+\end{equation}
+The weights $w_M$ were found via Nelder-Mead maximization~\cite{Press2007} of the prediction accuracy over the training
+dataset\footnote{The obtained weights are: \TextualHuangWeights}.
+
+\begin{figure}[p]
+  \csdef{Status0}{\textcolor{TangoScarletRed2}{\ding{55}}}%
+  \csdef{Status1}{\textcolor{TangoChameleon2}{\ding{51}}}%
+  \newcommand*{\ShowIt}[1]{\InputTikzGraph{0.25\textwidth}{#1}}
+  \newcommand*{\TellIt}[3]{%
+    \begin{tabular}{l@{\quad}c}
+      \enum{DISC\_MODEL} & \csuse{Status#1}\\
+      \enum{STRESS}      & \csuse{Status#2}\\
+      \enum{COMB}        & \csuse{Status#3}\\
+    \end{tabular}
+  }
+  \begin{center}
+    \begin{tabular}{>{\centering}m{0.35\textwidth}>{\centering}m{0.35\textwidth}@{\qquad}m{0.2\textwidth}}
+      \ShowIt{8314f2c1-4d644640-more} & \ShowIt{8314f2c1-bac12550-less} & \TellIt{1}{0}{1}\\[1ex]\\[1ex]
+      \ShowIt{d8c1498f-8c5ad49b-more} & \ShowIt{d8c1498f-4c2beafc-less} & \TellIt{1}{0}{0}\\[1ex]\\[1ex]
+      \ShowIt{5b3b66d2-49e8882a-more} & \ShowIt{5b3b66d2-f60fcc04-less} & \TellIt{1}{1}{0}\\
+    \end{tabular}
+  \end{center}
+  \caption{%
+    Examples where our discriminator model (\enum{DISC\_MODEL}) succeeds (\csuse{Status1}) and the competing metrics
+    fail (\csuse{Status0}) to predict the answer correctly.  In each row, the layout on the left is expected to be
+    superior compared to the one on the right.
+  }
+  \label{fig:model-comp}
+\end{figure}
+
+The accuracy of the stress-based and the combined model-based discriminators is shown in
+Tab.~\ref{tab:competing-metrics}.  In most cases, our model outperforms these algorithms by a comfortable margin.
+Fig.~\ref{fig:model-comp} provides examples of mis-predictions.  By inspecting such cases, we notice that \enum{STRESS}
+often fails to guess the aesthetics of (almost) planar layouts that contain both very short and very long edges (such
+behavior may also be inferred from the definition of \enum{STRESS}).  We observe that there are planar graphs, such as
+nested triangulations, for which this property is unavoidable in planar drawings.  The mis-predictions of \enum{COMB}
+seem to be due to the high weight of the edge length metric \enum{EL}.  Both \enum{STRESS} and \enum{COMB} are weaker
+than our model in capturing the absolute symmetry and regularity of layouts.
+
+\begin{table}[p]
+  \begin{center}
+    \InputCompetingMetrics{eval-competing-metrics.tex}
+  \end{center}
+  \caption{%
+    Accuracy scores for the \enum{COMB} and \enum{STRESS} model.  The standard deviation in each column is estimated
+    based on the $5$-fold cross-validation (using $20\percent$ of data for testing each time).  The \enquote{Advantage}
+    column shows the improvement in the accuracy of our model with respect to the alternative metric.
+  }
+  \label{tab:competing-metrics}
+\end{table}
+
+\subsection{Significance of Individual Syndromes}
+
+In order to estimate the influence of individual syndromes on the final result, we have tested several modifications of
+our model.  For each syndrome, we considered the case when the feature vector contained only that syndrome.  In the
+second case, that syndrome was removed from the original feature vector.  The entries for the omitted features were set
+to zero.  The results are shown in Tab.~\ref{tab:eval-puncture}.
+
+\begin{table}
+  \begin{center}
+    \InputPunctureResult[eval-cross-valid.tex]{eval-puncture.tex}
+  \end{center}
+  \caption{%
+    Success rates of our discriminator when a syndrome is excluded from the feature vector, and when the feature vector
+    contains only that a syndrome.  Note that \enum{RDF\_LOCAL} is a family of syndromes that are all included or
+    excluded together.  The apparent paradox of higher success rates when some syndromes are excluded can be explained
+    by a statistical fluctuation and is well within the listed range of uncertainty.
+  }
+  \label{tab:eval-puncture}
+\end{table}
+
+As can be observed, the dominant contribution to the accuracy of the model is due to the RDF-based properties
+\enum{RDF\_LOCAL} and \enum{RDF\_GLOBAL}.  The exclusion of other syndromes does not significantly change the results
+(they agree within the estimated uncertainty).  However, the sole inclusion of these syndromes still performs better
+than random choice.  This suggests that there is a considerable overlap between the aesthetic aspects captured by
+various syndromes.  Further analysis is needed to identify the nature and the magnitude of these correlations.

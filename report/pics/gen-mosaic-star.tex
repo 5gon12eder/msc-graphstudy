@@ -1,0 +1,26 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\providecommand*{\GenMosaicScale}{0.6}
+\begin{tikzpicture}[scale = \GenMosaicScale, rotate = 18]
+
+  \node[Vertex] (u1) at (  0:3) {$u_1$};
+  \node[Vertex] (u2) at ( 72:3) {$u_2$};
+  \node[Vertex] (u3) at (144:3) {$u_3$};
+  \node[Vertex] (u4) at (216:3) {$u_4$};
+  \node[Vertex] (u5) at (288:3) {$u_5$};
+
+  \node[Vertex] (v) at (0, 0) {$v$};
+
+  \draw[edge] (u1) -- (u2) -- (u3) -- (u4) -- (u5) -- (u1);
+  \draw[edge] (v) -- (u1);
+  \draw[edge] (v) -- (u2);
+  \draw[edge] (v) -- (u3);
+  \draw[edge] (v) -- (u4);
+  \draw[edge] (v) -- (u5);
+
+\end{tikzpicture}

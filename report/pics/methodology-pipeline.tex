@@ -1,0 +1,81 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\begin{tikzpicture}
+  [
+    object/.style = {
+      inner sep = 4pt,
+      font = \small,
+    },
+    tool/.style = {
+      object,
+      draw,
+      rectangle,
+      minimum width = 30mm,
+      minimum height = 15mm,
+    },
+    asset/.style = {
+      object,
+      draw,
+      circle,
+      minimum size = 20mm,
+    },
+    config/.style = {
+      font = \small\ttfamily,
+    },
+    dataflow/.style = {
+      draw,
+      very thick,
+    },
+  ]
+  \newcommand*{\twoliner}[3][c]{\begin{tabular}{@{}#1@{}}#2\\#3\end{tabular}}
+  \node[tool] (generators) {\twoliner{Graph}{Generators}};
+  \node[object, left = 2cm of generators] (sources) {\twoliner{External}{Sources}};
+  \node[asset, below = of generators] (graphs) {Graphs};
+  \node[tool, below = of graphs] (layalgos) {\twoliner{Layout}{Algorithms}};
+  \node[asset, below = of layalgos] (layouts) {Layouts};
+  \node[tool, right = 2cm of layouts] (laytrans) {\twoliner{Layout}{Transformations}};
+  \node[tool, below = of layouts] (extractors) {\twoliner{Feature}{Extractors}};
+  \node[asset, below = of extractors] (properties) {Properties};
+  \node[tool, right = of properties] (trainer) {\twoliner{Training}{{\&} Testing}};
+  \node[asset, right = of trainer] (model) {\twoliner{Neural}{Network}};
+
+  \node[config, right = 3mm of generators, anchor = west] {\twoliner[l]{graphs.cfg}{imports.json}};
+  \node[config, right = 3mm of layalgos, anchor = west] {layouts.cfg};
+  \node[config, right = 3mm of extractors, anchor = west] {properties.cfg};
+  \node[config, right = 3mm of laytrans, anchor = west] {\twoliner[l]{worsening.cfg}{interpolation.cfg}};
+
+  \draw[dataflow, ->] (sources.east) ++(0.5em, 0) -- (generators);
+  \draw[dataflow, ->] (generators) -- (graphs);
+  \draw[dataflow, ->] (graphs) -- (layalgos);
+  \draw[dataflow, ->] (layalgos) -- (layouts);
+  \draw[dataflow, ->] (layouts) -- (extractors);
+  \draw[dataflow, ->] (extractors) -- (properties);
+  \draw[dataflow, ->] (properties) -- (trainer);
+  \draw[dataflow, ->] (trainer) -- (model);
+
+  \coordinate[xshift =  0mm, yshift = +15mm] (c1a) at (laytrans.north);
+  \coordinate[xshift = 25mm, yshift = +25mm] (c2a) at (layouts.center);
+  \coordinate[xshift =  0mm, yshift = -15mm] (c1b) at (laytrans.south);
+  \coordinate[xshift = 25mm, yshift = -25mm] (c2b) at (layouts.center);
+
+  %% \draw[ultra thin, red] (laytrans.north) -- (c1a);
+  %% \draw[ultra thin, red] (layouts) -- (c2a);
+  %% \draw[ultra thin, red] (laytrans.south) -- (c1b);
+  %% \draw[ultra thin, red] (layouts) -- (c2b);
+
+  \draw[dataflow, <-] (laytrans.north) .. controls (c1a) and (c2a) .. (layouts);
+  \draw[dataflow, ->] (laytrans.south) .. controls (c1b) and (c2b) .. (layouts);
+
+  \coordinate (native1) at ($(generators.south)!0.5!(graphs.north)$);
+  \coordinate[left = 3cm of native1] (native2);
+  \coordinate (native3) at (native2|-layouts.center);
+
+  \draw[dataflow, ->] (native1) -- (native2) -- (native3) -- (layouts);
+  \node[object, rotate = 90, anchor = south] at ($(native2)!0.5!(native3)$) {native layouts};
+
+\end{tikzpicture}

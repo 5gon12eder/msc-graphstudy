@@ -1,0 +1,41 @@
+/* -*- coding:utf-8; mode:c; -*- */
+
+/* Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>                                                */
+/*                                                                                                                    */
+/* This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public  */
+/* License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any     */
+/* later version.                                                                                                     */
+/*                                                                                                                    */
+/* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the         */
+/* implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   */
+/* more details.                                                                                                      */
+/*                                                                                                                    */
+/* You should have received a copy of the GNU General Public License along with this program.  If not, see            */
+/* <http://www.gnu.org/licenses/>.                                                                                    */
+
+/// \mainpage Internal API Documentation
+/// \author @MSC_PACKAGE_AUTHOR@ (@MSC_PACKAGE_BUGREPORT@)
+/// \date @MSC_PACKAGE_YEAR@
+///
+/// This is the documentation of the internal C++ API used by the code written for
+/// [my Master's thesis](@MSC_PACKAGE_URL@).
+///
+/// The graph data structures and layouting algorithms are from the
+/// [Open Graph Drawing Framework (OGDF)](http://www.ogdf.net/) which is a prequisite for building and using this
+/// library.  Furthermore, [Boost 1.66](http://www.boost.org/) or later is required.
+///
+/// This library is not really meant to be useful to anyone else though you are welcome to re-use (obeying the licensing
+/// terms) parts of it if you find them useful.  No attempt has been made to make the feature-set provided by this
+/// library complete.  I have only implemented what was needed in order to get my work done.  The only really value of
+/// this documentation is probably to understand more rapidly what the code for my thesis is doing, if you feel so
+/// inclined.
+
+/// \namespace msc
+///
+/// \brief
+///     Top-level name-space for pretty much everything in this project.
+
+/// \namespace msc::test
+///
+/// \brief
+///     Name-space for auxiliary unit testing utilities.

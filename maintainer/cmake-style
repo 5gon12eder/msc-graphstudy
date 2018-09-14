@@ -1,0 +1,473 @@
+#! /usr/bin/python3
+#! -*- coding:utf-8; mode:python; -*-
+
+# Copyright (C) 2018 Moritz Klammler <moritz@klammler.eu>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+# Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+# WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS
+# OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+import argparse
+import collections
+import fnmatch
+import itertools as it
+import os
+import re
+import shutil
+import subprocess
+import sys
+
+CMAKE_FILE_NAME_PATTERNS = [ 'CMakeLists.txt', '*.cmake' ]
+BACKUP_SUFFIX = '~' if os.name == 'posix' else '.backup'
+TAB_WIDTH = 4
+SPACE = ' '
+INDENT = SPACE * TAB_WIDTH
+ANSI_COLOR = None
+
+class ConfusingCMakeSyntax(Exception):
+
+    def __str__(self):
+        return "Sorry, I'm confused by the CMake syntax here"
+
+
+class CMakeScope(object):
+
+    def __init__(self, left, right, inter=None):
+        self.left = left
+        self.right = right
+        self.inter = frozenset(inter) if inter else frozenset()
+
+
+CMAKE_SCOPES = [
+    CMakeScope('if', 'endif', [ 'elseif', 'else' ]),
+    CMakeScope('foreach', 'endforeach', [ 'break', 'continue' ]),
+    CMakeScope('while', 'endwhile', [ 'break', 'continue' ]),
+    CMakeScope('macro', 'endmacro'),
+    CMakeScope('function', 'endfunction'),
+]
+
+CMAKE_KEYWORDS_LEFT = frozenset(cm.left for cm in CMAKE_SCOPES)
+CMAKE_KEYWORDS_RIGHT = frozenset(cm.right for cm in CMAKE_SCOPES)
+CMAKE_KEYWORDS_INTER = frozenset(it.chain(cm.inter for cm in CMAKE_SCOPES))
+CMAKE_KEYWORDS = CMAKE_KEYWORDS_LEFT | CMAKE_KEYWORDS_INTER | CMAKE_KEYWORDS_RIGHT
+
+# Set of CMake functions that are "set-like" and therefore want the first argument to appear on the same line as the
+# opening parenthesis.  For all other functions, this is not accepted.
+CMAKE_SET_FUNCTIONS = frozenset([ 'set' ])
+
+def iskeyword(token, lowercase=False):
+    return (token if lowercase else token.lower()) in CMAKE_KEYWORDS
+
+def main():
+    ap = argparse.ArgumentParser(
+        prog='cmake-style',
+        usage="%(prog)s [--directory=DIR] [--summary | --quiet] [--fix] [--] [FILE...]",
+        description=(
+              "Checks CMake files for conformance with the style guide.  If no files are specified, all regular files"
+            + " reported by 'git ls-files' with names matching 'CMakeLists.txt' or '*.cmake' are checked."
+        ),
+        epilog=(
+              "All checks are conservative and aim for zero false positives at the cost of potentially many false"
+            + " negatives.  Therefore, if an issue is reported, it is real and needs fixing.  The automatic repair (via"
+            + " the '--fix' option), on the other hand, is not perfect and cannot settle all issues.  It also might"
+            + " apply fixes you don't like so you should carefully check your files afterwards.  If you run it over"
+            + " file {!r}, the original file will be backed up as {!r} in case you want to restore it or generate a"
+            + " diff."
+        ).format('foo.txt', make_backup_file_name('foo.txt'))
+    )
+    ap.add_argument('filenames', metavar='FILE', type=check_filename, nargs='*', help="regular file to check")
+    ap.add_argument('-C', '--directory', metavar='DIR', help="enter directory DIR before doing anything")
+    ap.add_argument('-f', '--fix', action='store_true', help="automatically fix some issues (implies -s)")
+    ap.add_argument('-s', '--summary', action='store_true', help="print only one line per file")
+    ap.add_argument('-q', '--quiet', action='store_true', help="don't produce any output")
+    ap.add_argument(
+        '--color', metavar='WHEN', type=parse_ansi_color_choice,
+        help="whether to use ANSI terminal color ('always', 'never', 'auto')"
+    )
+    os.environ['COLUMNS'] = str(shutil.get_terminal_size().columns)
+    ns = ap.parse_args()
+    handle_ansi_color_choice(ns.color)
+    if ns.fix:
+        ns.summary = True
+    if ns.directory is not None:
+        os.chdir(ns.directory)
+    status = check_files(
+        filelist=list(ns.filenames or git_ls_files(terminal=(sys.stderr if not ns.quiet else None))),
+        fix=ns.fix,
+        verboseout=(sys.stderr if not ns.quiet and not ns.summary else None),
+        summaryout=(sys.stderr if not ns.quiet and     ns.summary else None),
+    )
+    raise SystemExit(abs(status))
+
+def check_files(filelist, fix=False, verboseout=None, summaryout=None):
+    overallstatus = 0
+    for filename in filelist:
+        try:
+            with open(filename, 'r') as istr:
+                linesold = list(map(str.rstrip, istr.readlines()))
+        except OSError as e:
+            print_fatal(filename, "Cannot read file", e.strerror)
+        except UnicodeDecodeError as e:
+            print_fatal(filename, "Cannot decode file", str(e))
+        linesnew = list(linesold)
+        try:
+            with CMakeFileChecker(verboseout, fix) as cmfc:
+                status = cmfc(linesnew, filename=filename)
+            if linesnew != linesold:
+                assert fix
+                assert status != 0
+                update_fixed_file(linesnew, filename=filename)
+        except ConfusingCMakeSyntax as e:
+            status = -1
+            print_error(filename, str(e), file=verboseout)
+        if   status == 0: print_good(filename, "OK", file=summaryout)
+        elif status == 1: print_warning(filename, "non-conforming", file=summaryout)
+        elif status == 2: print_info(filename, "fixed", file=summaryout)
+        elif status < 0:  print_error(filename, "error", file=summaryout)
+        else: raise ValueError(status)
+        if status < 0:
+            overallstatus = -1
+        elif status != 0 and overallstatus != 1:
+            overallstatus = status
+    return overallstatus
+
+class CMakeFileChecker(object):
+
+    def __init__(self, terminal, fix=False):
+        self._terminal = terminal
+        self._fix = fix
+
+    def __enter__(self):
+        self._status = None
+        self._lines = None
+        self._stack = list()
+        self._function = None
+        self._moreindent = None
+        self._lineno = None
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+    def __call__(self, lines, filename=None):
+        assert self._status is None  # not reentrant
+        self._status = 0
+        self._lines = lines
+        self._filename = filename if filename is not None else '/dev/stdin'
+        self._check_preamble()
+        self._check_body()
+        return self._status
+
+    def _check_preamble(self):
+        if len(self._lines) < 2:
+            self._bemoan("File ought to have at least a shebang and a mode line")
+        elif self._lines[0] != "#! /usr/bin/cmake -P":
+            self._bemoan("First line should be CMake shebang line")
+        elif self._lines[1] != "#! -*- coding:utf-8; mode:cmake; -*-":
+            self._bemoan("Second line should be CMake mode line")
+        elif len(self._lines) > 2 and self._lines[2]:
+            self._bemoan("Third line should be blank")
+
+    def _check_body(self):
+        for (i, line) in enumerate(self._lines):
+            self._lineno = i + 1
+            hashidx = line.find('#')
+            if not line or hashidx >= 0 and all(line[j].isspace() for j in range(hashidx)):
+                if line.endswith('\\'):
+                    self._bemoan("Never ever continue a comment line by escaping the newline character at the end")
+                continue
+            self._lines[i] = self._check_line(line)
+        if self._stack:
+            self._unexpected_eof()
+
+    def _check_line(self, line):
+        #print("_check_line({!r})".format(line))
+        if self._function:
+            return self._check_parameter(line)
+        match = re.match(r'(\s*)(\w+)\s*\(\s*', line)
+        if match:
+            line = self._check_invocation(line, token=match.group(2).lower(), offset=len(match.group(1)))
+        return line
+
+    def _check_invocation(self, line, token, offset):
+        #print("_check_invocation({!r}, token={!r}, offset={!r})".format(line, token, offset))
+        userspelling = line[offset : offset + len(token)]
+        what = "keyword" if iskeyword(token, lowercase=True) else "identifier"
+        if token != userspelling and self._bemoan_and_offer_fix(
+                "{what:s} {!r} should be spelled in lower-case".format(token, what=what.title()),
+                offset=offset
+        ):
+            (before, userspelling, after) = line.partition(userspelling)
+            line = before + token + after
+        (before, paren, after) = line.partition('(')
+        if (before.endswith(SPACE) or after.startswith(SPACE)) and self._bemoan_and_offer_fix(
+                "There should be no spaces around the opening parenthesis after the {what:s} {!r}"
+                .format(token, what=what), offset=line.index('(')
+        ):
+            line = before.rstrip() + paren.strip() + after.lstrip()
+        if iskeyword(token, lowercase=True):
+            line = self._check_keyword(line, token)
+        else:
+            line = self._check_function(line, token)
+        return line
+
+    def _check_keyword(self, line, keyword, offset=None):
+        #print("_check_keyword(..., keyword={!r}, offset={!r})".format(token, offset))
+        if offset is None:
+            offset = line.lower().index(keyword)
+        if self._function:
+            self._unexpected_keyword(keyword, offset=offset)
+        if self._stack and keyword in self._stack[-1].inter:
+            level = len(self._stack) - 1
+        elif keyword in CMAKE_KEYWORDS_LEFT:
+            level = len(self._stack)
+            self._stack_push(keyword)
+        elif keyword in CMAKE_KEYWORDS_RIGHT:
+            level = len(self._stack) - 1
+            scope = self._stack_pop()
+            if scope is None or keyword != scope.right:
+                self._unexpected_keyword(keyword, offset=offset)
+        else:
+            self._unexpected_keyword(keyword, offset=offset)
+        if find_paren_at_eol(line).symbol != ')':
+            self._bemoan("Line doesn't end with a closing parenthesis")
+        return self._check_indentation(line, level=level, actual=line[0 : offset])
+
+    def _check_function(self, line, function, offset=None):
+        #print("_check_function(..., keyword={!r}, offset={!r})".format(function, offset))
+        if offset is None:
+            offset = line.lower().index(function)
+        if self._function:
+            self._unexpected_function(function, offset=offset)
+        self._enter_function(function)
+        paren = find_paren_at_eol(line)
+        if paren.symbol == ')':
+            self._leave_function(function)
+        elif paren.allparens != '(':
+            self._confused_by_cmake_syntax("Unexpected use of parenthesis")
+        elif function in CMAKE_SET_FUNCTIONS:
+            varname = line.partition('#')[0].partition('(')[2].strip()
+            if not re.fullmatch(r'\w+', varname):
+                self._bemoan(
+                    "The name of the variable should appear on the same line as the {!r} command".format(function),
+                    offset=paren.offset
+                )
+        elif paren.symbol != '(':
+            self._bemoan("Line doesn't end with an opening or closing parenthesis")
+        return line
+
+    def _enter_function(self, name):
+        assert self._function is None and self._moreindent is None
+        self._function = name
+        self._moreindent = 0
+
+    def _leave_function(self, name=None):
+        assert name is None or name == self._function
+        self._function = None
+        self._moreindent = None
+
+    def _check_parameter(self, line):
+        #print("_check_parameter(...)".format())
+        assert isinstance(self._function, str)
+        assert isinstance(self._moreindent, int)
+        level = len(self._stack)
+        match = re.match(r'(\s*)([A-Z0-9_]+)(\s+|$)', line)
+        if match:
+            token = match.group(2)
+            line = self._check_indentation(line, level=(level + 1), actual=match.group(1))
+            if len(match.group(3)) > 1 and self._bemoan_and_offer_fix(
+                    "Key {!r} should only be followed by a single space".format(token),
+                    offset=(line.index(token) + len(token))
+            ):
+                (before, token, after) = line.partition(token)
+                line = before + token + SPACE + after.lstrip()
+            self._moreindent = len(token) + 1 if match.group(3) else 0
+        elif line.endswith(')'):
+            if line.strip() != ')':
+                self._bemoan("Line should only contain a single closing parenthesis")
+            line = self._check_indentation(line, level=level)
+            self._function = None
+            self._moreindent = None
+        else:
+            alignment = (level + 1) * INDENT + self._moreindent * SPACE
+            line = self._check_indentation(line, expected=alignment)
+        return line
+
+    def _check_indentation(self, line, level : int = None, expected : str = None, actual : str = None):
+        assert level is None or expected is None
+        assert level is None or isinstance(level, int)
+        assert expected is None or isinstance(expected, str)
+        assert actual is None or isinstance(actual, str)
+        if expected is None:
+            if level is None:
+                level = len(self._stack)
+            expected = level * INDENT
+        if actual is None:
+            actual = ''.join(it.takewhile(str.isspace, line))
+        if actual != expected:
+            if level is not None:
+                complaint = "Line should be indented to level {:d}".format(level)
+            elif all(c == SPACE for c in expected):
+                complaint = "Line should be indented with {:d} spaces".format(len(expected))
+            else:
+                complaint = "Line should be indented with {!r}".format(expected)
+            if self._bemoan_and_offer_fix(complaint):
+                line = expected + line.lstrip()
+        return line
+
+    def _stack_push(self, keyword):
+        [ scope ] = (cm for cm in CMAKE_SCOPES if cm.left == keyword)
+        self._stack.append(scope)
+
+    def _stack_pop(self):
+        if self._stack:
+            return self._stack.pop()
+
+    def _bemoan_and_offer_fix(self, *args, **kwargs):
+        self._bemoan(*args, **kwargs, canfix=True)
+        return self._fix
+
+    def _bemoan(self, *parts, offset=None, canfix=False):
+        column = offset + 1 if offset is not None else None
+        direction = [ self._filename, self._lineno, column ]
+        assert (lambda seq : seq == sorted(seq))([ d is None for d in direction ])
+        if self._function is not None:
+            direction.append(self._function)
+        location = ':'.join(map(str, filter(None, direction)))
+        print_warning(location, *parts, file=self._terminal)
+        self._status = 2 if canfix and self._fix and self._status != 1 else 1
+
+    def _confused_by_cmake_syntax(self, *parts, offset=None):
+        if parts:
+            self._bemoan(*parts, offset=offset)
+        raise ConfusingCMakeSyntax()
+
+    def _unexpected_keyword(self, keyword, offset=None):
+        self._confused_by_cmake_syntax("Unexpected keyword {!r}".format(keyword), offset=offset)
+
+    def _unexpected_function(self, function, offset=None):
+        self._confused_by_cmake_syntax("Unexpected function {!r}".format(function), offset=offset)
+
+    def _unexpected_eof(self):
+        self._confused_by_cmake_syntax("Unexpected end of file")
+
+
+ParenLocation = collections.namedtuple('ParenLocation', [ 'symbol', 'offset', 'allparens' ])
+
+def find_paren_at_eol(line, parens='()'):
+    code = ''.join(yield_before_comment(line)).rstrip()
+    allparens = ''.join(c for c in code if c in parens)
+    for c in parens:
+        if code.endswith(c):
+            return ParenLocation(c, len(code) - 1, allparens)
+    return ParenLocation(None, -1, allparens)
+
+def yield_before_comment(text):
+    instring = False
+    afterbs = False
+    for c in text:
+        if afterbs:
+            afterbs = False
+        elif c == '\\':
+            afterbs = True
+        elif c == '"':
+            instring = not instring
+        elif c == '#':
+            if not instring: break
+        yield c
+
+def update_fixed_file(lines, filename):
+    backupname = make_backup_file_name(filename)
+    shutil.copy(filename, backupname)
+    with open(filename, 'w') as ostr:
+        for line in lines:
+            ostr.write(line)
+            ostr.write('\n')
+
+def make_backup_file_name(filename):
+    if filename.endswith(BACKUP_SUFFIX):
+        print_fatal("Looks like a backup file", filename)
+    return filename + BACKUP_SUFFIX
+
+def git_ls_files(terminal=None):
+    command = [ os.getenv('GIT', default='git'), 'ls-files' ]
+    result = subprocess.run(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=None)
+    if result.returncode != 0:
+        print_fatal("Cannot list version-controlled files")
+    try: stdout = result.stdout.decode()
+    except UnicodeDecodeError: print_fatal("Cannot decode standard output of Git command")
+    for filename in map(str.strip, stdout.splitlines()):
+        basename = os.path.basename(filename)
+        if any(fnmatch.fnmatch(basename, pattern) for pattern in CMAKE_FILE_NAME_PATTERNS):
+            if is_regular_file(filename):
+                yield filename
+            else:
+                print_notice(filename, "Non-regular file won't be checked", file=terminal)
+
+def is_regular_file(filename):
+    return os.path.isfile(filename) and not os.path.islink(filename)
+
+def check_filename(text):
+    if not text or text.strip() != text or text == '-':
+        raise argparse.ArgumentTypeError("Not a reasonable file name")
+    return text
+
+def print_good(*parts, file=None):
+    _print(*parts, file=file, init='\033[32m', fini='\033[39m')
+
+def print_info(*parts, file=None):
+    _print(*parts, file=file, init='\033[34m', fini='\033[39m')
+
+def print_notice(*parts, file=None):
+    _print(*parts, file=file, init='\033[33m', fini='\033[39m')
+
+def print_warning(*parts, file=None):
+    _print(*parts, file=file, init='\033[31m', fini='\033[39m')
+
+def print_error(*parts, file=None):
+    _print(*parts, file=file, init='\033[1m\033[31m', fini='\033[39m\033[22m')
+
+def print_fatal(*parts):
+    print_error(*parts, file=sys.stderr)
+    raise SystemExit(True)
+
+def _print(*parts, file=None, init='', fini=''):
+    if file is None:
+        return
+    elif use_color(file):
+        message = ': '.join(parts)
+        print(init, message, fini, file=file, sep='')
+    else:
+        print(*parts, sep=': ', file=file)
+
+def use_color(terminal):
+    if ANSI_COLOR is not None:
+        return ANSI_COLOR
+    return (os.name == 'posix' and terminal.isatty())
+
+def handle_ansi_color_choice(choice=None):
+    global ANSI_COLOR
+    if choice is not None:
+        ANSI_COLOR = choice
+
+def parse_ansi_color_choice(when):
+    when = when.lower()
+    if when in { 'never', 'off', 'no', 'false', '0' }:
+        return False
+    if when in { 'always', 'on', 'yes', 'true', '1' }:
+        return True
+    if when in { 'auto' }:
+        return None
+    raise argparse.ArgumentTypeError("Invalid choice")
+
+if __name__ == '__main__':
+    main()

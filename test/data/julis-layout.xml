@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- Copyright (C) 2017 Moritz Klammler <moritz.klammler@student.kit.edu>                                            -->
+<!--                                                                                                                 -->
+<!-- Copying and distribution of this file, with or without modification, are permitted in any medium without        -->
+<!-- royalty provided the copyright notice and this notice are preserved.  This file is offered as-is, without any   -->
+<!-- warranty.                                                                                                       -->
+
+<!-- This graph / layout resembles the logo of the Young Liberals (www.julis.de).  -->
+
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+
+  <key id="x" for="node" attr.name="x" attr.type="double" />
+  <key id="y" for="node" attr.name="y" attr.type="double" />
+
+  <graph id="julis" edgedefault="undirected">
+
+    <node id="j1"><data key="x">12.30</data><data key="y">42.30</data></node>
+    <node id="j2"><data key="x">22.20</data><data key="y">56.90</data></node>
+    <node id="j3"><data key="x">30.10</data><data key="y">27.70</data></node>
+    <node id="j4"><data key="x">16.20</data><data key="y">27.70</data></node>
+
+    <node id="l1"><data key="x">36.60</data><data key="y">12.30</data></node>
+    <node id="l2"><data key="x">28.80</data><data key="y">41.50</data></node>
+    <node id="l3"><data key="x">42.60</data><data key="y">41.50</data></node>
+    <node id="l4"><data key="x">50.40</data><data key="y">12.30</data></node>
+
+    <edge id="1" source="j1" target="j2" />
+    <edge id="2" source="j2" target="j3" />
+    <edge id="3" source="j3" target="j4" />
+    <edge id="4" source="j4" target="j1" />
+
+    <edge id="5" source="l1" target="l2" />
+    <edge id="6" source="l2" target="l3" />
+    <edge id="7" source="l3" target="l4" />
+    <edge id="8" source="l4" target="l1" />
+
+  </graph>
+
+</graphml>

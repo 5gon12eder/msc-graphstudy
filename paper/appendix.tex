@@ -1,0 +1,205 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+% Copyright (C) 2018 Tamara Mchedlidze <mched@iti.uka.de>
+% Copyright (C) 2018 Alexey Pak <alexey.pak@iosb.fraunhofer.de>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\section*{Appendix -- Supplementary Figures and Tables}
+
+\begin{figure}[h!]
+  \begin{center}
+    \begin{tabular}{c@{\qquad}c@{\qquad}c}
+      \InputTikzGraph{30mm}{demograph-a}&
+      \InputTikzGraph{30mm}{demograph-b}&
+      \InputTikzGraph{30mm}{demograph-c}\\[3ex]
+      \InputLuatikzPlot{rdf-global-a}&
+      \InputLuatikzPlot{rdf-global-b}&
+      \InputLuatikzPlot{rdf-global-c}\\[2ex]
+      \InputLuatikzPlot{angular-a}&
+      \InputLuatikzPlot{angular-b}&
+      \InputLuatikzPlot{angular-c}
+    \end{tabular}
+  \end{center}
+  \caption{%
+    Illustration of the syndromes \enum{RDF\_GLOBAL} and \enum{ANGULAR}.  Upper row, from left to right: proper,
+    distorted layouts of a regular grid, and a force-directed layout of an irregular graph (\enquote{power grid}).
+    Central row: smoothed relative frequency distributions for the \enum{RDF\_GLOBAL} syndromes computed for the
+    respective layouts in the upper row.  The isolated peaks in the leftmost distribution correspond to characteristic
+    distances in the lattice.  In the central plot, these peaks are widened due to random distortion. In the rightmost
+    plot, no regular structure can be identified.  Lower row: smoothed relative frequency distributions for the
+    \enum{ANGULAR} syndromes.  The leftmost plot clearly shows the dominance of angles proportional to $\pi/2$.  In the
+    rightmost plot, the distinctive peak at $\phi = 2\pi$ corresponds to the large number of degree one vertices.
+  }
+  \label{app:fig:rdf-global}
+\end{figure}
+\clearpage
+
+\begin{figure}[bp]
+  \begin{center}
+    \begin{tabular}{c@{\qquad}c@{\qquad}c}
+      \InputTikzGraph{0.25\textwidth}{rome}&
+      \InputTikzGraph{0.25\textwidth}{north}&
+      \InputTikzGraph{0.25\textwidth}{randdag}\\[2ex]
+      \enum{ROME} & \enum{NORTH} & \enum{RANDDAG}
+    \end{tabular}
+    \par\vspace{1cm}
+    \begin{tabular}{c@{\qquad\qquad}c}
+      \InputTikzGraph{0.35\textwidth}{bcspwr}&
+      \InputTikzGraph{0.35\textwidth}{grenoble}\\[2ex]
+      \enum{BCSPWR} & \enum{GRENOBLE}
+    \end{tabular}
+    \par\vspace{1cm}
+    \begin{tabular}{c@{\qquad\qquad}c}
+      \InputTikzGraph{0.35\textwidth}{psadmit}&
+      \InputTikzGraph{0.35\textwidth}{smtape}\\[2ex]
+      \enum{PSADMIT} & \enum{SMTAPE}
+    \end{tabular}
+  \end{center}
+  \caption{%
+    Examples of imported graphs.  The \enum{BCSPWR}, \enum{GRENOBLE}, \enum{PSADMIT} and \enum{SMTAPE} graphs come from
+    the respective datasets in the Harwell-Boeing collection in NIST's \enquote{Matrix Market}~\cite{MatrixMarket}.  All
+    graphs are visualized using the FM\textsuperscript{3} algorithm.
+  }
+  \label{app:fig:archives}
+\end{figure}
+
+\begin{figure}[bp]
+  \begin{center}
+    \begin{tabular}{c@{\qquad}c@{\qquad}c@{\qquad}c}
+      \InputTikzGraph{0.2\textwidth}{grid}&
+      \InputTikzGraph{0.2\textwidth}{torus1}&
+      \InputTikzGraph{0.2\textwidth}{torus2}&
+      \InputTikzGraph{0.2\textwidth}{bottle}\\[2ex]
+      \enum{GRID} & \enum{TORUS1} & \enum{TORUS2} & \enum{BOTTLE}
+    \end{tabular}
+    \par\vspace{1cm}
+    \begin{tabular}{c@{\qquad}c@{\qquad}c@{\qquad}c}
+      \InputTikzGraph{0.2\textwidth}{quasi3d}&
+      \InputTikzGraph{0.2\textwidth}{quasi4d}&
+      \InputTikzGraph{0.2\textwidth}{quasi5d}&
+      \InputTikzGraph{0.2\textwidth}{quasi6d}\\[2ex]
+      \enum{QUASI3D} & \enum{QUASI4D} & \enum{QUASI5D} & \enum{QUASI6D}
+    \end{tabular}
+    \par\vspace{1cm}
+    \begin{tabular}{c@{\qquad}c@{\qquad}c}
+      \InputTikzGraph{0.25\textwidth}{lindenmayer}&
+      \InputTikzGraph{0.25\textwidth}{mosaic1}&
+      \InputTikzGraph{0.25\textwidth}{mosaic2}\\[2ex]
+      \enum{LINDENMAYER} & \enum{MOSAIC1} & \enum{MOSAIC2}
+    \end{tabular}
+  \end{center}
+  \caption{%
+    Examples of generated graphs labeled by the respective generators.  \enum{GRID}, \enum{LINDENMAYER},
+    \enum{QUASI\meta{$n$}D}, \enum{MOSAIC1}, \enum{MOSAIC2} and \enum{BOTTLE} layouts are native.  \enum{TORUS1} and
+    \enum{TORUS2} are visualized with the stress-minimization algorithm.
+  }
+  \label{app:fig:generators}
+\end{figure}
+
+\begin{figure}[p]
+  \begin{center}
+    \begin{tabular}{c@{\qquad\qquad}c}
+      \input{pics/gen-lindenmayer-singleton.tex} & \input{pics/gen-lindenmayer-star.tex}\\
+      $\menum{L/SINGLETON}$ & $\menum{L/STAR}_3(v)$\\[2ex]
+      \input{pics/gen-lindenmayer-wheel.tex} & \input{pics/gen-lindenmayer-ring.tex}\\
+      $\menum{L/WHEEL}_3(v)$ & $\menum{L/RING}_3(v)$\\[2ex]
+      \input{pics/gen-lindenmayer-clique.tex} & \input{pics/gen-lindenmayer-grid.tex}\\
+      $\menum{L/CLIQUE}_2(v)$ & $\menum{L/GRID}_{3,5}(v)$
+    \end{tabular}
+  \end{center}
+  \caption{%
+    Illustration of the \enum{LINDENMAYER} generator operations.  A degree four vertex may be replaced by any of the
+    above subgraphs, except for the bottom right subgraph which replaces a degree zero vertex.
+  }
+  \label{app:fig:lindenmayer-subgens}
+\end{figure}
+
+\begin{figure}[p]
+  \begin{center}
+    \newcommand*{\GenMosaicScale}{0.5}
+    \begin{tabular}{c@{\quad}c@{\quad}c}
+      \input{pics/gen-mosaic-star.tex}&
+      \input{pics/gen-mosaic-flower.tex}&
+      \input{pics/gen-mosaic-shape.tex}\\[1ex]
+      \enum{M/STAR} & \enum{M/FLOWER} & \enum{M/SHAPE}
+    \end{tabular}
+  \end{center}
+  \caption{%
+    Operations of the \enum{MOSAIC} generator on a pentagonal facet $\{u_1,\ldots,u_5\}$.
+  }
+  \label{app:fig:mosaic-subgens}
+\end{figure}
+
+\begin{figure}[p]
+  \begin{center}
+    \begin{tabular}{c@{\qquad\qquad}c@{\qquad\qquad}c}
+      \InputTikzGraph{0.2\textwidth}{native}&
+      \InputTikzGraph{0.2\textwidth}{fmmm}&
+      \InputTikzGraph{0.2\textwidth}{stress}\\[2ex]
+      \enum{NATIVE} & \enum{FMMM} & \enum{STRESS}
+    \end{tabular}
+    \par\vspace{1cm}
+    \begin{tabular}{c@{\qquad\qquad}c@{\qquad\qquad}c}
+      \InputTikzGraph{0.2\textwidth}{random-uniform}&
+      \InputTikzGraph{0.2\textwidth}{random-normal}&
+      \InputTikzGraph{0.2\textwidth}{phantom}\\[2ex]
+      \enum{RANDOM\_UNIFORM} & \enum{RANDOM\_NORMAL} & \enum{PHANTOM}
+    \end{tabular}
+  \end{center}
+  \caption{%
+    Examples of different layouts for the same graph.  \enum{RANDOM\_UNIFORM}, \enum{RANDOM\_NORMAL} are random layouts
+    where vertex positions are sampled from the uniform and the normal distributions, respectively.
+  }
+  \label{app:fig:layouts}
+\end{figure}
+
+\begin{figure}[p]
+  \begin{center}
+    \begin{tabular}{lc@{\quad}c@{\quad}c@{\quad}c}
+      \rotatebox{90}{\enum{PERTURB}}&
+      \InputTikzGraph{0.2\textwidth}{perturb-00000}&
+      \InputTikzGraph{0.2\textwidth}{perturb-01500}&
+      \InputTikzGraph{0.2\textwidth}{perturb-05000}&
+      \InputTikzGraph{0.2\textwidth}{perturb-10000}\\[2ex]
+      \rotatebox{90}{\enum{FLIP\_NODES}}&
+      \InputTikzGraph{0.2\textwidth}{flip-nodes-00000}&
+      \InputTikzGraph{0.2\textwidth}{flip-nodes-01500}&
+      \InputTikzGraph{0.2\textwidth}{flip-nodes-05000}&
+      \InputTikzGraph{0.2\textwidth}{flip-nodes-10000}\\[2ex]
+      \rotatebox{90}{\enum{FLIP\_EDGES}}&
+      \InputTikzGraph{0.2\textwidth}{flip-edges-00000}&
+      \InputTikzGraph{0.2\textwidth}{flip-edges-01500}&
+      \InputTikzGraph{0.2\textwidth}{flip-edges-05000}&
+      \InputTikzGraph{0.2\textwidth}{flip-edges-10000}\\[2ex]
+      \rotatebox{90}{\enum{MOVLSQ}}&
+      \InputTikzGraph{0.2\textwidth}{movlsq-00000}&
+      \InputTikzGraph{0.2\textwidth}{movlsq-01500}&
+      \InputTikzGraph{0.2\textwidth}{movlsq-05000}&
+      \InputTikzGraph{0.2\textwidth}{movlsq-10000}\\[2ex]
+      & $r=0\percent$ & $r=15\percent$ & $r=50\percent$ & $r=100\percent$
+    \end{tabular}
+  \end{center}
+  \caption{%
+    Examples of applying  different layout worsening techniques at different rates.
+  }
+  \label{app:fig:worsening}
+\end{figure}
+
+\begin{figure}[p]
+  \begin{center}
+    \begin{tabular}{c@{\qquad}c@{\qquad}c@{\qquad}c}
+      \InputTikzGraph{0.2\textwidth}{linear-00000}&
+      \InputTikzGraph{0.2\textwidth}{linear-02500}&
+      \InputTikzGraph{0.2\textwidth}{linear-07500}&
+      \InputTikzGraph{0.2\textwidth}{linear-10000}\\[2ex]
+      $r=0\percent$ & $r=25\percent$ & $r=75\percent$ & $r=100\percent$
+    \end{tabular}
+  \end{center}
+  \caption{%
+    Example of linear interpolation between a proper and a garbage layout.
+  }
+  \label{app:fig:interpolating}
+\end{figure}

@@ -1,0 +1,42 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+% Copyright (C) 2018 Tamara Mchedlidze <mched@iti.uka.de>
+% Copyright (C) 2018 Alexey Pak <alexey.pak@iosb.fraunhofer.de>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\section{Related Work}
+\label{sec:relwork}
+
+According to empirical studies, graph drawings that maximize one or several quality metrics are more aethetically
+pleasing and easier to read~\cite{HuangE05,Huang2013,Purchase97,PurchaseHNK12,WarePCM02}.  For instance, in their
+seminal work, Purchase et al.~have established~\cite{PurchaseCM96} that higher numbers of edge crossings and bends as
+well as lower levels of symmetry negatively influence user performance in graph reading tasks.
+
+Many graph drawing algorithms attempt to optimize multiple quality metrics.  As one way to combine them, Huang et
+al.~\cite{Huang2013} have used a weighted sum of \enquote{simple} metrics, effects of their interactions (see
+Purchase~\cite{PURCHASE98} or Huang and Huang~\cite{Huang10}), and error terms to account for possible measurement
+errors.
+
+In another work, Huang et al.~\cite{HuangHL16} have empirically demonstrated that their \enquote{aggregate} metric is
+sensitive to quality changes and is correlated with the human performance in graph comprehension tasks.  They have also
+noticed that the dependence of aesthetic quality on input quality metrics can be non-linear (e.g.~a quadratic
+relationship better describes the interplay between crossing angles and drawing quality~\cite{HuangHE08}).  Our work
+extends this idea as we allow for arbitrary non-linear dependencies implemented by an artificial neural network.
+
+In evolutionary graph drawing approaches, several techniques have been suggested to \enquote{train} a \emph{fitness
+  function}\footnote{Objective function in genetic algorithms that summarizes optimization goals.}  from the user's
+responses as a composition of several known quality metrics.  Masui~\cite{Masui1994} modeled the fitness function as a
+linear combination in which the weights are obtained via genetic programming from the pairs of \enquote{good} and
+\enquote{bad} layouts provided by users.  The so-called co-evolution was used by Barbosa and Barreto~\cite{Barbosa2001}
+to evolve the weights of the fitness function in parallel with a drawing population in order to match the ranking made
+by users.  Sp\"{o}nemann and others~\cite{Sponemann14} suggested two alternative techniques.  In the first one, the user
+directly chooses the weights with a slider.  In the second, they select good layouts from the current population and the
+weights are adjusted according to the selection.  Rosete-Suarez~\cite{Rosete-Suarez99} determined the relative
+importance of individual quality metrics based on user inputs.  Several machine learning-based approaches to graph
+drawing are described by dos Santos Vieira et al.~\cite{Raissa2015}.  Recently, Kwon et al.~\cite{Kwon18} presented a
+novel work on topological similarity of graphs.  Their goal was to avoid expensive computations of graph layouts and
+their quality measures.  The resulting system was able to sketch a graph in different layouts and estimate corresponding
+quality measures.

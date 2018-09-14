@@ -1,0 +1,10 @@
+#! /usr/bin/less
+#! -*- coding:utf-8; mode:text; -*-
+
+# Copyright (C) 2018 Karlsruhe Institute of Technology
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+This configuration directory is intentionally left empty such that the builtin defaults will be used.

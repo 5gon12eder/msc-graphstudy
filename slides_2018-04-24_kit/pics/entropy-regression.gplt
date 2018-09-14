@@ -1,0 +1,47 @@
+#! /usr/bin/gnuplot
+#! -*- coding:utf-8; mode:shell-script; -*-
+
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+set terminal tikz tightboundingbox plotsize 4.0in, 2.25in font ",8"
+set output 'entropy-regression.pgf'
+
+set xrange [* : *]
+set yrange [* : *]
+
+set xtics 1
+set ytics 1
+
+set xlabel "$\\log_2(h)$"
+set ylabel "$\\Entropy/\\text{bit}$"
+
+set key left Left reverse
+
+load 'entropy-regression-native.gplt'
+load 'entropy-regression-fmmm.gplt'
+load 'entropy-regression-stress.gplt'
+load 'entropy-regression-phantom.gplt'
+load 'entropy-regression-random-uniform.gplt'
+load 'entropy-regression-random-normal.gplt'
+
+plot f_native(x) lt 1 lc '#009682' notitle,                                                                             \
+     f_fmmm(x) lt 2 lc '#4664aa' notitle,                                                                               \
+     f_stress(x) lt 3 lc '#8cb63c' notitle,                                                                             \
+     f_random_uniform(x) lt 4 lc '#fce500' notitle,                                                                     \
+     f_random_normal(x) lt 5 lc '#df9b1b' notitle,                                                                      \
+     f_phantom(x) lt 6 lc '#a22223' notitle,                                                                            \
+     'entropy-regression-native.txt' with points lt 1 lc '#009682' pt 1                                                 \
+         title sprintf("\\regression[\\menum{NATIVE}]{%.2f}{%.2f}", c0_native, c1_native),                              \
+     'entropy-regression-fmmm.txt' with points lt 2 lc '#4664aa' pt 2                                                   \
+         title sprintf("\\regression[\\menum{FMMM}]{%.2f}{%.2f}", c0_fmmm, c1_fmmm),                                    \
+     'entropy-regression-stress.txt' with points lt 3 lc '#8cb63c' pt 3                                                 \
+         title sprintf("\\regression[\\menum{STRESS}]{%.2f}{%.2f}", c0_stress, c1_stress),                              \
+     'entropy-regression-random-uniform.txt' with points lt 4 lc '#fce500' pt 4                                         \
+         title sprintf("\\regression[\\menum{RANDOM\\_UNIFORM}]{%.2f}{%.2f}", c0_random_uniform, c1_random_uniform),    \
+     'entropy-regression-random-normal.txt' with points lt 5 lc '#df9b1b' pt 5                                          \
+         title sprintf("\\regression[\\menum{RANDOM\\_NORMAL}]{%.2f}{%.2f}", c0_random_normal, c1_random_normal),       \
+     'entropy-regression-phantom.txt' with points lt 6 lc '#a22223' pt 6                                                \
+         title sprintf("\\regression[\\menum{PHANTOM}]{%.2f}{%.2f}", c0_phantom, c1_phantom)

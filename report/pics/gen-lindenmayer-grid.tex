@@ -1,0 +1,22 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\begin{tikzpicture}[scale = 0.5]
+
+  \path[use as bounding box] (-4.5, -4.5) rectangle (4.5, 4.5);
+
+  \begin{scope}[scale = 1.5]
+    \draw[edge] (-2, -1) grid[step = 1] (+2, +1);
+    \foreach \i in {-1, 0, +1} {
+      \foreach \j in {-2, -1, 0, +1, +2} {
+        \node[vertex] at (\j, \i) {};
+      }
+    }
+    \node[Vertex, fill = white] (v) at (0, 0) {$v$};
+  \end{scope}
+
+\end{tikzpicture}

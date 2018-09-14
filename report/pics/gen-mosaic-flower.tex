@@ -1,0 +1,33 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\providecommand*{\GenMosaicScale}{0.6}
+\begin{tikzpicture}[scale = \GenMosaicScale, rotate = 18]
+
+  \node[Vertex] (u1) at (  0:3) {$u_1$};
+  \node[Vertex] (u2) at ( 72:3) {$u_2$};
+  \node[Vertex] (u3) at (144:3) {$u_3$};
+  \node[Vertex] (u4) at (216:3) {$u_4$};
+  \node[Vertex] (u5) at (288:3) {$u_5$};
+
+  \node[Vertex] (w1) at ($(u1)!0.5!(u2)$) {$w_1$};
+  \node[Vertex] (w2) at ($(u2)!0.5!(u3)$) {$w_2$};
+  \node[Vertex] (w3) at ($(u3)!0.5!(u4)$) {$w_3$};
+  \node[Vertex] (w4) at ($(u4)!0.5!(u5)$) {$w_4$};
+  \node[Vertex] (w5) at ($(u5)!0.5!(u1)$) {$w_5$};
+
+  \node[Vertex] (v) at (0, 0) {$v$};
+
+  \draw[edge] (u1) -- (w1) -- (u2) -- (w2) -- (u3) -- (w3) -- (u4) -- (w4) -- (u5) -- (w5) -- (u1);
+
+  \draw[edge] (v) -- (w1);
+  \draw[edge] (v) -- (w2);
+  \draw[edge] (v) -- (w3);
+  \draw[edge] (v) -- (w4);
+  \draw[edge] (v) -- (w5);
+
+\end{tikzpicture}

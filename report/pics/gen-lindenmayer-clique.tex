@@ -1,0 +1,39 @@
+% -*- coding:utf-8; mode:latex; -*- %
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+%
+% Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+% provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+\begin{tikzpicture}[scale = 0.5]
+
+  \path[use as bounding box] (-4.5, -4.5) rectangle (4.5, 4.5);
+
+  \node[Vertex] (u1)  at (  0:4) {$u_1$};
+  \node[Vertex] (u2)  at ( 90:4) {$u_2$};
+  \node[Vertex] (u3)  at (180:4) {$u_3$};
+  \node[Vertex] (u4)  at (270:4) {$u_4$};
+
+  \node[vertex] (w1)  at (  0:2) {};
+  \node[vertex] (w2)  at ( 45:2) {};
+  \node[vertex] (w3)  at ( 90:2) {};
+  \node[vertex] (w4)  at (135:2) {};
+  \node[vertex] (w5)  at (180:2) {};
+  \node[vertex] (w6)  at (225:2) {};
+  \node[vertex] (w7)  at (270:2) {};
+  \node[vertex] (w8)  at (315:2) {};
+
+  \draw[edge] (w1) -- (u1);
+  \draw[edge] (w3) -- (u2);
+  \draw[edge] (w5) -- (u3);
+  \draw[edge] (w7) -- (u4);
+
+  \foreach \i in {1, ..., 8} {
+    \foreach \j in {\i, ..., 8} {
+      \ifnumequal{\i}{\j}{}{%
+        \draw[edge] (w\i) -- (w\j);
+      }
+    }
+  }
+
+\end{tikzpicture}

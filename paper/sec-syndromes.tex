@@ -1,0 +1,72 @@
+% -*- coding:utf-8; mode:latex; -*-
+
+% Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+% Copyright (C) 2018 Tamara Mchedlidze <mched@iti.uka.de>
+% Copyright (C) 2018 Alexey Pak <alexey.pak@iosb.fraunhofer.de>
+%
+% This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
+% (https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+\section{Definitions}
+\label{sec:definitions}
+
+In this paper we consider general simple graphs $G=(V,E)$ where $V=V(G)$ and $E=E(G)$ are the vertex and edge sets of
+$G$ with $\card{V}=n$ and $\card{E}=m$.  A \emph{drawing} or \emph{layout} of a graph is its graphical representation
+where vertices are drawn as points or small circles, and the edges as straight line segments.  Vertex positions in a
+drawing are denoted by $\vec{p^k}=(p_1^k, p_2^k)\transposed$ for $k=1,\dots,n$ and their set $P=\{\vec{p}^k\}_{k=1}^n$.
+Furthermore, we use $\textrm{dist}_G(u,v)$ to denote the \emph{graph-theoretical distance} -- the length of the shortest
+path between vertices $u$ and $v$ in $G$ -- and $\textrm{dist}_\Gamma(u,v)$ for the Euclidean distance between $u$ and
+$v$ in the drawing $\Gamma(G)$.
+
+\section{Quality Syndromes of Graph Layouts}
+\label{sec:syndromes}
+
+A \emph{quality syndrome} of a layout $\Gamma$ is a multi-set of numbers sharing an interpretation that are known or
+suspected to correlate with the aesthetic quality (e.g.~all pairwise angles between incident edges in $\Gamma$).  In the
+following we describe several syndromes (implemented in our code) inspired by popular quality metrics and common
+statistical tools.  The list is by no means exhaustive, nor do we claim syndromes below as necessary or independent.
+Our model accepts any combination of syndromes; better choices remain to be systematically investigated.
+
+\begin{explanation}
+\explain{\enum{PRINVEC1} and \enum{PRINVEC2}} The two principal axes of the set $P$.  If we define a covariance matrix
+$C=\{c_{ij}\}$, $c_{ij}=\frac{1}{n}\sum_{k=1}^n{(p_i^k-\overline{p_i})(p_j^k-\overline{p_j})})$, $i, j \in \{1, 2\}$,
+where $\overline{p_i}=\frac{1}{n}\sum_{k=1}^n{p_i^k}$ are the mean values over each dimension, then \enum{PRINVEC1} and
+\enum{PRINVEC2} will be its eigenvectors.
+
+\explain{\enum{PRINCOMP1} and \enum{PRINCOMP2}} Projections of vertex positions onto $\vec{v}_1=\menum{PRINVEC1}$ and
+$\vec{v}_2=\menum{PRINVEC2}$, that is, ~$\{\langle\left(\vec{p}^j-\overline{\vec{p}}\right),\vec{v}_i\rangle\}_{j=1}^n$
+for $i\in\{1,2\}$ where $\langle\cdot,\cdot\rangle$ denotes the scalar product.
+
+\explain{\enum{ANGULAR}} Let $A(v)$ denote the sequence of edges incident to a vertex $v$, appearing in a clockwise
+order around it in $\Gamma$.  Let $\alpha(e_i,e_j)$ denote the clockwise angle between edges $e_i$ and $e_j$ incident to
+the same vertex.  This syndrome is then defined as $\bigcup_{v\in{}V(G)}\{\alpha(e_i,e_j)\st{}e_i,e_j\text{ are
+  consecutive in }A(v)\}$.
+
+\explain{\enum{EDGE\_LENGTH}} $\bigcup_{(u,v)\in{}E(G)}\{\textrm{dist}_\Gamma(u,v)\}$ is the set of edge lengths in
+$\Gamma$.
+
+\explain{\enum{RDF\_GLOBAL}} $\bigcup_{u\neq{}v\in{}V(G)}\{\dist_\Gamma(u,v)\}$ contains distances between all vertices
+in the drawing.  The concept of a \emph{radial distribution function (RDF)}~\cite{Findenegg2015} (the distribution of
+\enum{RDF\_GLOBAL}) is borrowed from Statistical Physics and Crystallography and characterizes the regularity of
+molecular structures.  In large graph layouts it captures regular, periodic and symmetric patterns in the vertex
+positions.
+\OnlyArxiv{%
+  Fig.~\ref{app:fig:rdf-global} in the Appendix shows histograms of \enum{RDF\_GLOBAL} for some graphs and layouts.
+  Note that more regular drawings feature better-isolated peaks in the respective histograms.
+}
+
+\explain{$\menum{RDF\_LOCAL}(d)$} $\bigcup_{u\neq{}v\in{}V(G)}\{\dist_\Gamma(u,v)\st\dist(u,v)\leq{}d\}$ is the set of
+distances between vertices such that the graph-theoretical distance between them is bounded by $d\in\IntsN$.  In our
+implementation, we compute $\menum{RDF\_LOCAL}(2^i)$ for $i\in\{0,\ldots,\ceil{\log_2(D)}\}$ where $D$ is the diameter
+of $G$.  $\menum{RDF\_LOCAL}(d)$ in a sense interpolates between \enum{EDGE\_LENGTH} ($d=1$) and \enum{RDF\_GLOBAL}
+($d\to\infty$).
+
+\explain{\enum{TENSION}} $\bigcup_{u\neq{}v\in{}V(G)}\{\dist_\Gamma(u,v)/\dist_G(u,v)\}$ are the ratios of Euclidean and
+graph-theoretical distances computed for all vertex pairs.  \enum{TENSION} is motivated by and is related to the
+well-known stress function~\cite{Kamada1989}.
+\end{explanation}
+
+\noindent
+Note that before computing the quality syndromes, we \emph{normalize} all layouts so that the center of gravity of $V$
+is at the origin and the mean edge length is fixed in order to remove the effects of scaling and translation (but not
+rotation).

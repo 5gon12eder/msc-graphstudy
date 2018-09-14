@@ -1,0 +1,13 @@
+#! /usr/bin/gnuplot
+#! -*- coding:utf-8; mode:shell-script; -*-
+
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@student.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+set terminal tikz tightboundingbox plotsize 80mm, 60mm font ",8"
+set output 'adaptive-sampling.pgf'
+unset key
+
+plot 'adaptive-sampling.txt' smooth csplines lc black, 'adaptive-sampling.txt' with points lc black pt 6

@@ -1,0 +1,510 @@
+#! /usr/bin/python3
+#! -*- coding:utf-8; mode:python; -*-
+
+# Copyright (C) 2018 Moritz Klammler <moritz@klammler.eu>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+# Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+# WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS
+# OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+import argparse
+import fnmatch
+import itertools as it
+import os
+import re
+import shutil
+import subprocess
+import sys
+
+# Line width limit.
+line_width = 120
+
+# Number of spaces a tab is expanded to.
+tab_width = 8
+
+# Maximum allowed number of consecutive blank lines.
+max_vskip = 1
+
+# Number of blank lines after mode line.
+blank_after_mode = 1
+
+# File modes for which we do not enforce line lengths to be within limits.
+arbitrary_column_width_okay_modes = frozenset([ 'bibtex', 'json', 'xml' ])
+
+# File name extensions for which we do not enforce line lengths to be within limits.
+arbitrary_column_width_okay_extensions = frozenset([ '.json' ])
+
+# Globbing expressions matching files which are known to be textual even if they don't say so.
+well_known_textual_files = [
+    '*.txt',
+    'AUTHORS',
+    'COPYING',
+    'ChangeLog',
+    'HACKING',
+    'INSTALL',
+    'LICENSE',
+    'NEWS',
+    'README',
+]
+
+assert blank_after_mode <= max_vskip
+
+# Whether output should be colorized (using ANSI escape sequences)
+ANSI_COLOR = None
+
+class BadStyle(Exception):
+
+    pass
+
+def main(args):
+    ap = argparse.ArgumentParser(
+        prog='whitespace',
+        usage="%(prog)s [--directory=DIR] [--summary | --quiet] [--fix] [--] [FILE...]",
+        description=(
+              "Checks white-space in files for conformance with the style guide.  If no files are specified, all"
+            + " regular files reported by 'git ls-files' are checked.  The exit status is the number of non-conforming"
+            + " files or 1 in case of an error.  All arguments after the first '--' will be interpreted as file names"
+            + " and never as options.  '-' is not a valid argument."
+        ),
+        epilog=(
+              "All checks are conservative and aim for zero false positives at the cost of potentially many false"
+            + " negatives.  Therefore, if an issue is reported, it is real and needs fixing.  The automatic repair (via"
+            + " the '--fix' option), on the other hand, is not perfect and cannot settle all issues.  It also might"
+            + " apply fixes you don't like so you should carefully check your files afterwards.  If you run it over"
+            + " file '{}', the original file will be backed up as '{}' in case you want to restore it or generate a"
+            + " diff."
+        ).format('foo.txt', make_backup_file_name('foo.txt'))
+    )
+    ap.add_argument('filenames', metavar='FILE', nargs='*', type=reasonable_file_name, help="regular file to check")
+    ap.add_argument('-C', '--directory', metavar='DIR', help="enter directory DIR before doing anything")
+    ap.add_argument('-f', '--fix', action='store_true', help="automatically fix some issues")
+    ap.add_argument('-s', '--summary', action='store_true', help="print only one line per file")
+    ap.add_argument('-q', '--quiet', action='store_true', help="don't produce any output")
+    ap.add_argument(
+        '--color', metavar='WHEN', type=parse_ansi_color_choice,
+        help="whether to use ANSI terminal color ('always', 'never', 'auto')"
+    )
+    os.environ['COLUMNS'] = str(shutil.get_terminal_size().columns)
+    ns = ap.parse_args(args)
+    handle_ansi_color_choice(ns.color)
+    if ns.directory is not None:
+        os.chdir(ns.directory)
+    for fn in it.filterfalse(is_regular_file, ns.filenames):
+        raise ValueError("Not a regular file: {:s}".format(fn))
+    return check_files(
+        ns.filenames if ns.filenames else list(git_ls_files(terminal=(sys.stderr if not ns.quiet else None))),
+        ns.fix,
+        sys.stderr if not ns.quiet and not ns.summary else None,
+        sys.stderr if not ns.quiet and     ns.summary else None,
+    )
+
+def check_files(filenames, fix, verboseout, summaryout):
+    bad_files = 0
+    for filename in filenames:
+        try: badname = (filename.encode().decode('ascii') != filename)
+        except UnicodeDecodeError: badname = True
+        if badname:
+            print_warning("{:s}: file name contains non-ASCII bytes".format(filename), file=verboseout)
+        basename = os.path.basename(filename)
+        lines = list()
+        try:
+            wasfixed = read_file_and_maybe_fix_it(filename, lines, fix)
+        except UnicodeDecodeError as e:
+            print_warning("{:s}: {!s}".format(filename, e), file=verboseout)
+            print_warning("{:s}: file contains non-ASCII data".format(filename), file=summaryout)
+            bad_files += 1
+            continue
+        filetype = guess_file_mode(lines)
+        istex = determine_whether_this_is_a_tex_file(filetype, filename)
+        kwargs = {
+            'maxcols' : get_max_columns(filetype, filename),
+            'eolbs' : not istex,
+            'eolsuffix' : '%' if istex else '',
+            'maketabs' : filetype in [ 'makefile' ] or basename.lower() in [ 'makefile', 'gnumakefile' ],
+            'xml' : { 'xml' : 'xml', 'html' : 'html' }.get(filetype),
+        }
+        if check_content(filename, lines, verboseout, **kwargs) and not badname:
+            if wasfixed:
+                print_info("{:s}: fixed".format(filename), file=summaryout)
+            else:
+                print_good("{:s}: OK".format(filename), file=summaryout)
+        else:
+            bad_files += 1
+            print_warning("{:s}: non-conforming".format(filename), file=summaryout)
+    return bad_files
+
+def get_max_columns(mode, filename):
+    if mode in arbitrary_column_width_okay_modes:
+        return None
+    if filename is not None and any(filename.endswith(ext) for ext in arbitrary_column_width_okay_extensions):
+        return None
+    return line_width
+
+def determine_whether_this_is_a_tex_file(mode, filename):
+    if mode is not None:
+        return mode in { 'tex', 'latex', 'bibtex' }
+    if filename is not None:
+        return filename.endswith('.tex')
+
+def check_content(filename, lines, verboseout, maxcols=None, eolbs=True, eolsuffix='', maketabs=False, xml=None):
+    ok = True
+    try:
+        check_vertical(lines, xml=xml)
+    except BadStyle as e:
+        ok = False
+        print_warning("{:s}: {!s}".format(filename, e), file=verboseout)
+    for (i, line) in enumerate(lines):
+        try:
+            check_horizontal(line, maxcols=maxcols, eolbs=eolbs, eolsuffix=eolsuffix, maketabs=maketabs)
+        except BadStyle as e:
+            ok = False
+            print_warning("{:s}:{:d}: {!s}".format(filename, i + 1, e), file=verboseout)
+    return ok
+
+def check_vertical(lines, xml=None):
+    if not lines:
+        raise BadStyle("File is empty")
+    blank_eh = list(map(is_blank, lines))
+    filtergroup = lambda pred, seq : filter(pred, it.groupby(seq))
+    for blank in it.takewhile(identity, blank_eh):
+        raise BadStyle("Blank lines at beginning of file")
+    for blank in it.takewhile(identity, reversed(blank_eh)):
+        raise BadStyle("Blank lines at end of file")
+    if max(map(count, map(second, filtergroup(first, blank_eh))), default=0) > max_vskip:
+        raise BadStyle("File contains excessive vertical white-space")
+    if lines and not lines[-1].endswith('\n'):
+        raise BadStyle("No new-line character at end of last line")
+    if is_shebang_line(lines[0]):
+        if not lines[0].startswith('#! /'):
+            raise BadStyle("The first four bytes of a shebang line should be {!r}".format(list(map(hex, b'#! /'))))
+        if not (len(lines) >= 2 and lines[1].startswith('#! ') and is_mode_line(lines[1])):
+            raise BadStyle("Second line of interpreted schript file should be mode line starting with shebang")
+        textstart = 2 + blank_after_mode
+        if not (len(lines) > textstart and all(map(is_blank, lines[2:textstart])) and not is_blank(lines[textstart])):
+            raise BadStyle("Mode line should be followed by {:d} blank line(s)".format(blank_after_mode))
+    elif xml is not None:
+        if xml == 'xml' and not is_xml_directive(lines[0]):
+            raise BadStyle("First line of XML document should be XML directive")
+        if xml == 'html' and not is_doctype_declaration(lines[0]):
+            raise BadStyle("First line of HTML document should be doctype declaration")
+        if any(map(is_mode_line, it.islice(lines, 3))):
+            raise BadStyle("{:s} document should not contain a mode line".format(xml.upper()))
+    else:
+        if not is_mode_line(lines[0]):
+            raise BadStyle("First line of non-interpreted file should be mode line and not start with shebang")
+        textstart = 1 + blank_after_mode
+        if not (len(lines) > textstart and all(map(is_blank, lines[1:textstart])) and not is_blank(lines[textstart])):
+            raise BadStyle("Mode line should be followed by {:d} blank line(s)".format(blank_after_mode))
+
+def check_horizontal(line, maxcols=None, eolbs=True, eolsuffix='', maketabs=False):
+    line = line.rstrip('\n')
+    if line.rstrip() != line:
+        if line != '\f':
+            raise BadStyle("Line has trailing white-space")
+    if '\t' in line:
+        if not maketabs or line[0] != '\t' or sum(1 for c in line if c == '\t') > 1:
+            raise BadStyle("Indent with spaces not with tabs")
+    if eolbs and line.endswith('\\'):
+        if line.endswith(' \\'):
+            if sum(tab_width if c == '\t' else 1 for c in line) != line_width + 1:
+                raise BadStyle("EOL backslash is not aligned to column {:d}".format(line_width))
+        if line.endswith('\\\\'):
+            raise BadStyle("Two or more backslashes before EOL")
+    elif maxcols is not None and len(line) > maxcols and line[-1] not in eolsuffix:
+        raise BadStyle("Line is longer than {:d} characters".format(maxcols))
+
+def fix_vertical(lines):
+    tag = lambda pred, seq : zip(map(pred, seq), seq)
+    flatten = it.chain.from_iterable
+    flatmap = lambda func, seq : flatten(map(func, seq))
+    listmap = lambda func, seq : list(map(func, seq))
+    revlist = lambda seq : reversed(list(seq))
+    dwf = lambda seq : it.dropwhile(first, seq)
+    fixed = listmap(
+        # Strip the enumerator and predicate off again.
+        lambda x : second(second(x)),
+        filter(
+            # Pick all lines from non-blank groups and the first max_vskip
+            # lines from blank groups.
+            lambda x : not first(second(x)) or first(x) < max_vskip,
+            flatmap(
+                second,
+                map(
+                    lambda pair : (pair[0], enumerate(pair[1])),
+                    it.groupby(
+                        # Trim leading and trailing blank lines.
+                        dwf(revlist(dwf(revlist(tag(is_blank, lines))))),
+                        first)))))
+    head = it.takewhile(lambda l : is_shebang_line(l) or is_mode_line(l), fixed)
+    body = it.dropwhile(lambda l : is_shebang_line(l) or is_mode_line(l) or is_blank(l), fixed)
+    glue = it.repeat(str(), blank_after_mode)
+    return list(it.chain(map(fix_shebang, head), glue, body))
+
+def fix_horizontal(line, maketabs=False):
+    assert not maketabs  # TODO: Implement suport for this
+    line = line.rstrip()
+    line = untabify(line, tab_width)
+    if line.endswith(' \\'):
+        line = line.rstrip('\\').rstrip()
+        line = '{:{width}s} \\'.format(line, width=(line_width - 1))
+    return line + '\n'
+
+def is_blank(line):
+    return not ('\f' in line or bool(line.strip()))
+
+PATTERN_MODE_LINE = re.compile(
+    r'-[*]-\s+' +
+    r'coding\s*:\s*(?P<coding>[a-z0-9-]+)\s*;\s*' +
+    r'(mode\s*:\s*(?P<mode>[a-z0-9+-]+)\s*;)?\s*' +
+    r'([a-z0-9-]+\s*:\s*[a-z0-9+-]+\s*;)*\s*' +
+    r'\s+-[*]-'
+)
+
+PATTERN_XML_LINE = re.compile(
+    r'''<[?]xml\s+version\s*=\s*['"][0-9.]+['"](\s+encoding\s*=\s*['"](?P<encoding>[A-Z0-9-]+)['"])?\s*[?]>''',
+    flags=re.IGNORECASE
+)
+
+PATTERN_DOCTYPE_LINE = re.compile(
+    r'<!DOCTYPE\s+(?P<type>[a-z0-9.-]+)(\s+.*|>)', flags=re.IGNORECASE
+)
+
+def is_mode_line(line, get=None):
+    """
+    >>> is_mode_line('#! -*- coding:utf-8; mode:shell-script; -*-')
+    True
+    >>> is_mode_line('#! -*- coding:utf-8; mode:shell-script; -*-', get='coding')
+    'utf-8'
+    >>> is_mode_line('#! -*- coding:utf-8; mode:shell-script; -*-', get='mode')
+    'shell-script'
+    """
+    assert get is None or get in [ 'coding', 'mode' ]
+    notsomuch = None if get is not None else False
+    csi = '-*-'
+    (lo, hi) = (line.find(csi), line.rfind(csi))
+    if not (0 <= lo < hi):
+        return notsomuch
+    text = line[lo : hi + len(csi)].strip()
+    m = PATTERN_MODE_LINE.fullmatch(text)
+    if not m: return notsomuch
+    elif get is None: return True
+    else: return m.group(get).lower()
+
+def is_xml_directive(line, get=None):
+    """
+    >>> is_xml_directive('<?xml version="1.0" encoding="EBCDIC" ?>')
+    True
+    >>> is_xml_directive('<?xml version="1.0" encoding="EBCDIC" ?>', get='encoding')
+    'ebcdic'
+    >>> is_xml_directive('<?xml version="1.0" encoding="ASCII"?>', get='encoding')
+    'ascii'
+    >>> is_xml_directive('<?xml version="1.0" ?>', get='encoding')
+    'utf-8'
+    """
+    assert get is None or get in [ 'encoding' ]
+    notsomuch = None if get is not None else False
+    m = PATTERN_XML_LINE.fullmatch(line.strip())
+    if not m: return notsomuch
+    elif get is None: return True
+    else: return (m.group(get) or 'UTF-8').lower()
+
+def is_doctype_declaration(line, get=None):
+    assert get is None or get in [ 'type', 'encoding' ]
+    notsomuch = None if get is not None else False
+    m = PATTERN_DOCTYPE_LINE.fullmatch(line.strip())
+    if not m: return notsomuch
+    elif get is None: return True
+    elif get == 'type': return m.group(get).lower()
+    elif get == 'encoding': return 'binary'  # TODO
+    else: raise ValueError(repr(get))
+
+def guess_file_mode(lines):
+    """
+    >>> guess_file_mode([ '#! /bin/bash', '#! -*- coding:utf-8; mode:shell-script; -*-' ])
+    'shell-script'
+    >>> guess_file_mode([ '-*- coding:utf-8; mode:text; -*-' ])
+    'text'
+    >>> guess_file_mode([ '<?xml version="1.0" encoding="latin-1" ?>' ])
+    'xml'
+    >>> guess_file_mode([ '<!DOCTYPE html>' ])
+    'html'
+    >>> part1 = "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    >>> part2 = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
+    >>> guess_file_mode([ '<!DOCTYPE html PUBLIC {!r} {!r}>'.format(part1, part2) ])
+    'html'
+    """
+    if not lines:
+        return None
+    if is_xml_directive(lines[0]):
+        return 'xml'
+    doctype = is_doctype_declaration(lines[0], get='type')
+    if doctype: return doctype
+    for line in it.islice(lines, 2):
+        mode = is_mode_line(line, get='mode')
+        if mode: return mode
+
+def guess_file_encoding(filename):
+    try:
+        with open(filename, 'rb') as istr:
+            for (i, line) in enumerate(it.islice(istr, 2)):
+                textline = line.decode('ascii', errors='replace').strip()
+                if i == 0:
+                    coding = is_xml_directive(textline, get='encoding')
+                    if coding is not None:
+                        return coding
+                    coding = is_doctype_declaration(textline, get='encoding')
+                    if coding is not None:
+                        return coding
+                coding = is_mode_line(textline, get='coding')
+                if coding is not None:
+                    return coding
+    except OSError as e:
+        raise RuntimeError("{:s}: Cannot read file to figure out encoding: {:s}".format(filename, e.strerror))
+
+def is_shebang_line(line):
+    return line.startswith('#!')
+
+def fix_shebang(line):
+    if line.startswith('#!'):
+        words = line[2 : ].split()
+        words.insert(0, '#!')
+        return ' '.join(words)
+    return line  # Cannot fix that one
+
+def untabify(line, tabwidth):
+    assert tabwidth > 0
+    without = line.lstrip('\t')
+    tabs = len(line) - len(without)
+    return ' ' * tabwidth * tabs + without.replace('\t', ' ')
+
+# Reads lines of text from `filename` and assigns them to `lines` (which is cleared if it contained anything else
+# before.  If `fix` is true, applies available fixes before the assignment.  If this changes anything, creates a backup
+# file on disk and replaces the contents of the file `filename` with the fixed version.  Returns whether the file on
+# disk was changed.  Raises a `UnicodeDecodeError` if the file cannot be decoded.
+def read_file_and_maybe_fix_it(filename, lines, fix, coding='ascii'):
+    lines.clear()
+    with open(filename, mode='r', encoding=coding) as istr:
+        lines_before_fixing = istr.readlines()
+    if fix:
+        lines.extend(map(fix_horizontal, fix_vertical(lines_before_fixing)))
+        if lines_before_fixing != lines:
+            backupname = make_backup_file_name(filename)
+            shutil.copy(filename, backupname)
+            with open(filename, 'w') as ostr:
+                ostr.writelines(lines)
+            return True
+        return False
+    else:
+        lines.extend(lines_before_fixing)
+        return False
+
+def make_backup_file_name(filename):
+    backup_suffix = '~' if os.name == 'posix' else '.backup'
+    if filename.endswith(backup_suffix):
+        raise ValueError("Looks like a backup file: " + filename)
+    return filename + backup_suffix
+
+def git_ls_files(terminal=None):
+    proc = subprocess.Popen(
+        [ os.getenv('GIT', default='git'), 'ls-files' ],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=None
+    )
+    (stdout, stderr) = proc.communicate()
+    if proc.returncode != 0:
+        raise RuntimeError("Cannot list version-controlled files")
+    try:
+        textstdout = stdout.decode()
+    except UnicodeDecodeError:
+        raise RuntimeError("Cannot decode standard output of Git command")
+    for filename in map(str.strip, textstdout.splitlines()):
+        if not is_regular_file(filename):
+            print_notice("{!s}: Non-regular file won't be checked".format(filename), file=terminal)
+            continue
+        basename = os.path.basename(filename)
+        wellknown = any(fnmatch.fnmatch(basename, pattern) for pattern in well_known_textual_files)
+        if guess_file_encoding(filename) is None and not wellknown:
+            print_notice("{!s}: Non-textual file won't be checked".format(filename), file=terminal)
+            continue
+        yield filename
+
+def is_regular_file(filename):
+    return os.path.isfile(filename) and not os.path.islink(filename)
+
+def reasonable_file_name(filename):
+    if filename == '-':
+        raise ValueError("Not a valid file name: " + filename)
+    return filename
+
+def identity(x):
+    return x
+
+def first(pair):
+    return pair[0]
+
+def second(pair):
+    return pair[1]
+
+def count(seq):
+    return sum(1 for x in seq)
+
+def print_good(message, file=None):
+    _print(message, file=file, init='\033[32m', fini='\033[39m')
+
+def print_info(message, file=None):
+    _print(message, file=file, init='\033[34m', fini='\033[39m')
+
+def print_notice(message, file=None):
+    _print(message, file=file, init='\033[33m', fini='\033[39m')
+
+def print_warning(message, file=None):
+    _print(message, file=file, init='\033[31m', fini='\033[39m')
+
+def print_error(message, file=None):
+    _print(message, file=file, init='\033[1m\033[31m', fini='\033[39m\033[22m')
+
+def _print(*parts, file=None, init='', fini=''):
+    if file is None:
+        return
+    elif use_color(file):
+        message = ': '.join(parts)
+        print(init, message, fini, file=file, sep='')
+    else:
+        print(*parts, sep=': ', file=file)
+
+def use_color(terminal):
+    if ANSI_COLOR is not None:
+        return ANSI_COLOR
+    return (os.name == 'posix' and terminal.isatty())
+
+def handle_ansi_color_choice(choice=None):
+    global ANSI_COLOR
+    if choice is not None:
+        ANSI_COLOR = choice
+
+def parse_ansi_color_choice(when):
+    when = when.lower()
+    if when in { 'never', 'off', 'no', 'false', '0' }:
+        return False
+    if when in { 'always', 'on', 'yes', 'true', '1' }:
+        return True
+    if when in { 'auto' }:
+        return None
+    raise argparse.ArgumentTypeError("Invalid choice")
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except Exception as e:
+        print_error("error: {!s}".format(e), file=sys.stderr)
+        sys.exit(1)

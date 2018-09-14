@@ -1,0 +1,140 @@
+// -*- coding:utf-8; mode:javascript; -*-
+
+// Copyright (C) 2018 Karlsruhe Institute of Technology
+// Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+// Copyright (C) 2016 Moritz Klammler <moritz.klammler@student.kit.edu>
+//
+// This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with this program.  If not, see
+// <http://www.gnu.org/licenses/>.
+
+// This file defines the macro-benchmarks.  It consists of a single JSON object with one attribute per benchmark.  The
+// key is the name of the benchmark and the value is its definition.  The definition is itself a JSON object that may
+// have the following attributes.
+//
+//  - `description` -- a short description of the benchmark (optional)
+//  - `command` -- command to execute and time (mandatory)
+//  - `environment` -- modified environment to run the command in (optional, see below)
+//  - `setup` -- setup of input and output files (optional, see below)
+//  - `stdin` -- file to connect to the standard input of the command (optional)
+//  - `stdout` -- file to connect to the standard output of the command (optional)
+//  - `stderr` -- file to connect to the standard error output of the command (optional)
+//  - `expect` -- expected exit code of the command (optional, integer)
+//  - `require` -- additional requirements to check after running the benchmark (optional)
+//
+// If the `environment` attribute is present, its value must be an object where the keys are the names of environment
+// variables and the values are the respective values.  They must be either strings (if the environment variable should
+// be set to the specified value) or `null` (if the environment variable should be cleared).  Values of environment
+// variables are subject to file name substitution (see below).  The environment is also available to setup commands.
+//
+// The `setup` attribute of a benchmark defines input and output files that are involved in running the benchmark.  It
+// is a JSON object with variable names (which you can choose almost to your liking) as the keys and "recipes" as the
+// values.  A recipe can have either of three types which determines how it is interpreted.
+//
+//  - If the value is a string, it is interpreted as a file-name.
+//  - Otherwise, if the value is a list of strings, it is interpreted as a command to execute that will produce the
+//    contents of the file as its output.  The first element of the list (which must not be empty) is interpreted as the
+//    file-name of an executable file that will be passed the remaining elements as arguments.
+//  - Finally, if the value is `null`, only a variable name is defined but no file created.  This is useful for output
+//    files that you want to refer to later.
+//
+// A variable defined in the `setup` section can be referred to in the rest of the benchmark definition.  For example,
+// if you defined `XYZ` as a variable, then you can use `{XYZ}` in, say, the `cmdargs` attribute and the appropriate
+// path will be substituted.
+//
+// You can even use these variable substitutions in the recipes in the `setup` section.  Don't expect that the files
+// will already exist by the time the generator scripts are run, though.
+//
+// You can connect the standard streams of the process to a file by using the `stdin`, `stdout` or `stderr` attributes.
+// Their value should be a string, which is interpreted as a file-name.  You can also use variable substitutions in the
+// strings.  For example, if you defined the variable `XYZ` in the `setup` attribute, then `{XYZ}` would be a valid
+// value for, say, `stdin`.
+//
+// If you want to discard any of the streams, you can connect them to `null`, which is the default, anyway, if you don't
+// connect them.
+//
+// The `require` attribute must have as value an object that can have the following attributes, all of which are
+// optional.
+//
+//  - empty -- an array of strings with files names which must be empty
+//  - equal -- an array of two strings with file names which must be equal
+//
+// As you will probably have guessed by now, you can -- as an extension to the official JSON format -- also use comments
+// in this file.  This functionality is rather limited, however.  Only line-comments that are on a line of their own are
+// allowed.  Everything else is still a syntax error.
+
+{
+
+    "rdf-global-raw" : {
+        "description" : "compute global RDF (raw, N = 3k)",
+        "command" : [ "${PROJECT_BINARY_DIR}/src/properties/rdf-global", "--kernel=RAW", "--output=NULL" ],
+        "environment" : { "MSC_RANDOM_SEED" : "DETERMINISTIC" },
+        "stdin" : "{IN}",
+        "setup" : {
+            "IN" : [ "${PROJECT_BINARY_DIR}/src/generators/grid", "--nodes=3000" ]
+        }
+    },
+
+    "rdf-global-boxed" : {
+        "description" : "compute global RDF (raw, N = 3k)",
+        "command" : [ "${PROJECT_BINARY_DIR}/src/properties/rdf-global", "--kernel=BOXED", "--output=NULL" ],
+        "environment" : { "MSC_RANDOM_SEED" : "DETERMINISTIC" },
+        "stdin" : "{IN}",
+        "setup" : {
+            "IN" : [ "${PROJECT_BINARY_DIR}/src/generators/grid", "--nodes=3000" ]
+        }
+    },
+
+    "rdf-global-gaussian" : {
+        "description" : "compute global RDF (raw, N = 100)",
+        "command" : [ "${PROJECT_BINARY_DIR}/src/properties/rdf-global", "--kernel=RAW", "--output=NULL" ],
+        "environment" : { "MSC_RANDOM_SEED" : "DETERMINISTIC" },
+        "stdin" : "{IN}",
+        "setup" : {
+            "IN" : [ "${PROJECT_BINARY_DIR}/src/generators/grid", "--nodes=100" ]
+        }
+    },
+
+    "rdf-local-raw" : {
+        "description" : "compute local RDF (raw, N = 1k)",
+        "command" : [ "${PROJECT_BINARY_DIR}/src/properties/rdf-local", "--kernel=RAW", "--output=NULL" ],
+        "environment" : { "MSC_RANDOM_SEED" : "DETERMINISTIC" },
+        "stdin" : "{IN}",
+        "setup" : {
+            "IN" : [ "${PROJECT_BINARY_DIR}/src/generators/grid", "--nodes=1000" ]
+        }
+    },
+
+    "rdf-local-boxed" : {
+        "description" : "compute local RDF (boxed, N = 1k)",
+        "command" : [ "${PROJECT_BINARY_DIR}/src/properties/rdf-local", "--kernel=BOXED", "--output=NULL" ],
+        "environment" : { "MSC_RANDOM_SEED" : "DETERMINISTIC" },
+        "stdin" : "{IN}",
+        "setup" : {
+            "IN" : [ "${PROJECT_BINARY_DIR}/src/generators/grid", "--nodes=1000" ]
+        }
+    },
+
+    "rdf-local-gaussian" : {
+        "description" : "compute local RDF (gaussian, N = 100)",
+        "command" : [ "${PROJECT_BINARY_DIR}/src/properties/rdf-local", "--kernel=GAUSSIAN", "--output=NULL" ],
+        "environment" : { "MSC_RANDOM_SEED" : "DETERMINISTIC" },
+        "stdin" : "{IN}",
+        "setup" : {
+            "IN" : [ "${PROJECT_BINARY_DIR}/src/generators/grid", "--nodes=100" ]
+        }
+    },
+
+    "xxx-sleepy" : {
+        "description" : "sleep for 10 milliseconds",
+        "command" : [ "${PROJECT_BINARY_DIR}/test/perf/macro/perf-macro-sleepy" ]
+    }
+
+}
