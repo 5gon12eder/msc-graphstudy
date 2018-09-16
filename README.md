@@ -56,7 +56,7 @@ necessarily repeat all the information from that help message so please check it
 are understood to be relative to the root of the version-controlled directory tree.  Paths ending with a slash refer to
 directories.  Absolute paths (starting with a &ldquo;`/`&rdquo;) refer to absolute paths on the host system and for
 paths which are just a simple file name it will be understood from the context to what directory (if any) they are
-relative.  [globbing](http://www.tldp.org/LDP/abs/html/globbingref.html) expressions (e.g. `example-*.c`) will be used
+relative.  [Globbing](http://www.tldp.org/LDP/abs/html/globbingref.html) expressions (e.g. `example-*.c`) will be used
 to refer to a set of (zero or more) files.
 
 **Convention for Placeholders:** This document uses &ldquo;shell expansion&rdquo; for placeholders.  For example, we
@@ -114,11 +114,11 @@ license.  If so, the comment at the top of the source file will mention that, in
 short) license text.  The text of this license can also be found in the file `./COPYING_MIT.txt` as well as
 [online](https://opensource.org/licenses/MIT).
 
-A number of small auxiliary files is provided under an even less restrictive ["all-permissive"
+A number of small auxiliary files is provided under an even less restrictive [&ldquo;all-permissive&rdquo;
 license](https://www.gnu.org/prep/maintain/html_node/License-Notices-for-Other-Files.html).  The files to which this
-applies bear a comment at the top which says: "Copying and distribution of this file, with or without modification, are
-permitted in any medium without royalty provided the copyright notice and this notice are preserved.  This file is
-offered as-is, without any warranty."  This is exactly what it is.
+applies bear a comment at the top which says: &ldquo;Copying and distribution of this file, with or without
+modification, are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+This file is offered as-is, without any warranty.&rdquo; This is exactly what it is.
 
 The *prose* files (but none of the functional code) in the `./report/`, `./paper/` and `./slides_*` directories are
 licensed under a *Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License* the text for which
@@ -128,8 +128,9 @@ mention this in a comment at the top of the file.
 
 Finally, this `README` document is published under the terms of the *GNU Free Documentation License*, Version 1.3 or any
 later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no
-Back-Cover Texts.  A copy of the license is included in the section entitled "GNU Free Documentation License" and can
-also be found in a file called `/.COPYING_GFDL.txt` as well as [online](https://www.gnu.org/licenses/fdl-1.3.html).
+Back-Cover Texts.  A copy of the license is included in the section entitled &ldquo;GNU Free Documentation
+License&rdquo; and can also be found in a file called `/.COPYING_GFDL.txt` as well as
+[online](https://www.gnu.org/licenses/fdl-1.3.html).
 
 **Tip:** Running the script `./maintainer/copyright` with no arguments from the top-level source directory (of a Git
 clone) will print the license used for each file in the repository.
@@ -290,13 +291,13 @@ downloads and allow for offline builds once the cache is populated.
 the absolute path of a file to which the script will append one line per (attempted) download.  Each line in the file
 will be a JSON object holding the following keys.
 
- - `url` (string) -- URL for which a download was attempted
- - `date` (string) -- timestamp when the download was started (in
+ - `url` (string) &mdash; URL for which a download was attempted
+ - `date` (string) &mdash; timestamp when the download was started (in
    [RFC-5322](https://tools.ietf.org/html/rfc5322#section-3.3) format)
- - `time` (real) -- elapsed time in seconds (only present if the download was successful)
- - `size` (integer) -- size of the downloaded file in bytes (only present if the download was successful)
- - `error` (string) -- informal error message (only present if the download failed)
- - `digest-${algo}` (string) -- computed `${algo}` checksum (e.g. `digest-sha256`) of the downloaded file as a
+ - `time` (real) &mdash; elapsed time in seconds (only present if the download was successful)
+ - `size` (integer) &mdash; size of the downloaded file in bytes (only present if the download was successful)
+ - `error` (string) &mdash; informal error message (only present if the download failed)
+ - `digest-${algo}` (string) &mdash; computed `${algo}` checksum (e.g. `digest-sha256`) of the downloaded file as a
    hexadecimal string (only present if the download was successful)
 
 Please note that the file as a whole is not a valid JSON document but can be transformed into one by adding a comma
@@ -309,25 +310,25 @@ This trace log is not used by the build system but might help you reason about t
 The default CMake target will only build the C++ tools.  In order to run any experiments, you have to build the
 respective targets explicitly.  The following targets might be useful.
 
- - `deploy` -- populates the database and runs the main experiment
- - `httpd` -- starts a HTTP server listening at port 8000 providing a web front-end to the database
- - `eval` -- runs cross validation and other tests (also note the targets `eval-cross-valid`, `eval-puncture`,
+ - `deploy` &mdash; populates the database and runs the main experiment
+ - `httpd` &mdash; starts a HTTP server listening at port 8000 providing a web front-end to the database
+ - `eval` &mdash; runs cross validation and other tests (also note the targets `eval-cross-valid`, `eval-puncture`,
    `eval-puncture-excl`, `eval-puncture-incl` and `eval-clean`)
- - `integrity` -- checks the database for inconsistencies
- - `integrity-fix` -- checks the database for inconsistencies and tries to fix them (you shouldn't run into this unless
-   you go messing with the database by manually deleting / adding files or executing SQL statements)
- - `apidoc` -- builds Doxygen API reference documentation
- - `benchmark` -- runs some benchmarks (there are not many of them)
- - `report` -- typesets the written thesis in `./report/graphstudy.pdf` (also note the target `report-clean`)
- - `slides-kit` -- typesets the slides for the presentation given at the KIT on April 24 2018 in
+ - `integrity` &mdash; checks the database for inconsistencies
+ - `integrity-fix` &mdash; checks the database for inconsistencies and tries to fix them (you shouldn't run into this
+   unless you go messing with the database by manually deleting / adding files or executing SQL statements)
+ - `apidoc` &mdash; builds Doxygen API reference documentation
+ - `benchmark` &mdash; runs some benchmarks (there are not many of them)
+ - `report` &mdash; typesets the written thesis in `./report/graphstudy.pdf` (also note the target `report-clean`)
+ - `slides-kit` &mdash; typesets the slides for the presentation given at the KIT on April 24 2018 in
    `./slides_2018-04-24_kit/graphstudy.pdf` (also note the target `slides-kit-clean`)
- - `slides-gd18` -- typesets the slides for the presentation given at GD'18 on September 26 2018 in
+ - `slides-gd18` &mdash; typesets the slides for the presentation given at GD'18 on September 26 2018 in
    `./slides_2018-09-26_gd18/graphstudy.pdf` (also note the target `slides-gd18-clean`)
- - `paper` -- typesets a preliminary version of the paper submitted to GD'18 in `./paper/graphstudy-gd18.pdf` as well as
-   an extended version (as submitted to Arxiv) in `./paper/graphstudy-arxiv.pdf` (also note the targets `paper-cache`,
-   `paper-pubar` and `paper-clean`)
- - `test` -- exercises all tests
- - `maintainer-everything` -- builds all of the above targets except `httpd`
+ - `paper` &mdash; typesets a preliminary version of the paper submitted to GD'18 in `./paper/graphstudy-gd18.pdf` as
+   well as an extended version (as submitted to Arxiv) in `./paper/graphstudy-arxiv.pdf` (also note the targets
+   `paper-cache`, `paper-pubar` and `paper-clean`)
+ - `test` &mdash; exercises all tests
+ - `maintainer-everything` &mdash; builds all of the above targets except `httpd`
 
 The `deploy` target will take a *very long* time to build (probably several days).  The `eval` target will take a long
 time, too (probably several hours).  Building the `eval` target will run the experiments again each time.  If the
@@ -355,7 +356,7 @@ The `eval-clean` target deletes the results of any previous experiments.  Beware
 other mentioned `eval-*` targets will start by deleting all previous results as if `eval-clean` were built beforehand.
 Please note that in the case of the `eval-*` targets which only build a sub-set of the complete `eval` target, this
 means that previous results will be deleted but no recreated.  The takeaway is that you should think carefully before
-building `eval` or any of the `eval-*` targets -- even more so given that they will take a *long* time to complete.
+building `eval` or any of the `eval-*` targets &ndash; even more so given that they will take a *long* time to complete.
 
 If the environment variable `MSC_EVAL_PROGRESS_REPORT` is set (to an absolute file name) the current progress and
 estimated time remaining for the evaluation will be appended to it in a format suitable as input for Gnuplot.
@@ -380,12 +381,13 @@ and ideally benefit from it.
 
 This project uses the following terminology.
 
- - *graph* -- set of nodes and edges (graph theory)
- - *layout* -- mapping of vertices to two-dimensional coordinates for a given graph
- - *property* -- multi-set of real numbers computed for a given layout
- - *metric* -- single scalar number computed for given a layout
- - *discriminator* -- function that takes two layouts and outputs a number indicating an aesthetic preference
- - *fingerprint* -- fixed-length deterministic value computed for a graph or layout assumed to be practically unique
+ - *graph* &mdash; set of nodes and edges (graph theory)
+ - *layout* &mdash; mapping of vertices to two-dimensional coordinates for a given graph
+ - *property* &mdash; multi-set of real numbers computed for a given layout
+ - *metric* &mdash; single scalar number computed for given a layout
+ - *discriminator* &mdash; function that takes two layouts and outputs a number indicating an aesthetic preference
+ - *fingerprint* &mdash; fixed-length deterministic value computed for a graph or layout assumed to be practically
+   unique
 
 The source code frequently refers to discriminators as &ldquo;tests&rdquo; for historical reasons.  This should be
 cleaned up over time.
@@ -436,15 +438,17 @@ After building the project, the `src` directory will (in sub directories) contai
 are subsequently invoked by the driver script but may also have merits on their own.  The tools are structured by their
 purpose in the following sub-directories.
 
- - `generators` -- These tools take &ldquo;nothing&rdquo; and output a graph.  The directory contains probabilistic
+ - `generators` &mdash; These tools take &ldquo;nothing&rdquo; and output a graph.  The directory contains probabilistic
    graph generators and a program to &ldquo;import&rdquo; graphs from a variety of formats.
- - `layouts` -- Layout algorithms; these tools take a graph and output a layout for it.
- - `unitrans` -- Unary layout transformations; these tools take a layout and output another layout (or multiple).
- - `bitrans` -- Binary layout transformations; these tools take two layouts and output another layout (or multiple).
- - `properties` -- These tools take a layout, compute some property of it and output some data.
- - `metrics` -- These tools take a layout, compute some metric for it and output some number.
- - `visualizations` -- These tools take a layout and output a drawing (an image file of some sort).
- - `utility` -- These tools do various things.
+ - `layouts` &mdash; Layout algorithms; these tools take a graph and output a layout for it.
+ - `unitrans` &mdash; Unary layout transformations; these tools take a layout and output another layout (or multiple if
+   multiple rates are specified).
+ - `bitrans` &mdash; Binary layout transformations; these tools take two layouts and output another layout (or
+   multiple if multiple rates are specified).
+ - `properties` &mdash; These tools take a layout, compute some property of it and output some data.
+ - `metrics` &mdash; These tools take a layout, compute some metric for it and output some number.
+ - `visualizations` &mdash; These tools take a layout and output a drawing (an image file of some sort).
+ - `utility` &mdash; These tools do various things.
 
 The sub-directory `common` contains no programs but C++ code that is shared by all command line tools.  The static
 library is called `libcommon.a` when built.  It contains a grab-bag of features needed for this project and is not
@@ -565,13 +569,13 @@ from within `${srcdir}` passing any options and arguments the module expects ins
 
 The following driver modules are available:
 
- - `deploy` -- populates the database
- - `httpd` -- runs an HTTP server for the web-interface
- - `compare` -- queries the discriminator model about pairs of layouts
- - `doctests` -- runs Python [`doctests`](https://docs.python.org/3/library/doctest.html) for the driver
- - `archidx` -- prints statistics about graph archives
- - `integrity` -- checks integrity of the database and can try to fix them
- - `model` -- allows access to internals useful for preparing documents
+ - `deploy` &mdash; populates the database
+ - `httpd` &mdash; runs an HTTP server for the web-interface
+ - `compare` &mdash; queries the discriminator model about pairs of layouts
+ - `doctests` &mdash; runs Python [`doctests`](https://docs.python.org/3/library/doctest.html) for the driver
+ - `archidx` &mdash; prints statistics about graph archives
+ - `integrity` &mdash; checks integrity of the database and can try to fix them
+ - `model` &mdash; allows access to internals useful for preparing documents
 
 ### Invocation
 
@@ -581,16 +585,16 @@ a driver module expects.
 
 The following options are supported by all driver modules.
 
- - `-B`, `--bindir=${bindir}` -- root of the build directory where to find executables (default: `.`)
- - `-C`, `--configdir=${configdir}` -- search for configuration files in `${configdir}` (default: `config`)
- - `-D`, `--datadir=${datadir}` -- root of the data directory (can be created, default: `data`)
- - `-v`, `--verbose` -- increase the logging verbosity by one level (may be repeated and combined)
- - `-q`, `--quiet` -- decrease the logging verbosity by one level (may be repeated and combined)
- - `--log-level=${level}` -- set the logging verbosity to one of the well-known
+ - `-B`, `--bindir=${bindir}` &mdash; root of the build directory where to find executables (default: `.`)
+ - `-C`, `--configdir=${configdir}` &mdash; search for configuration files in `${configdir}` (default: `config`)
+ - `-D`, `--datadir=${datadir}` &mdash; root of the data directory (can be created, default: `data`)
+ - `-v`, `--verbose` &mdash; increase the logging verbosity by one level (may be repeated and combined)
+ - `-q`, `--quiet` &mdash; decrease the logging verbosity by one level (may be repeated and combined)
+ - `--log-level=${level}` &mdash; set the logging verbosity to one of the well-known
    [`syslog`](http://man7.org/linux/man-pages/man3/syslog.3.html) levels (by default, the value of the environment
    variable `MSC_LOG_LEVEL` is used which in turn defaults to `NOTICE`
- - `--help` -- show usage information and exit
- - `--version` -- show version information and exit
+ - `--help` &mdash; show usage information and exit
+ - `--version` &mdash; show version information and exit
 
 If an argument is shown for the long form of an option, the short form of the option accepts that same argument, too.
 
@@ -645,47 +649,47 @@ case of doubt, please refer to this definition and consider the information prov
 
 The following graph generators are defined:
 
- - `SMTAPE` -- imports graphs from the
+ - `SMTAPE` &mdash; imports graphs from the
    [`SMTAPE`](https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/smtape/smtape.html) set of the Harwell-Boeing
    collection in NIST's *Matrix Market*
- - `PSADMIT` -- imports graphs from the
+ - `PSADMIT` &mdash; imports graphs from the
    [`PSADMIT`](https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/psadmit/psadmit.html) set of the Harwell-Boeing
    collection in NIST's *Matrix Market*
- - `GRENOBLE` -- imports graphs from the
+ - `GRENOBLE` &mdash; imports graphs from the
    [`GRENOBLE`](https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/grenoble/grenoble.html) set of the Harwell-Boeing
    collection in NIST's *Matrix Market*
- - `BCSPWR` -- imports graphs from the
+ - `BCSPWR` &mdash; imports graphs from the
    [`BCSPWR`](https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/bcspwr/bcspwr.html) set of the Harwell-Boeing
    collection in NIST's *Matrix Market*
- - `RANDDAG` -- imports graphs from the [`RANDDAG`](http://graphdrawing.org/download/random-dag-graphml.tgz) collection
+ - `RANDDAG` &mdash; imports graphs from the [`RANDDAG`](http://graphdrawing.org/download/random-dag-graphml.tgz)
+   collection hosted on `graphdrawing.org`
+ - `NORTH` &mdash; imports graphs from the [`NORTH`](http://graphdrawing.org/download/north-graphml.tgz) collection
    hosted on `graphdrawing.org`
- - `NORTH` -- imports graphs from the [`NORTH`](http://graphdrawing.org/download/north-graphml.tgz) collection hosted on
-   `graphdrawing.org`
- - `ROME` -- imports graphs from the [`ROME`](http://graphdrawing.org/download/rome-graphml.tgz) collection hosted on
-   `graphdrawing.org`
- - `IMPORT` -- imports graphs (and optionally native layouts) from arbitrary user-defined sources specified in the
+ - `ROME` &mdash; imports graphs from the [`ROME`](http://graphdrawing.org/download/rome-graphml.tgz) collection hosted
+   on `graphdrawing.org`
+ - `IMPORT` &mdash; imports graphs (and optionally native layouts) from arbitrary user-defined sources specified in the
    user-provided `${configdir}/imports.json` configuration file
- - `LINDENMAYER` -- probabilistic algorithm creating graphs with native layouts utilizing a stochastic L-system
- - `QUASI3D` -- probabilistic algorithm creating graphs with native layouts from a random projection of a regular
+ - `LINDENMAYER` &mdash; probabilistic algorithm creating graphs with native layouts utilizing a stochastic L-system
+ - `QUASI3D` &mdash; probabilistic algorithm creating graphs with native layouts from a random projection of a regular
    3-dimensional lattice onto a 2-dimensional plane
- - `QUASI4D` -- probabilistic algorithm creating graphs with native layouts from a random projection of a regular
+ - `QUASI4D` &mdash; probabilistic algorithm creating graphs with native layouts from a random projection of a regular
    4-dimensional lattice onto a 2-dimensional plane
- - `QUASI5D` -- probabilistic algorithm creating graphs with native layouts from a random projection of a regular
+ - `QUASI5D` &mdash; probabilistic algorithm creating graphs with native layouts from a random projection of a regular
    5-dimensional lattice onto a 2-dimensional plane
- - `QUASI6D` -- probabilistic algorithm creating graphs with native layouts from a random projection of a regular
+ - `QUASI6D` &mdash; probabilistic algorithm creating graphs with native layouts from a random projection of a regular
    6-dimensional lattice onto a 2-dimensional plane
- - `GRID` -- probabilistic algorithm creating graphs with native layouts as regular <var>n</var> &times; <var>m</var>
-   girds
- - `TORUS1` -- probabilistic algorithm creating graphs as regular <var>n</var> &times; <var>m</var> girds connected to
-   form a 1-torus (a cylinder)
- - `TORUS2` -- probabilistic algorithm creating graphs as regular <var>n</var> &times; <var>m</var> girds connected to
-   form a 2-torus (a doughnut)
- - `MOSAIC1` -- probabilistic algorithm creating graphs with native layouts by recursively splitting the facets of an
-   initial regular polygon.
- - `MOSAIC2` -- like `MOSAIC1` but the amount of randomness is reduced to produce more symmetric results.
- - `BOTTLE` -- probabilistic algorithm creating graphs with native layouts as axonometric projections of 3D-meshes of
-   random bodies of revolution
- - `TREE` -- probabilistic algorithm creating random trees
+ - `GRID` &mdash; probabilistic algorithm creating graphs with native layouts as regular <var>n</var> &times;
+   <var>m</var> girds
+ - `TORUS1` &mdash; probabilistic algorithm creating graphs as regular <var>n</var> &times; <var>m</var> girds connected
+   to form a 1-torus (a cylinder)
+ - `TORUS2` &mdash; probabilistic algorithm creating graphs as regular <var>n</var> &times; <var>m</var> girds connected
+   to form a 2-torus (a doughnut)
+ - `MOSAIC1` &mdash; probabilistic algorithm creating graphs with native layouts by recursively splitting the facets of
+   an initial regular polygon.
+ - `MOSAIC2` &mdash; like `MOSAIC1` but the amount of randomness is reduced to produce more symmetric results.
+ - `BOTTLE` &mdash; probabilistic algorithm creating graphs with native layouts as axonometric projections of 3D-meshes
+   of random bodies of revolution
+ - `TREE` &mdash; probabilistic algorithm creating random trees
 
 These constants are specified by the enumerator `Generators` which is defined in the file `./driver/constants.py`.
 
@@ -716,19 +720,19 @@ size classes, it selects all size classes in between.
 
 The following layout algorithms are defined:
 
- - `NATIVE` -- this is not a layout &ldquo;algorithm&rdquo; but merely a request to use the &ldquo;native&rdquo; layout
-   (if any) provided by the graph generator
- - `FMMM` -- fast Multipole Multilevel layout algorithm
- - `STRESS` -- energy-based layout using stress minimization
- - `DAVIDSON_HAREL` -- Davidson-Harel layout algorithm
- - `SPRING_EMBEDDER_KK` -- spring-embedder layout algorithm by Kamada and Kawai
- - `PIVOT_MDS` -- pivot MDS (multi-dimensional scaling) layout algorithm
- - `SUGIYAMA` -- Sugiyama's layout algorithm
- - `RANDOM_UNIFORM` -- garbage layout algorithm assigning independent random coordinates (drawn from a uniform
+ - `NATIVE` &mdash; this is not a layout &ldquo;algorithm&rdquo; but merely a request to use the &ldquo;native&rdquo;
+   layout (if any) provided by the graph generator
+ - `FMMM` &mdash; fast Multipole Multilevel layout algorithm
+ - `STRESS` &mdash; energy-based layout using stress minimization
+ - `DAVIDSON_HAREL` &mdash; Davidson-Harel layout algorithm
+ - `SPRING_EMBEDDER_KK` &mdash; spring-embedder layout algorithm by Kamada and Kawai
+ - `PIVOT_MDS` &mdash; pivot MDS (multi-dimensional scaling) layout algorithm
+ - `SUGIYAMA` &mdash; Sugiyama's layout algorithm
+ - `RANDOM_UNIFORM` &mdash; garbage layout algorithm assigning independent random coordinates (drawn from a uniform
    distribution) to each vertex
- - `RANDOM_NORMAL` -- garbage layout algorithm assigning independent random coordinates (drawn from a normal
+ - `RANDOM_NORMAL` &mdash; garbage layout algorithm assigning independent random coordinates (drawn from a normal
    distribution) to each vertex
- - `PHANTOM` -- garbage layout algorithm using the coordinates of a force-directed layout computed for a random
+ - `PHANTOM` &mdash; garbage layout algorithm using the coordinates of a force-directed layout computed for a random
    &ldquo;phantom&rdquo; graph (which has the same number of nodes and edges)
 
 These constants are specified by the enumerator `Layouts` which is defined in the file `./driver/constants.py`.
@@ -748,19 +752,19 @@ while worsened layouts using the `MOVLSQ` algorithm should be computed only for 
 
 The following layout interpolation algorithms are available:
 
- - `LINEAR` -- uses simple linear interpolation between vertex coordinates
- - `XLINEAR` -- like `LINEAR` but tries to reduce paradox effects by aligning the principal exes of the two parent
+ - `LINEAR` &mdash; uses simple linear interpolation between vertex coordinates
+ - `XLINEAR` &mdash; like `LINEAR` but tries to reduce paradox effects by aligning the principal exes of the two parent
    layouts beforehand
 
 These constants are specified by the enumerator `LayInter` which is defined in the file `./driver/constants.py`.
 
 The following layout worsening algorithms are available:
 
- - `FLIP_NODES` -- flips the coordinates of randomly selected pairs of nodes
- - `FLIP_EDGES` -- flips the coordinates of randomly selected pairs of adjacent nodes
- - `MOVLSQ` -- deforms the entire drawing using affine transformations based on moving least squares as described by
-   Schaefer et al.
- - `PERTURB` -- adds white noise to vertex coordinates
+ - `FLIP_NODES` &mdash; flips the coordinates of randomly selected pairs of nodes
+ - `FLIP_EDGES` &mdash; flips the coordinates of randomly selected pairs of adjacent nodes
+ - `MOVLSQ` &mdash; deforms the entire drawing using affine transformations based on moving least squares as described
+   by Schaefer et al.
+ - `PERTURB` &mdash; adds white noise to vertex coordinates
 
 These constants are specified by the enumerator `LayWorse` which is defined in the file `./driver/constants.py`.
 
@@ -778,27 +782,27 @@ inclusive) and the `EDGE_LENGTH` property shall be computed for layouts of mediu
 
 The following properties are available:
 
- - `RDF_GLOBAL` -- pairwise distances between nodes
- - `RDF_LOCAL` -- pairwise distances between nodes separated in the graph no further than a given threshold
- - `ANGULAR` -- angles between edges incident to the same node
- - `EDGE_LENGTH` -- edge lengths
- - `PRINCOMP1ST` -- node coordinates along the first (major) principal axis
- - `PRINCOMP2ND` -- node coordinates along the second (minor) principal axis
- - `TENSION` -- quotients of Euclidian distance in the layout and graph-theoretical distance between vertices
+ - `RDF_GLOBAL` &mdash; pairwise distances between nodes
+ - `RDF_LOCAL` &mdash; pairwise distances between nodes separated in the graph no further than a given threshold
+ - `ANGULAR` &mdash; angles between edges incident to the same node
+ - `EDGE_LENGTH` &mdash; edge lengths
+ - `PRINCOMP1ST` &mdash; node coordinates along the first (major) principal axis
+ - `PRINCOMP2ND` &mdash; node coordinates along the second (minor) principal axis
+ - `TENSION` &mdash; quotients of Euclidian distance in the layout and graph-theoretical distance between vertices
 
 These constants are specified by the enumerator `Properties` which is defined in the file `./driver/constants.py`.
 
 The following metrics are available:
 
- - `STRESS_KK` -- stress as defined by Kamada and Kawai with a desired edge length of 100
- - `STRESS_FIT_NODESEP` -- stress as defined by Kamada and Kawai with a desired edge length chosen to minimize the
+ - `STRESS_KK` &mdash; stress as defined by Kamada and Kawai with a desired edge length of 100
+ - `STRESS_FIT_NODESEP` &mdash; stress as defined by Kamada and Kawai with a desired edge length chosen to minimize the
    result value
- - `STRESS_FIT_SCALE` -- stress as defined by Kamada and Kawai with a desired edge length of 100 computed after scaling
-   the layout homogeneously to minimize the result value
- - `CROSS_COUNT` -- number of edge crossings
- - `CROSS_RESOLUTION` -- minimal angle between any two intersecting edges
- - `ANGULAR_RESOLUTION` -- minimal angle between any two edges incident to the same node
- - `EDGE_LENGTH_STDEV` -- standard deviation of edge lengths
+ - `STRESS_FIT_SCALE` &mdash; stress as defined by Kamada and Kawai with a desired edge length of 100 computed after
+   scaling the layout homogeneously to minimize the result value
+ - `CROSS_COUNT` &mdash; number of edge crossings
+ - `CROSS_RESOLUTION` &mdash; minimal angle between any two intersecting edges
+ - `ANGULAR_RESOLUTION` &mdash; minimal angle between any two edges incident to the same node
+ - `EDGE_LENGTH_STDEV` &mdash; standard deviation of edge lengths
 
 These constants are specified by the enumerator `Metrics` which is defined in the file `./driver/constants.py`.
 
@@ -834,58 +838,62 @@ specify multiple import sources only in conjunction with selecting to import all
 in the JSON object depend on the type of the archive.  The following types are defined and accept or require the
 attributes mentioned as nested items.  Items with no default value mentioned are mandatory.
 
- * `DIR` -- refers to a local directory
+ * `DIR` &mdash; refers to a local directory
 
-    - `type` -- must be the text `DIR` (string)
-    - `directory` -- specifies the directory (path) to scan for graph files (string<sup><i>a,b</i></sup>)
-    - `format` -- specifies the file format used by the archive (string<sup><i>d</i></sup>)
-    - `compression` -- specifies the compression (if any) applied to the files in the archive
-      (string<sup><i>c</i></sup>, default: `NONE`)
-    - `pattern` -- specifies a POSIX globbing expression by which to select files in the directory
-      (string, default: `*`)
-    - `recursive` -- selects whether or not the directory shall be scanned recursively for graph files to import
-      (boolean, default: `false`)
-    - `layout` -- specifies whether or not the graph files have an associated native layout (boolean, default: `false`)
-    - `simplify` -- specifies whether or not to "simplify" the imported graphs by pruning multiple edges, loops and
-      making the graph undirected (boolean, default: `false`)
+    - `type` (string) &mdash; must be the text `DIR`
+    - `directory` (string<sup><i>a,b</i></sup>) &mdash; specifies the directory (path) to scan for graph files
+    - `format` (string<sup><i>d</i></sup>) &mdash; specifies the file format used by the archive
+    - `compression` (string<sup><i>c</i></sup>, default: `NONE`) &mdash; specifies the compression (if any) applied to
+      the files in the archive
+    - `pattern` (string, default: `*`) &mdash; specifies a POSIX globbing expression by which to select files in the
+      directory
+    - `recursive` (boolean, default: `false`) &mdash; selects whether or not the directory shall be scanned recursively
+      for graph files to import
+    - `layout` (boolean, default: `false`) &mdash; specifies whether or not the graph files have an associated native
+      layout
+    - `simplify` (boolean, default: `false`) &mdash; specifies whether or not to &ldquo;simplify&rdquo; the imported
+      graphs by pruning multiple edges, loops and making the graph undirected
 
- * `TAR` -- refers to a tarball specified via a URL
+ * `TAR` &mdash; refers to a tarball specified via a URL
 
-    - `type` -- must be the text `TAR` (string)
-    - `url` -- specifies the URL of the tarball (string)
-    - `format` -- specifies the file format used by the archive (string<sup><i>d</i></sup>)
-    - `compression` -- specifies the compression (if any) applied to the files in the archive
-      (string<sup><i>c</i></sup>, default: `NONE`)
-    - `cache` -- specifies a file name (not a full path) to use for caching the tarball locally which is useful if the
-      URL is not a `file://` (string<sup><i>b</i></sup>, default: don't cache)
-    - `checksum` -- specifies the cryptographic hash algorithm and hex digest to expect for the tarball in the format
-      `${algo}:${hash}` where `${algo}` is one of the strings understood by the `hashlib` module from the Python
-      standard library and `${hash}` is a hexadecimal encoding of the expected checksum (string, default: don't verify
-      checksum)
-    - `pattern` -- specifies a POSIX globbing expression by which to select files in the directory
-      (string, default: `*`)
-    - `layout` -- specifies whether or not the graph files have an associated native layout (boolean, default: `false`)
-    - `simplify` -- specifies whether or not to "simplify" the imported graphs by pruning multiple edges, loops and
-      making the graph undirected (boolean, default: `false`)
+    - `type` (string) &mdash; must be the text `TAR`
+    - `url` (string) &mdash; specifies the URL of the tarball
+    - `format` (string<sup><i>d</i></sup>) &mdash; specifies the file format used by the archive
+    - `compression` (string<sup><i>c</i></sup>, default: `NONE`) &mdash; specifies the compression (if any) applied to
+      the files in the archive
+    - `cache` (string<sup><i>b</i></sup>, default: don't cache) &mdash; specifies a file name (not a full path) to use
+      for caching the tarball locally which is useful if the URL is not a `file://`
+    - `checksum` (string, default: don't verify checksum) &mdash; specifies the cryptographic hash algorithm and hex
+      digest to expect for the tarball in the format `${algo}:${hash}` where `${algo}` is one of the strings understood
+      by the `hashlib` module from the Python standard library and `${hash}` is a hexadecimal encoding of the expected
+      checksum
+    - `pattern` (string, default: `*`) &mdash; specifies a POSIX globbing expression by which to select files in the
+      directory
+    - `layout` (boolean, default: `false`) &mdash; specifies whether or not the graph files have an associated native
+      layout
+    - `simplify` (boolean, default: `false`) &mdash; specifies whether or not to &ldquo;simplify&rdquo; the imported
+      graphs by pruning multiple edges, loops and making the graph undirected
 
- * `URL` -- refers to a collection of URLs of individual graphs
+ * `URL` &mdash; refers to a collection of URLs of individual graphs
 
-    - `type` -- must be the text `URL` (string)
-    - `urls` -- lists the URLs of the graph files to consider (array of strings)
-    - `format` -- specifies the file format used by the archive (string<sup><i>d</i></sup>)
-    - `compression` -- specifies the compression (if any) applied to the files in the archive
-      (string<sup><i>c</i></sup>, default: `NONE`)
-    - `layout` -- specifies whether or not the graph files have an associated native layout (boolean, default: `false`)
-    - `simplify` -- specifies whether or not to "simplify" the imported graphs by pruning multiple edges, loops and
-      making the graph undirected (boolean, default: `false`)
-    - `name` -- specifies an informal name for the archive and should be a valid identifier
-      (string<sup><i>b</i></sup>, default: `www`)
-    - `cache` -- specifies whether or not to cache the downloaded files locally in a database
-      (boolean, default: `false`)
+    - `type` (string) &mdash; must be the text `URL`
+    - `urls` (array of strings) &mdash; lists the URLs of the graph files to consider
+    - `format` (string<sup><i>d</i></sup>) &mdash; specifies the file format used by the archive
+    - `compression` (string<sup><i>c</i></sup>, default: `NONE`) &mdash; specifies the compression (if any) applied to
+      the files in the archive
+    - `layout` (boolean, default: `false`) &mdash; specifies whether or not the graph files have an associated native
+      layout
+    - `simplify` (boolean, default: `false`) &mdash; specifies whether or not to &ldquo;simplify&rdquo; the imported
+      graphs by pruning multiple edges, loops and making the graph undirected
+    - `name` (string<sup><i>b</i></sup>, default: `www`) &mdash; specifies an informal name for the archive and should
+      be a valid identifier (`\w+`)
+    - `cache` (boolean, default: `false`) &mdash; specifies whether or not to cache the downloaded files locally in a
+      database
 
- * `NULL` -- is a dummy archive that contains no graphs
+ * `NULL` &mdash; is a dummy archive that contains no graphs
 
-    - `type` -- must be the text `NULL` (string)
+    - `type` (string) &mdash; must be the text `NULL` (That's right: the string literal `"NULL"` as opposed to the
+      special JSON value `null`.)
 
 <sup><i>a)</i></sup>&nbsp;Environment variables can be expanded using shell syntax (e.g.&nbsp;`${HOME}/work/` might get
 expanded to `/home/5gon12eder/work/`; the curly braces may be omitted).
@@ -904,26 +912,26 @@ available.  Please also refer to the reference documentation of the
 
  - `BENCH`
  - [`CHACO`](https://cfwebprod.sandia.gov/cfdocs/CompResearch/docs/guide.pdf)
- - [`DL`](https://sites.google.com/site/ucinetsoftware/document/ucinethelp.htm) -- UCINET DL format
- - [`DMF`](ftp://dimacs.rutgers.edu/pub/netflow/) -- DIMACS Max Flow Challenge
+ - [`DL`](https://sites.google.com/site/ucinetsoftware/document/ucinethelp.htm) &mdash; UCINET DL format
+ - [`DMF`](ftp://dimacs.rutgers.edu/pub/netflow/) &mdash; DIMACS Max Flow Challenge
  - [`DOT`](http://www.graphviz.org/doc/info/lang.html)
- - [`GDF`](http://graphexploration.cond.org/manual.html) -- GUESS Database File
- - [`GD_CHALLENGE`](http://graphdrawing.de/contest2013/challenge.html) -- Graph Drawing Challenge: Area Minimization for
-   Orthogonal Grid Layouts
- - [`GEXF`](https://gephi.org/gexf/format/) -- Graph Exchange XML Format
- - [`GML`](https://en.wikipedia.org/wiki/Graph_Modelling_Language) -- Graph Modelling Language
- - `GRAPH6` -- the Graph6 format represents a (preferable dense or small) simple undirected graph as a string containing
-    printable characters between 0x3F and 0x7E
- - [`GRAPHML`](http://graphml.graphdrawing.org/) -- Graph Markup Language
- - [`LEDA`](http://www.algorithmic-solutions.info/leda_guide/graphs/leda_native_graph_fileformat.html) --LEDA Native
-   File Format for Graphs
+ - [`GDF`](http://graphexploration.cond.org/manual.html) &mdash; GUESS Database File
+ - [`GD_CHALLENGE`](http://graphdrawing.de/contest2013/challenge.html) &mdash; Graph Drawing Challenge: Area
+   Minimization for Orthogonal Grid Layouts
+ - [`GEXF`](https://gephi.org/gexf/format/) &mdash; Graph Exchange XML Format
+ - [`GML`](https://en.wikipedia.org/wiki/Graph_Modelling_Language) &mdash; Graph Modelling Language
+ - `GRAPH6` &mdash; the Graph6 format represents a (preferable dense or small) simple undirected graph as a string
+    containing printable characters between 0x3F and 0x7E
+ - [`GRAPHML`](http://graphml.graphdrawing.org/) &mdash; Graph Markup Language
+ - [`LEDA`](http://www.algorithmic-solutions.info/leda_guide/graphs/leda_native_graph_fileformat.html) &mdash; LEDA
+   Native File Format for Graphs
  - [`MATRIX_MARKET`](http://math.nist.gov/MatrixMarket/formats.html)
  - `PLA`
- - `PM_DISS_GRAPH` -- graph file format from Petra Mutzel's PhD thesis
- - [`ROME`](http://www.graphdrawing.org/data/) -- Rome-Lib format
+ - `PM_DISS_GRAPH` &mdash; graph file format from Petra Mutzel's PhD thesis
+ - [`ROME`](http://www.graphdrawing.org/data/) &mdash; Rome-Lib format
  - `RUDY`
- - [`STP`](http://steinlib.zib.de/format.php) -- SteinLib STP Data Format
- - [`TLP`](http://tulip.labri.fr/TulipDrupal/?q=tlp-file-format) -- Tulip software graph format
+ - [`STP`](http://steinlib.zib.de/format.php) &mdash; SteinLib STP Data Format
+ - [`TLP`](http://tulip.labri.fr/TulipDrupal/?q=tlp-file-format) &mdash; Tulip software graph format
  - [`YGRAPH`](http://www3.cs.stonybrook.edu/~algorith/implement/nauty/distrib/makebg.c)
 
 Unlike vanilla JSON, the format used for the `imports.json` file allows you to use simple comments introduced by two
@@ -948,19 +956,19 @@ as the elements of a JSON array (with no keys) instead.
 
 Here is a summary of all environment variables that are honored by the driver.
 
- - `MSC_MODEL_DEBUGDIR` -- If set to a directory, the driver will dump human-readable information about the built neural
-   network into it.
- - `MSC_NN_TEST_SUMMARY` -- If set to a file name, the driver will write to it a summary of how the various
+ - `MSC_MODEL_DEBUGDIR` &mdash; If set to a directory, the driver will dump human-readable information about the built
+   neural network into it.
+ - `MSC_NN_TEST_SUMMARY` &mdash; If set to a file name, the driver will write to it a summary of how the various
    discriminators performed on the test data set in JSON format.
- - `MSC_PUNCTURE` -- If set to a non-negative integer <var>N</var>, the driver will check that exactly <var>N</var>
+ - `MSC_PUNCTURE` &mdash; If set to a non-negative integer <var>N</var>, the driver will check that exactly <var>N</var>
    properties are punctured (see `puncture.cfg`).
- - `MSC_LOG_LEVEL` -- If set to one of the well-known [syslog](http://man7.org/linux/man-pages/man3/syslog.3.html)
+ - `MSC_LOG_LEVEL` &mdash; If set to one of the well-known [syslog](http://man7.org/linux/man-pages/man3/syslog.3.html)
    levels, this defines the initial verbosity of the driver (may be altered by passing additional `--verbose` or
    `--quiet` options or overridden by the `--log-level` option).
- - `MSC_CACHE_DIR` -- If set to a directory, the driver will use it to cache downloaded files and rendered pictures
+ - `MSC_CACHE_DIR` &mdash; If set to a directory, the driver will use it to cache downloaded files and rendered pictures
    served by the local HTTP server.
- - `MSC_QUICK_ARCHIVE_IMPORT` -- If set to a positive integer, graph archives won't be scanned for more graphs if the
-   multiplicity &ldquo;`*`&rdquo; (see `graphs.cfg`) was selected for the desired number of graphs.  Setting this
+ - `MSC_QUICK_ARCHIVE_IMPORT` &mdash; If set to a positive integer, graph archives won't be scanned for more graphs if
+   the multiplicity &ldquo;`*`&rdquo; (see `graphs.cfg`) was selected for the desired number of graphs.  Setting this
    variable to 0 has the same effect as not setting it at all and will cause the archive to be scanned.
 
 The following environment variables can be used to specify external programs the driver will use.
@@ -1006,10 +1014,15 @@ successfully again, as any TeX'nician will have experienced from time to time.
 The actual typesetting is accomplished by the `./utils/typeset.py` script.  This Python script creates a symlink farm to
 enable out-of-tree TeX builds and takes care of invoking the various TeX tools in the appropriate order and required
 number of times.  By default, all documents draw plots and graph layouts directly in TeX using the `tikz` package.  This
-is very cool but -- unfortunately -- takes a lot of time and a lot of memory.  Since neither TeX, pdfTex or XeTeX (at
-least not from the TeXLive 2018 distribution) are capable of dynamically allocating the required amount of memory, the
-only TeX engine that will work out-of-the-box is LuaTeX.  Therefore, the build system will typeset all documents using
-LuaLaTex which is pretty darn slow.  Expect build times of several minutes or more.
+is very cool but &ndash; unfortunately &ndash; takes a lot of time and a lot of memory.  Since neither TeX, pdfTex or
+XeTeX (at least not from the TeXLive 2018 distribution) are capable of dynamically allocating the required amount of
+memory, the only TeX engine that will work out-of-the-box is LuaTeX.  Therefore, the build system will typeset all
+documents using LuaLaTex which is pretty darn slow.  Expect build times of several minutes or more.
+
+**On-Demand Downloads:** The documents include some example graphs taken from public graph collections which will be
+downloaded on-demand when the documents are typeset.  Unless the files are already available from a local cache, access
+to the internet will be required.  See the section &ldquo;Automatic File Downloads&rdquo; for more information.  Some
+documents may require additional downloads (other than graphs) that will be mentioned below.
 
 **TeX'nical Troubleshooting:** If the environment variable `MSC_TEX_REPORT_HTML` is set (to an absolute file name), the
 `./utils/typeset.py` script will write a report (in HTML format) to that file which contains a nicely formatted
@@ -1092,7 +1105,7 @@ you may instead prepare a ZIP archive with the following files (not all of which
     kit_logo_en_4c_positiv-rgb.pdf
     kit_logo_en_4c_positiv.pdf
 
-The archive must contain the files directly at the top-level -- not within a sub-directory.  Tell CMake (at
+The archive must contain the files directly at the top-level &ndash; not within a sub-directory.  Tell CMake (at
 configuration time) the location of this ZIP archive via setting the variable `MSC_KIT_BEAMER_ZIP` to the absolute path
 where the archive can be found and it will get extracted into the build directory as needed without clobbering the
 global TeX installation on your system.  (The `./maintainer/configure` script will recognize an environment variable
@@ -1129,33 +1142,35 @@ Either of the following two commands will exercise all of the above tests.
 
 The following environment variables are honored by the unit test driver:
 
- - `MSC_RANDOM_SEED` -- This environment variable may be set to an arbitrary byte sequence in order to make unit tests
-   deterministic.  Not all tests honor this variable at the moment, though.
+ - `MSC_RANDOM_SEED` &mdash; This environment variable may be set to an arbitrary byte sequence in order to make unit
+   tests deterministic.  Not all tests honor this variable at the moment, though.
 
- - `MSC_TEST_ANSI_TERMINAL` -- Enables colorized output (using ANSI escape sequences) if set to a positive integer and
-   disables it if set to `0`.  The unit test driver is currently not smart about figuring out whether the output
+ - `MSC_TEST_ANSI_TERMINAL` &mdash; Enables colorized output (using ANSI escape sequences) if set to a positive integer
+   and disables it if set to `0`.  The unit test driver is currently not smart about figuring out whether the output
    terminal might support ANSI escape sequences or even is a terminal to begin with.  If this variable is not set, no
    colorized output will ever be produced and if it is set, its value will be definitive.
 
- - `MSC_TEST_ANSI_COLOR_SKIPPED` -- If colorized test output is enabled, the value of this environment variable will be
-   interpreted as a decimal digit specifying an ANSI terminal color to use for skipped unit tests.  The default value is
-   3 (yellow).  If colorized test output is not enabled, this environment variable has no effect.
+ - `MSC_TEST_ANSI_COLOR_SKIPPED` &mdash; If colorized test output is enabled, the value of this environment variable
+   will be interpreted as a decimal digit specifying an ANSI terminal color to use for skipped unit tests.  The default
+   value is 3 (yellow).  If colorized test output is not enabled, this environment variable has no effect.
 
- - `MSC_TEST_ANSI_COLOR_FAILED` -- If colorized test output is enabled, the value of this environment variable will be
-   interpreted as a decimal digit specifying an ANSI terminal color to use for failed unit tests.  The default value is
-   1 (red).  If colorized test output is not enabled, this environment variable has no effect.
+ - `MSC_TEST_ANSI_COLOR_FAILED` &mdash; If colorized test output is enabled, the value of this environment variable will
+   be interpreted as a decimal digit specifying an ANSI terminal color to use for failed unit tests.  The default value
+   is 1 (red).  If colorized test output is not enabled, this environment variable has no effect.
 
- - `MSC_TEST_ANSI_COLOR_ERROR` -- If colorized test output is enabled, the value of this environment variable will be
-   interpreted as a decimal digit specifying an ANSI terminal color to use for unit tests that encountered hard errors.
-   The default value is 5 (purple).  If colorized test output is not enabled, this environment variable has no effect.
+ - `MSC_TEST_ANSI_COLOR_ERROR` &mdash; If colorized test output is enabled, the value of this environment variable will
+   be interpreted as a decimal digit specifying an ANSI terminal color to use for unit tests that encountered hard
+   errors.  The default value is 5 (purple).  If colorized test output is not enabled, this environment variable has no
+   effect.
 
- - `CTEST_OUTPUT_ON_FAILURE` ([standard CTest setting](https://cmake.org/cmake/help/latest/manual/ctest.1.html)) -- If
-   set to 1, the individual output of failed tests will be shown.  Setting it to 0 turns on the default behavior of not
-   showing the output of individual tests.
+ - `CTEST_OUTPUT_ON_FAILURE` ([standard CTest setting](https://cmake.org/cmake/help/latest/manual/ctest.1.html)) &mdash;
+   If set to 1, the individual output of failed tests will be shown.  Setting it to 0 turns on the default behavior of
+   not showing the output of individual tests.
 
- - `CTEST_PARALLEL_LEVEL` ([standard CTest setting](https://cmake.org/cmake/help/latest/manual/ctest.1.html)) -- If set
-   to a positive integer <var>N</var>, run up to <var>N</var> tests in parallel.  (Tip: You may consider `export`'ing
-   `CTEST_PARALLEL_LEVEL=$(nproc)` in your `~/.profile` to utilize all of your CPUs whenever you're running CTest.)
+ - `CTEST_PARALLEL_LEVEL` ([standard CTest setting](https://cmake.org/cmake/help/latest/manual/ctest.1.html)) &mdash; If
+   set to a positive integer <var>N</var>, run up to <var>N</var> tests in parallel.  (Tip: You may consider
+   `export`'ing `CTEST_PARALLEL_LEVEL=$(nproc)` in your `~/.profile` to utilize all of your CPUs whenever you're running
+   CTest.)
 
 Several unit tests are sensitive to specific environment variables that will usually cause them to output some debugging
 information.  You will recognize these environment variables when reading that unit test code which you will likely do
