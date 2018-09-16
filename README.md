@@ -22,7 +22,7 @@ You may cite this work (the source code repository) like so:
 
 > Klammler, M. et al.:
 > Source code for aesthetic discrimination of graph layouts,
-> [https://github.com/5gon12eder/msc-graphstudy/](https://github.com/5gon12eder/msc-graphstudy/)
+> https://github.com/5gon12eder/msc-graphstudy/
 
 The following BibTeX entry may come in handy:
 
@@ -36,11 +36,11 @@ Here is a list of publications about this work:
 
  1. Klammler, M.:
     *Aesthetic value of graph layouts: Investigation of statistical syndromes for automatic quantification.*
-    Master's thesis, Karlsruhe Institute of Technology (2018), [http://klammler.eu/msc/](http://klammler.eu/msc/).
+    Master's thesis, Karlsruhe Institute of Technology (2018), http://klammler.eu/msc/
 
  2. Klammler, M., Mchedlidze, T., Pak, A.:
     *Aesthetic Discrimination of Graph Layouts.*
-    2018; [http://arxiv.org/abs/1809.01017](http://arxiv.org/abs/1809.01017).
+    2018; http://arxiv.org/abs/1809.01017
 
 The second item is about to appear in the Proceedings of the 26<sup>th</sup> International Symposium on Graph Drawing,
 Barcelona, Spain, 2018.
@@ -77,8 +77,8 @@ Here is an example showing a command, a comment and some example output:
 
 Here is another example showing line continuation and shortened command output.
 
-    $ wget --no-verbose -O - 'https://raw.githubusercontent.com/5gon12eder/msc-graphstudy/master/README.md'             \
-          | grep -Eo '(http[s]|ftp)://[-a-zA-Z0-9@:%_+.~#?&//=]+'                                                       \
+    $ wget --no-verbose -O - 'https://raw.githubusercontent.com/5gon12eder/msc-graphstudy/master/README.md'   \
+          | grep -Eo '(http[s]|ftp)://[-a-zA-Z0-9@:%_+.~#?&//=]+'                                             \
           | sort -u
     http://arxiv.org/abs/1809.01017
     http://klammler.eu/msc/
@@ -464,11 +464,11 @@ a graphical rendition of the layout is saved as file `sample.svg`.
 
 The shell pipeline
 
-    $ wget -q -O - 'ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr01.mtx.gz'                        \
-          | import --format=matrix-market --simplify --meta=2 STDIO:gzip                                                \
-          | force --algorithm=fmmm                                                                                      \
+    $ wget -q -O - 'ftp://math.nist.gov/pub/MatrixMarket2/Harwell-Boeing/bcspwr/bcspwr01.mtx.gz'   \
+          | import --format=matrix-market --simplify --meta=2 STDIO:gzip                           \
+          | force --algorithm=fmmm                                                                 \
           | edge-length --kernel=boxed --output=histogram.txt
-    { "nodes": 42, "edges": 49, "graph": "f549a2236f459c8c6ea7bb28a7884f31", "native": false, "filename": null, ... }
+    { "nodes": 42, "edges": 49, "graph": "f549a2236f459c8c6ea7bb28a7884f31", "native": false, ... }
 
 downloads (using the standard `wget` command line utility) a graph from NIST's &ldquo;Matrix Market&rdquo; as `gzip`
 (Lempel-Ziv) compressed file, &ldquo;simplifies&rdquo; the graph (This operation makes edges undirected and deletes
@@ -958,7 +958,7 @@ Here is a summary of all environment variables that are honored by the driver.
 The following environment variables can be used to specify external programs the driver will use.
 
  First Choice            | Second Choice          | Default Value
- ------------------------|------------------------|------------------------
+-------------------------|------------------------|------------------------
  `MSC_GNUPLOT`           | `GNUPLOT`              | `gnuplot`
  `MSC_IMAGE_MAGICK`      | `IMAGE_MAGICK`         | `convert`
  `MSC_ZCAT`              | `ZCAT`                 | `gzip -dc`

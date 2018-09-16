@@ -127,7 +127,7 @@ def check_files(filenames, fix, verboseout, summaryout):
         istex = determine_whether_this_is_a_tex_file(filetype, filename)
         kwargs = {
             'maxcols' : get_max_columns(filetype, filename),
-            'eolbs' : not istex,
+            'eolbs' : not (istex or filetype in [ 'markdown', 'text' ]),
             'eolsuffix' : '%' if istex else '',
             'maketabs' : filetype in [ 'makefile' ] or basename.lower() in [ 'makefile', 'gnumakefile' ],
             'xml' : { 'xml' : 'xml', 'html' : 'html' }.get(filetype),
