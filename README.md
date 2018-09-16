@@ -339,7 +339,13 @@ configuration first.
 
 The `httpd` target starts a local web server listening on port 8000 and serves visualization and other useful insights
 into the current data base.  ([Check it out!](http://localhost:8000)) It won't show any results of the `eval` runs,
-though.  These are only stores in various JSON files in the `./eval/` directory.
+though.  These are only stores in various JSON files in the `./eval/` directory.  The server process automatically forks
+to the background.  In order to shut it down again, send it `SIGINT`.  Its process ID will written to a file
+`${bindir}/.httpd.pid` and also printed at startup.  If you find a server still running and cannot figure out which
+process it is, visit `http://localhost:${port}/about/` and look for a line that says &ldquo;Process-ID&rdquo;.  The
+default `${port}` is 8000.  Once you know the process ID `${pid}` shut the server down like so:
+
+    $ kill -s INT ${pid}
 
 The `eval` target runs all available evaluation experiments while the `eval-cross-valid` target only runs the normal
 (full) cross-validation while the `eval-puncture` target will only run the (reduced) cross-validation experiments for
