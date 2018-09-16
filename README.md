@@ -330,7 +330,9 @@ respective targets explicitly.  The following targets might be useful.
  - `maintainer-everything` -- builds all of the above targets except `httpd`
 
 The `deploy` target will take a *very long* time to build (probably several days).  The `eval` target will take a long
-time, too (probably several hours).  Building the `eval` target will run the experiments again each time.
+time, too (probably several hours).  Building the `eval` target will run the experiments again each time.  If the
+default setting makes you nervous whether the job is actually making any progress at all, you might want to increase the
+verbosity by setting the environment variable `MSC_LOG_LEVEL` to `INFO` (the default is `NOTICE`).
 
 Before you go ahead building the `deploy` and `eval` targets, you might want to read the section about driver
 configuration first.
@@ -1140,6 +1142,14 @@ The following environment variables are honored by the unit test driver:
  - `MSC_TEST_ANSI_COLOR_ERROR` -- If colorized test output is enabled, the value of this environment variable will be
    interpreted as a decimal digit specifying an ANSI terminal color to use for unit tests that encountered hard errors.
    The default value is 5 (purple).  If colorized test output is not enabled, this environment variable has no effect.
+
+ - `CTEST_OUTPUT_ON_FAILURE` ([standard CTest setting](https://cmake.org/cmake/help/latest/manual/ctest.1.html)) -- If
+   set to 1, the individual output of failed tests will be shown.  Setting it to 0 turns on the default behavior of not
+   showing the output of individual tests.
+
+ - `CTEST_PARALLEL_LEVEL` ([standard CTest setting](https://cmake.org/cmake/help/latest/manual/ctest.1.html)) -- If set
+   to a positive integer <var>N</var>, run up to <var>N</var> tests in parallel.  (Tip: You may consider `export`'ing
+   `CTEST_PARALLEL_LEVEL=$(nproc)` in your `~/.profile` to utilize all of your CPUs whenever you're running CTest.)
 
 Several unit tests are sensitive to specific environment variables that will usually cause them to output some debugging
 information.  You will recognize these environment variables when reading that unit test code which you will likely do
