@@ -129,11 +129,12 @@ can be found in a file called [`./COPYING_CC4-BY-NC-ND.txt`](./COPYING_CC4-BY-NC
 [online](https://creativecommons.org/licenses/by-nc-nd/4.0/).  The files to which this restrictive license applies all
 mention this in a comment at the top of the file.
 
+<!-- Cross-Reference: ./COPYING_GFDL.txt: FILE -->
 Finally, this `README` document is published under the terms of the *GNU Free Documentation License*, Version 1.3 or any
 later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no
 Back-Cover Texts.  A copy of the license is included in the section entitled
 &ldquo;[GNU Free Documentation License](#gnu-free-documentation-license)&rdquo; and can also be found in a file called
-[`/.COPYING_GFDL.txt`](/.COPYING_GFDL.txt) as well as [online](https://www.gnu.org/licenses/fdl-1.3.html).
+[`./COPYING_GFDL.txt`](./COPYING_GFDL.txt) as well as [online](https://www.gnu.org/licenses/fdl-1.3.html).
 
 **Tip:** Running the script `./maintainer/copyright` with no arguments from the top-level source directory (of a Git
 clone) will print the license used for each file in the repository.
@@ -1067,8 +1068,8 @@ author.
 ### Typesetting the GD'18 Paper
 
 Building the `paper` target will download the two files `llncs.cls` and `splncs04.bst` which are copyrighted by
-*Springer Verlag* for its [&ldquo;Lecture Notes in Computer
-Science&rdquo;](https://www.springer.com/it/computer-science/lncs/conference-proceedings-guidelines).  The latter file
+*Springer Verlag* for its&ldquo;[Lecture Notes in Computer
+Science](https://www.springer.com/it/computer-science/lncs/conference-proceedings-guidelines)&rdquo;.  The latter file
 states that it is available under the *LaTeX Project Public License* distributed from CTAN archives in directory
 `macros/latex/base/lppl.txt`; either version 1 of the License, or any later version.  The other file lacks a copyright
 notice but it is assumed that the same conditions apply.
