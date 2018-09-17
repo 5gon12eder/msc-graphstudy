@@ -181,6 +181,7 @@ find_program(LUALATEX_EXECUTABLE  lualatex  DOC "LuaLaTeX executable (https://ww
 find_program(MAKEINDEX_EXECUTABLE makeindex DOC "Makeindex executable (https://www.ctan.org/pkg/makeindex/)")
 find_program(PDFTOPS_EXECUTABLE   pdftops   DOC "PDF to PostScript converter executable compatible to 'pdftops'")
 find_program(ZIP_EXECUTABLE       zip       DOC "Info-ZIP compatible ZIP archiver executable (http://www.info-zip.org)")
+find_program(INKSCAPE_EXECUTABLE  inkscape  DOC "Inkscape executable (https://inkscape.org/)")
 
 # This nonsense is just because people cannot share...
 set(MSC_KIT_BEAMER_ZIP "" CACHE PATH "ZIP archive to provide the KIT's beamer theme in a drop-in fashion")

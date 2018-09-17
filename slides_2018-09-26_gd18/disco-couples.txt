@@ -1,0 +1,12 @@
+#! /bin/false
+#! -*- coding:utf-8; mode:conf-desktop; -*-
+
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+dab7fdeb9a2385d3d1c4826391401bdf fb8d28459a77f6aa5288e6514b65a071  # example from introduction
+a07125febd245912cd44ab3bc5f70662 101708eca5c10534fca5e3167a889722  # counter-example for HUANG
+0b878c80697a64676721b57018778f46 c7b63d0bee519bef57cb5aad9055f633  # counter-example for STRESS_FIT_SCALE
+4c326179599710e759d9f22366c14624 234952e32587404ac7176cfc273c22a8  # counter-example for both

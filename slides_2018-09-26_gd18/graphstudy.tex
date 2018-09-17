@@ -10,29 +10,33 @@
 \documentclass{beamer}
 
 \input{preamble.tex}
-%\KITtitleimage[width = 0.95\paperwidth]{pics/titlepicture.png}
-%\logo{\pgfimage[height = 1.5\KITlogoht]{pics/algo-logo.pdf}}
+\TitleImage[viewport = {303 303 703 703}]{pics/titlepicture.pdf}
+\logo{\pgfimage[width = \KITlogowd]{pics/iosb-logo.pdf}}
 
 \addbibresource{literature.bib}
+
+\AtBeginDocument{
+  \input{eval-cross-valid.tex}
+  \input{disco.tex}
+  \input{nn-info.tex}
+}
 
 \hypersetup{
   pdfauthor = {M. Klammler, T. Mchedlidze and A. Pak},
   pdftitle = {Aesthetic Discrimination of Graph Layouts},
-  pdfsubject = {26th International Symposium on Graph Drawing and Network Visualization},
+  pdfsubject = {26th International Symposium on Graph Drawing and Network Visualization, Barcelona (2018)},
   pdfkeywords = {}
 }
 
 \title{Aesthetic Discrimination of Graph Layouts}
-\subtitle{26\textsuperscript{th} International Symposium on Graph Drawing and Network Visualization}
-\author{M.\,Klammler, T.\,Mchedlidze and A.\,Pak}
-\institute[KIT {\textperiodcentered} Fraunhofer]{%
-  Karlsruhe Institute of Technology in cooperation with
-  Fraunhofer Institute of Optronics, System Technologies and Image Exploitation
+
+\subtitle{Moritz Klammler {\textand} Tamara Mchedlidze {\textand} Alexey Pak}
+
+\institute[M.~Klammler {\textand} T.~Mchedlidze {\textand} A.~Pak]{%
+  26\textsuperscript{th} International Symposium on Graph Drawing and Network Visualization, Barcelona (2018)
 }
 
 \date{September 2018}
-
-\providecommand*{\XValSuccessMean}{\mbox{\textbf{??}}}
 
 \begin{document}
 
@@ -54,24 +58,541 @@
     mean prediction accuracy of $\XValSuccessMean\percent$, outperforming discriminators based on stress and on the
     linear combination of popular quality metrics by a small but statistically significant margin.
   }
+  \vfill
+  \slidecite{Arxiv,MScThesis,GitHubRepo}
 \end{frame}
 
 \section{Motivation}
+\subsection{Problem Statement}
+
+\begin{frame}
+  \frametitle{Problem Statement}
+  Given two \alert<2>{vertex layouts} \(\Layout_a\) and \(\Layout_b\) for the same \alert<3>{simple graph}
+  \(\GraphGVE\).\newline
+  Is \(\Layout_a\) or \(\Layout_b\) more aesthetically pleasing?
+  \par\vspace{1pc}
+  \only<4>{\ShowDemo}
+  \DiscriminatorDemo[%
+    discmod = \GetDiscriminatorResult{?}{2c0ab2fa}{dab7fdeb}{fb8d2845}{discmod},
+  ]{pics/example-a.tikz}{pics/example-b.tikz}
+  \begin{tikzpicture}[remember picture, overlay]
+    \node<2>[smartbox, anchor = center, yshift = 2cm] at (current page.south) {%
+      \begin{tabular}{lrcl}
+        $\Layout:$ & $\GraphV$ & $\to$     & $\Reals^2$\\
+                   & $v$       & $\mapsto$ & $(x_v,y_v)$\\
+      \end{tabular}
+    };
+    \node<3>[smartbox, anchor = center, yshift = 2cm] at (current page.south) {%
+      \begin{tabular}{@{\makebox[1.5em][l]{$\to$}}l}
+        undirected\\
+        no loops\\
+        no multiple edges\\
+      \end{tabular}
+    };
+  \end{tikzpicture}
+\end{frame}
+
 \section{Related Work}
-\section{Our Contribution}
+
+\begin{frame}<1>[label = relatedwork]
+  \frametitle{Related Work}
+  \begin{itemize}
+  \item<+-> Simple Metrics
+    \begin{itemize}
+    \item number of edge crossings
+    \item minimum crossing angle (cross resolution)
+    \item minimum angle between incident edges (angular resolution)
+    \item standard deviation of edge lengths
+    \item\dots
+    \end{itemize}
+    \bigskip
+  \item<+-> % Combined Metric
+    \( \menum{COMB}(\Gamma_i) = \sum_{M} w_M \: z_{M}(\Gamma_i) \)
+    \bigskip
+  \item<+-> % Stress
+    \(
+      \stress(\Gamma) = \sum_{i=1}^{n-1} \sum_{j=i+1}^{n} k_{ij}
+      \Big( \dist_\Gamma(v_i,v_j) - L \cdot \dist_G(v_i,v_j) \Big)^2
+    \)
+  \end{itemize}
+  \slidecite{Huang2013,Kamada1989}
+\end{frame}
+
+\againframe<2>{relatedwork}
+
+\begin{frame}
+  \frametitle{Related Work}
+  \framesubtitle{Combined Metric (\enum{COMB})}
+  \ShowDemoScale\only<2>{\ShowDemoResult}
+  \DiscriminatorDemo[%
+    comb = \GetDiscriminatorResult{+}{5b3b66d2}{a07125fe}{101708ec}{comb},
+  ]{pics/5b3b66d2-a07125fe-more.tikz}{pics/5b3b66d2-101708ec-less.tikz}
+\end{frame}
+
+\againframe<2>{relatedwork}
+
+\begin{frame}
+  \frametitle{Related Work}
+  \frametitle{Stress (\enum{STRESS})}
+  \ShowDemoScale\only<2>{\ShowDemoResult}
+  \DiscriminatorDemo[%
+    stress = \GetDiscriminatorResult{+}{8314f2c1}{0b878c80}{c7b63d0b}{stress},
+  ]{pics/8314f2c1-0b878c80-more.tikz}{pics/8314f2c1-c7b63d0b-less.tikz}
+\end{frame}
+
+\section{Methodology}
+
+\begin{frame}[label = outermethod]
+  %\frametitle{Aesthetic Discrimination}
+  \begin{tikzpicture}[inner sep = 2ex]
+    \node (ex1more) at (-1, 0) {%
+      \begin{tikzpicture}[graphcolor = KITblue]
+        \node[vertex] (v1) at (-0.5, -0.5) {};
+        \node[vertex] (v2) at (-0.5, +0.5) {};
+        \node[vertex] (v3) at (+0.5, -0.5) {};
+        \node[vertex] (v4) at (+0.5, +0.5) {};
+        \draw[edge] (v1) -- (v2) -- (v4) -- (v3) -- (v1);
+      \end{tikzpicture}
+    };
+    \node (ex1less) at (+1, 0) {%
+      \begin{tikzpicture}[graphcolor = KITred]
+        \node[vertex] (v1) at (-0.5, -0.5) {};
+        \node[vertex] (v2) at (-0.5, +0.5) {};
+        \node[vertex] (v3) at (+0.5, +0.5) {};
+        \node[vertex] (v4) at (+0.5, -0.5) {};
+        \draw[edge] (v1) -- (v2) -- (v4) -- (v3) -- (v1);
+      \end{tikzpicture}
+    };
+    \node (ex2more) at (-1, -2) {%
+      \begin{tikzpicture}[graphcolor = KITblue]
+        \node[vertex] (v1) at (330:7mm) {};
+        \node[vertex] (v2) at (210:7mm) {};
+        \node[vertex] (v3) at (90:7mm) {};
+        \draw[edge] (v1) -- (v2) -- (v3) -- (v1);
+      \end{tikzpicture}
+    };
+    \node (ex2less) at (+1, -2) {%
+      \begin{tikzpicture}[graphcolor = KITred]
+        \node[vertex] (v1) at (330:7mm) {};
+        \node[vertex] (v2) at (210:7mm) {};
+        \node[vertex] (v3) at (10:9mm) {};
+        \draw[edge] (v1) -- (v2) -- (v3) -- (v1);
+      \end{tikzpicture}
+    };
+    \node[text = KITblue] (exdotsmore) at (-1, -3.5) {$\vdots$};
+    \node[text = KITred ] (exdotsless) at (+1, -3.5) {$\vdots$};
+    \node (exnmore) at (-1, -5) {%
+      \begin{tikzpicture}[graphcolor = KITblue]
+        \node[vertex] (v1) at (-1.0,  0.0) {};
+        \node[vertex] (v2) at (-0.5,  0.0) {};
+        \node[vertex] (v3) at (+0.5,  0.0) {};
+        \node[vertex] (v4) at (+1.0,  0.0) {};
+        \node[vertex] (v5) at ( 0.0, -0.5) {};
+        \node[vertex] (v6) at ( 0.0, +0.5) {};
+        \draw[edge] (v2) -- (v5) -- (v3) -- (v6) -- (v2);
+        \draw[edge] (v1) -- (v2);
+        \draw[edge] (v3) -- (v4);
+      \end{tikzpicture}
+    };
+    \node (exnless) at (+1, -5) {%
+      \begin{tikzpicture}[graphcolor = KITred]
+        \node[vertex] (v1) at (+1.0, +0.5) {};
+        \node[vertex] (v2) at (+0.5, +0.5) {};
+        \node[vertex] (v3) at (+0.5, -0.5) {};
+        \node[vertex] (v4) at (+1.0, -0.5) {};
+        \node[vertex] (v5) at (-0.5, +0.5) {};
+        \node[vertex] (v6) at (-0.5, -0.5) {};
+        \draw[edge] (v2) -- (v5) -- (v3) -- (v6) -- (v2);
+        \draw[edge] (v1) -- (v2);
+        \draw[edge] (v3) -- (v4);
+      \end{tikzpicture}
+    };
+    \coordinate (auxx) at (3, 0);
+    \coordinate (aux1) at (auxx|-ex1less.north);
+    \coordinate (auxdots) at (auxx|-exdotsless);
+    \coordinate (auxn) at (auxx|-exnless.south);
+    \coordinate (auxy) at ($(ex1more)!0.5!(ex1less)$);
+    \coordinate[below = 2ex of auxy] (auxy1a);
+    \coordinate[above = 2ex of auxy] (auxy1b);
+    \node<2->[draw = KITpalegreen, fill = KITpalegreen!50, align = center, inner sep = 2ex] (model) at (7, -2)
+             {Discriminator\\Model};
+    \coordinate<2-> (modelina) at ($(model.north west)!0.5!(model.north)$);
+    \coordinate<2-> (modelinb) at ($(model.north east)!0.5!(model.north)$);
+    \coordinate<2->[below = 4ex of model] (submod);
+    \draw<2->[KITpalegreen, <->] (model.west|-submod) -- (model.east|-submod);
+    \draw<2->[KITpalegreen] (submod) +(0, -3pt) -- +(0, +3pt);
+    \fill<3>[KITpalegreen] (submod) ++(-2em, 0) -- +(-1ex, 2ex) -- +(+1ex, 2ex) -- cycle;
+    \draw<3>[dashed] (ex1more.south west) rectangle (ex1less.north east);
+    \draw<3>[->, shorten < = 1ex, shorten > = 1ex, very thick, KITblue] (ex1less.east|-auxy1a)
+    -- (auxx|-auxy1a) to node[fill = white, inner sep = 1ex]{$f(\Gamma_a)$} (model.west|-auxy1a)
+    -- (modelina|-auxy1a) -- (modelina);
+    \draw<3>[->, shorten < = 1ex, shorten > = 1ex, very thick, KITred] (ex1less.east|-auxy1b)
+    -- (auxx|-auxy1b) to node[fill = white, inner sep = 1ex]{$f(\Gamma_b)$} (model.west|-auxy1b)
+    -- (modelinb|-auxy1b) -- (modelinb);
+    \draw<4>[<->, shorten > = 1ex] (aux1) to node[below, rotate = 90]{training} (auxdots);
+    \draw<4>[<->, shorten > = 1ex] (auxn) to node[below, rotate = 90]{testing} (auxdots);
+  \end{tikzpicture}
+\end{frame}
+
+\subsection{Data Acquisition {\&} Augmentation}
+
+\begin{frame}<1>[label = databullets]
+  \frametitle{Data Acquisition {\&} Augmentation}
+  \begin{enumerate}
+  \item<1-> Collect a large number of graphs
+    \begin{itemize}
+    \item\alert{imported graphs} --- from public collections
+    \item\alert{generated graphs} --- using probabilistic algorithms
+    \end{itemize}
+    \par\bigskip
+  \item<2-> Compute various layouts for these graphs
+    \begin{itemize}
+    \item\alert{native layouts} --- fall out of the graph generation process
+    \item\alert{proper layouts} --- using common state-of-the-art algorithms
+    \item\alert{garbage layouts} --- using more or less random placements of vertices
+    \end{itemize}
+    \par\bigskip
+  \item<3-> Use data augmentation to expand this corpus
+    \begin{itemize}
+    \item\alert{layout worsening} --- degrade proper layout by given rate
+    \item\alert{layout interpolation} --- compute layout \enquote{between} proper and garbage layout
+    \end{itemize}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Data Acquisition {\&} Augmentation}
+  \framesubtitle{Imported Graphs}
+  \newcommand*{\RandomSeed}{42}
+  \RandomThumbnailDemo{rome, north, randdag, bcspwr, grenoble, psadmit, smtape, import}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Data Acquisition {\&} Augmentation}
+  \framesubtitle{Generated Graphs}
+  \newcommand*{\RandomSeed}{100}
+  \RandomThumbnailDemo%
+      {lindenmayer, mosaic1, mosaic2, grid, torus1, torus2, quasi3d, quasi4d, quasi5d, quasi6d, bottle, tree}
+\end{frame}
+
+\againframe<2>{databullets}
+
+\begin{frame}
+  \frametitle{Data Acquisition {\&} Augmentation}
+  \framesubtitle{Layouts}
+  \begin{center}
+    \small\noindent%
+    \begin{tabular}{l@{\quad}c@{\qquad\qquad}c@{\qquad\qquad}c}
+        \rotatebox{90}{\emph{proper}}
+      & \InputTikzGraph[graphcolor = KITblue]{0.2\textwidth}{pics/native.tikz}
+      & \InputTikzGraph[graphcolor = KITblue]{0.2\textwidth}{pics/fmmm.tikz}
+      & \InputTikzGraph[graphcolor = KITblue]{0.2\textwidth}{pics/stress.tikz}\\[1ex]
+      & \enum{NATIVE} & \enum{FMMM} & \enum{STRESS}\\[2ex]
+        \rotatebox{90}{\emph{garbage}}
+      & \InputTikzGraph[graphcolor = KITred]{0.2\textwidth}{pics/random-uniform.tikz}
+      & \InputTikzGraph[graphcolor = KITred]{0.2\textwidth}{pics/random-normal.tikz}
+      & \InputTikzGraph[graphcolor = KITred]{0.2\textwidth}{pics/phantom.tikz}\\[1ex]
+      & \enum{RANDOM\_UNIFORM} & \enum{RANDOM\_NORMAL} & \enum{PHANTOM}
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+\againframe<3>{databullets}
+
+\begin{frame}
+  \frametitle{Data Acquisition {\&} Augmentation}
+  \framesubtitle{Layout Worsening}
+  \begin{center}
+    \InputTikzGraph{0.5\textwidth}{pics/worse-parent.tikz}
+  \end{center}
+\end{frame}
+
+% For some obscure reason, beamer won't tolerate these definitions inside the frame environment so we have to make them
+% global.  Yuck!
+
+\newcommand*{\DisplayWorseLayout}[2][00000]{%
+  \node at (#2|-r#1) {\InputTikzGraph{0.2\textwidth}{pics/#2-#1.tikz}};
+}
+
+\newcommand*{\DisplayWorseAlgo}[2][]{
+  \node[anchor = base, above = 10mm of #1] {\enum{#2}};
+}
+
+\newcommand*{\DisplayWorseRate}[2][]{
+  \node[anchor = base, xshift = -15mm, rotate = 90] at (r#1) {$r=#2\percent$};
+}
+
+\begin{frame}
+  \frametitle{Data Acquisition {\&} Augmentation}
+  \framesubtitle{Layout Worsening}
+  \begin{center}
+    \begin{tikzpicture}[scale = 1.05, font = \small]
+
+      \coordinate (perturb)    at (0.0, 0);
+      \coordinate (flip-nodes) at (2.5, 0);
+      \coordinate (flip-edges) at (5.0, 0);
+      \coordinate (movlsq)     at (7.5, 0);
+
+      \coordinate (r01000) at (0, -0);
+      \coordinate (r02000) at (0, -2);
+      \coordinate (r05000) at (0, -4);
+
+      \DisplayWorseAlgo[perturb]{PERTURB}
+      \DisplayWorseAlgo[flip-nodes]{FLIP\_NODES}
+      \DisplayWorseAlgo[flip-edges]{FLIP\_EDGES}
+      \DisplayWorseAlgo[movlsq]{MOVLSQ}
+
+      \DisplayWorseRate[01000]{10}
+      \DisplayWorseRate[02000]{20}
+      \DisplayWorseRate[05000]{50}
+
+      \DisplayWorseLayout[01000]{perturb}
+      \DisplayWorseLayout[01000]{flip-nodes}
+      \DisplayWorseLayout[01000]{flip-edges}
+      \DisplayWorseLayout[01000]{movlsq}
+
+      \DisplayWorseLayout[02000]{perturb}
+      \DisplayWorseLayout[02000]{flip-nodes}
+      \DisplayWorseLayout[02000]{flip-edges}
+      \DisplayWorseLayout[02000]{movlsq}
+
+      \DisplayWorseLayout[05000]{perturb}
+      \DisplayWorseLayout[05000]{flip-nodes}
+      \DisplayWorseLayout[05000]{flip-edges}
+      \DisplayWorseLayout[05000]{movlsq}
+
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Data Acquisition {\&} Augmentation}
+  \framesubtitle{Layout Interpolation}
+  \begin{center}
+    \small\noindent%
+    \begin{tabular}{c@{\qquad\qquad}c@{\qquad\qquad}c@{\qquad\qquad}c}
+      \InputTikzGraph[graphcolor = KITred!0!KITblue]{0.2\textwidth}{pics/linear-00000.tikz}&
+      \InputTikzGraph[graphcolor = KITred!20!KITblue]{0.2\textwidth}{pics/linear-02000.tikz}&
+      \InputTikzGraph[graphcolor = KITred!40!KITblue]{0.2\textwidth}{pics/linear-04000.tikz}\\[1ex]
+      $r=0\percent$ & $r=20\percent$ & $r=40\percent$\\[2ex]
+      \InputTikzGraph[graphcolor = KITred!60!KITblue]{0.2\textwidth}{pics/linear-06000.tikz}&
+      \InputTikzGraph[graphcolor = KITred!80!KITblue]{0.2\textwidth}{pics/linear-08000.tikz}&
+      \InputTikzGraph[graphcolor = KITred!100!KITblue]{0.2\textwidth}{pics/linear-10000.tikz}\\[1ex]
+      $r=60\percent$ & $r=80\percent$ & $r=100\percent$
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+\againframe<3>{outermethod}
+
+\begin{frame}<-3>[label = innermethod]
+  \begin{tikzpicture}
+    [
+      dataflow/.style = {
+        semithick,
+        KITpalegreen,
+      },
+      transformation/.style = {
+        dataflow,
+        decorate,
+        decoration = {snake, amplitude = 1.5pt, segment length = 1em, post length = 2pt},
+      },
+    ]
+
+    \node<-3> (layout) {\InputTikzGraph[graphcolor = KITblack]{3cm}{pics/smtape.tikz}};
+
+    \begin{scope}[node distance = 4ex]
+      \node<2->[right = 2cm of layout.north east, anchor = base west] (princomp1)  {\enum{PRINCOMP1}};
+      \node<2->[below = of princomp1.base west,   anchor = base west] (princomp2)  {\enum{PRINCOMP2}};
+      \node<2->[below = of princomp2.base west,   anchor = base west] (angular)    {\enum{ANGULAR}};
+      \node<2->[below = of angular.base west,     anchor = base west] (edgelength) {\enum{EDGE\_LENGTH}};
+      \node<2->[below = of edgelength.base west,  anchor = base west] (tension)    {\enum{TENSION}};
+      \node<2->[below = of tension.base west,     anchor = base west] (rdfglobal)  {\enum{RDF\_GLOBAL}};
+      \node<2->[below = of rdfglobal.base west,   anchor = base west] (rdflocal)   {\(\menum{RDF\_LOCAL}(d)\)};
+      \node<2->[fit = (princomp1) (princomp2) (angular) (edgelength) (tension) (rdfglobal) (rdflocal)] (properties) {};
+    \end{scope}
+
+    \begin{scope}
+      \draw<2-3>[->, transformation] (layout) -- (princomp1.west);
+      \draw<2-3>[->, transformation] (layout) -- (princomp2.west);
+      \draw<2-3>[->, transformation] (layout) -- (angular.west);
+      \draw<2-3>[->, transformation] (layout) -- (edgelength.west);
+      \draw<2-3>[->, transformation] (layout) -- (tension.west);
+      \draw<2-3>[->, transformation] (layout) -- (rdfglobal.west);
+      \draw<2-3>[->, transformation] (layout) -- (rdflocal.west);
+    \end{scope}
+
+    \begin{scope}
+      \coordinate<3->[right = 7em of princomp1.west] (aux1);
+      \node<3->[anchor = base west] (princomp1data)  at (aux1|-princomp1.base)  {$\{x_1,x_2,\ldots\ldots\}$};
+      \node<3->[anchor = base west] (princomp2data)  at (aux1|-princomp2.base)  {$\{x_1,x_2,\ldots\ldots\}$};
+      \node<3->[anchor = base west] (angulardata)    at (aux1|-angular.base)    {$\{x_1,x_2,\ldots\}$};
+      \node<3->[anchor = base west] (tensiondata)    at (aux1|-tension.base)    {$\{x_1,x_2,\ldots\}$};
+      \node<3->[anchor = base west] (edgelengthdata) at (aux1|-edgelength.base) {$\{x_1,x_2,\ldots\}$};
+      \node<3->[anchor = base west] (rdfglobaldata)  at (aux1|-rdfglobal.base)  {$\{x_1,x_2,\ldots\ldots\ldots\}$};
+      \node<3->[anchor = base west] (rdflocaldata)   at (aux1|-rdflocal.base)   {$\{x_1,x_2,\ldots\ldots\ldots\}(d)$};
+    \end{scope}
+
+    \begin{scope}
+      \coordinate<5->[right = 12em of princomp1data.west] (aux2);
+      \node<5->[anchor = base west] (princomp1feat)  at (aux2|-princomp1data.base)  {$(y_1,y_2,y_3,y_4,y_5,y_6)$};
+      \node<5->[anchor = base west] (princomp2feat)  at (aux2|-princomp2data.base)  {$(y_1,y_2,y_3,y_4,y_5,y_6)$};
+      \node<5->[anchor = base west] (angularfeat)    at (aux2|-angulardata.base)    {$(y_1,y_2,y_3,y_4)$};
+      \node<5->[anchor = base west] (tensionfeat)    at (aux2|-tensiondata.base)    {$(y_1,y_2,y_3,y_4)$};
+      \node<5->[anchor = base west] (edgelengthfeat) at (aux2|-edgelengthdata.base) {$(y_1,y_2,y_3)$};
+      \node<5->[anchor = base west] (rdfglobalfeat)  at (aux2|-rdfglobaldata.base)  {$(y_1,y_2,y_3,y_4)$};
+      \node<5->[anchor = base west] (rdflocalfeat)   at (aux2|-rdflocaldata.base)   {$(y_1,y_2,y_3)(d)$};
+    \end{scope}
+
+    \begin{scope}
+      \draw<5-6>[->, transformation] (princomp1data)  -- (princomp1feat);
+      \draw<5-6>[->, transformation] (princomp2data)  -- (princomp2feat);
+      \draw<5-6>[->, transformation] (angulardata)    -- (angularfeat);
+      \draw<5-6>[->, transformation] (edgelengthdata) -- (edgelengthfeat);
+      \draw<5-6>[->, transformation] (tensiondata)    -- (tensionfeat);
+      \draw<5-6>[->, transformation] (rdfglobaldata)  -- (rdfglobalfeat);
+      \draw<5-6>[->, transformation] (rdflocaldata)   -- (rdflocalfeat);
+    \end{scope}
+
+    \begin{scope}[overlay]
+      \coordinate<6->[right = 11em of princomp1feat.west] (aux3);
+      \node<6->[yshift = -1cm, align = center] (featvec) at (aux3|-rdflocal) {Feature\\Vector};
+      \draw<6>[dataflow, ->] (aux3) -- (featvec);
+      \draw<6>[dataflow] (princomp1feat)  -- (aux3|-princomp1feat);
+      \draw<6>[dataflow] (princomp2feat)  -- (aux3|-princomp2feat);
+      \draw<6>[dataflow] (angularfeat)    -- (aux3|-angularfeat);
+      \draw<6>[dataflow] (edgelengthfeat) -- (aux3|-edgelengthfeat);
+      \draw<6>[dataflow] (tensionfeat)    -- (aux3|-tensionfeat);
+      \draw<6>[dataflow] (rdfglobalfeat)  -- (aux3|-rdfglobalfeat);
+      \draw<6>[dataflow] (rdflocalfeat)   -- (aux3|-rdflocalfeat);
+    \end{scope}
+
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Statistical Syndromes of Graph Layouts}
+  \begin{itemize}
+    \item\enum{PRINVEC1} and \enum{PRINVEC2} --- first and second principal axis of vertex coordinates
+    \item\enum{PRINCOMP1} and \enum{PRINCOMP2} --- projections of vertex coordinates onto principal axes
+    \item\enum{ANGULAR} --- angles between incident edges
+    \item\enum{EDGE\_LENGTH} --- edge lengths
+    \item\enum{TENSION} -- ratios of Euclidean and graph-theoretical distances computed for all vertex pairs
+    \item\enum{RDF\_GLOBAL} --- pairwise distances between vertex coordinates
+    \item\(\menum{RDF\_LOCAL}(d)\) --- pairwise distances between vertex coordinates where the graph-theoretical
+      distance between them is bounded by $d\in\IntsN$
+  \end{itemize}
+  \par\vfill
+  \begin{tikzpicture}[remember picture, overlay]
+    \node<2>[smartbox, anchor = south, yshift = 1cm] at (current page.south) {%
+      \begin{tabular}{l@{\makebox[2em][c]{$=$}}l}
+        $\menum{RDF\_LOCAL}(\makebox[1em][c]{\ensuremath{1}})$      & \enum{EDGE\_LENGTH}\\[1ex]
+        $\menum{RDF\_LOCAL}(\makebox[1em][c]{\ensuremath{\infty}})$ & \enum{RDF\_GLOBAL}\\
+      \end{tabular}
+    };
+  \end{tikzpicture}
+\end{frame}
+
+\PropertyDemo[ANGULAR]{angular}{Angles Between Incident Edges}
+\PropertyDemo[RDF\_GLOBAL]{rdf-global}{Radial Distribution Function}
+
+\againframe<3->{innermethod}
+
+\begin{frame}
+  \frametitle{Feature Extraction}
+  We need to condense syndromes into a feature vector of fixed size.
+  \begin{itemize}
+  \item arithmetic mean
+  \item root mean squared (RMS)
+  \item entropy of distribution
+    \begin{itemize}
+    \item Problem: depends on data aggregation (histogram bin / filter width)
+    \item $\to$ Compute entropy for several histograms with different bin widths
+    \item $\to$ Perform linear regression
+    \item $\to$ Use regression parameters instead of entropy
+    \item For continuous filter, use Scott's Normal Reference Rule to fix filter width and compute differential entropy
+    \end{itemize}
+  \end{itemize}
+  \slidecite{Scott1979}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Siamese Neural Network}
+  \begin{center}
+    \newcommand*{\ScaleFactor}{0.9}%
+    \providecommand*{\SubfigLabelSM}{}%
+    \providecommand*{\SubfigLabelGM}{}%
+    \newcommand*{\PrimaryColor}{KITblue}%
+    \newcommand*{\SecondaryColor}{KITblue}%
+    \input{pics/discriminator.tex}
+  \end{center}
+  \slidecite{Bromley1994}
+\end{frame}
+
 \section{Evaluation}
+
+\subsection{Comparison With Competing Metrics}
+
+\begin{frame}
+  \frametitle{Comparison With Competing Metrics}
+  \InputCompetingMetrics{eval-competing-metrics.tex}
+  \par\vfill
+  \begin{itemize}
+  \item 10-fold Cross validation via random sub-sampling
+  \item \enum{STRESS} was compared for best scale
+  \item \enum{COMB} weights were fitted to training data set
+  \end{itemize}
+  \slidecite{Welch2017,Huang2013}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Comparison With Competing Metrics}
+  \ShowDemo\DiscriminatorDemo[%
+    discmod = \GetDiscriminatorResult{-}{d8c1498f}{4c326179}{234952e3}{discmod},
+    comb    = \GetDiscriminatorResult{+}{d8c1498f}{4c326179}{234952e3}{comb},
+    stress  = \GetDiscriminatorResult{+}{d8c1498f}{4c326179}{234952e3}{stress},
+  ]{pics/d8c1498f-4c326179-more.tikz}{pics/d8c1498f-234952e3-less.tikz}
+\end{frame}
+
+\subsection{Significance of Individual Syndromes}
+
+\begin{frame}
+  \frametitle{Significance of Individual Syndromes}
+  \begin{center}
+    \InputPunctureResult[eval-cross-valid.tex]{eval-puncture.tex}
+  \end{center}
+  \par\vfill
+  \begin{itemize}
+  \item Note that \enum{RDF\_LOCAL} refers to a whole set of syndromes.
+  \end{itemize}
+\end{frame}
+
 \section{Conclusion and Future Work}
 
-\nocite{MScThesis}
-\nocite{Arxiv}
-\nocite{GitHubRepo}
+\begin{frame}
+  \frametitle{Conclusion and Future Work}
+  \begin{itemize}
+  \item Automatic discrimination of layout's aesthetic value
+  \item Based on statistical syndromes
+  \item Inspired by Statistical Physics and Crystallography
+  \item Using machine learning techniques (neural network)
+  \item Accuracy usually outperforms competing metrics
+  \item \citeurl{GitHubRepo}
+  \end{itemize}
+  \par\bigskip
+  \begin{itemize}
+  \item Identification of necessary and sufficient syndromes
+  \item Optimization of the neural network
+  \item Validation against human-labeled data
+  \end{itemize}
+\end{frame}
 
-\section{\bibname}
-\begin{frame}[allowframebreaks]
+\section*{\bibname}
+
+\ResetBibliographyStyle
+\begin{frame}
   \frametitle{\bibname}
   \printbibliography
-  \par\bigskip
-  \emph{Please refer to the paper for a complete list of references.}
 \end{frame}
 
 \end{document}

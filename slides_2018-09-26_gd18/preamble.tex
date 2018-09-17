@@ -1,6 +1,5 @@
 % -*- coding:utf-8; mode:latex; -*-
 
-% Copyright (C) 2018 Karlsruhe Institute of Technology
 % Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
 %
 % Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
@@ -10,50 +9,347 @@
 
 \usetheme{KIT}
 
+\usepackage{ifluatex}
 \usepackage{fontspec}
 \usepackage{polyglossia}
 \usepackage{amsmath,amsfonts}
-%\usepackage{slidecite}
 \usepackage{csquotes}
-\usepackage{ifdraft}
 \usepackage{etoolbox}
 \usepackage{tabularx}
 \usepackage{booktabs}
+\usepackage{ragged2e}
 \usepackage{multicol}
 \usepackage{gnuplot-lua-tikz}
-\usetikzlibrary{positioning}
-\usepackage{libertine}
-\setmainlanguage{english}
+\usepackage[ttscale=0.85]{libertine}
 
 \usepackage[%
   backend = biber,
   citestyle = authoryear,
   bibstyle = chem-acs,
-  alldates = iso8601,
   giveninits = true,
 ]{biblatex}
 
-\usenavigationsymbols
-\setcounter{tocdepth}{2}
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations.pathmorphing}
+\usetikzlibrary{fit}
+\usetikzlibrary{matrix}
+\usetikzlibrary{positioning}
 
-\setbeamercolor*{bibliography entry author}{fg=KITblack}
-\setbeamercolor*{bibliography entry title}{fg=KITblack}
-\setbeamercolor*{bibliography entry journal}{fg=KITblack}
-\setbeamercolor*{bibliography entry note}{fg=KITblack}
+\setmainlanguage{english}
+
+\usenavigationsymbols
+\setbeamercovered{transparent}
+\setcounter{tocdepth}{1}
+
+\setbeamercolor*{bibliography entry author}{fg=KITgreen}
+\setbeamercolor*{bibliography entry title}{fg=KITgreen}
+\setbeamercolor*{bibliography entry journal}{fg=KITgreen}
+\setbeamercolor*{bibliography entry note}{fg=KITgreen}
+
+\newcommand*{\ResetBibliographyStyle}{%
+  \setbeamercolor*{bibliography entry author}{fg=black}
+  \setbeamercolor*{bibliography entry title}{fg=black}
+  \setbeamercolor*{bibliography entry journal}{fg=black}
+  \setbeamercolor*{bibliography entry note}{fg=black}
+  \setbeamertemplate{bibliography item}{\KIT@mark}
+  \renewcommand*{\bibfont}{\small}
+}
 
 \setbeamercolor{structure}{fg=KITgreen}
 %\setbeamercolor*{palette secondary}{fg=KITgreen}
 %\setbeamercolor*{palette tertiary}{fg=KITgreen}
 
-\AtBeginSection[]{%
-  \begin{frame}<beamer>
-    \frametitle{\contentsname}
-    \begin{multicols}{2}
-      \tableofcontents[currentsection,hideothersubsections]
-    \end{multicols}
+\AtBeginSection[\relax]{\frame{\frametitle{Agenda}\tableofcontents[currentsection]}}
+
+\setbeamerfont*{section in toc}{size=\large, series=\bfseries}
+\setbeamerfont*{section in toc shaded}{size=\large}
+\setbeamerfont*{subsection in toc}{size=\normalsize, series=\bfseries}
+\setbeamerfont*{subsection in toc shaded}{size=\normalsize}
+\setbeamerfont*{subsubsection in toc}{size=\small, series=\bfseries}
+\setbeamerfont*{subsubsection in toc shaded}{size=\small}
+
+\setbeamercolor*{section in toc}{fg=KITgreen}
+\setbeamercolor*{section in toc shaded}{}
+\setbeamercolor*{subsection in toc}{fg=KITgreen}
+\setbeamercolor*{subsection in toc shaded}{}
+\setbeamercolor*{subsubsection in toc}{fg=KITgreen}
+\setbeamercolor*{subsubsection in toc shaded}{}
+
+\setbeamertemplate{section in toc shaded}[default][100]
+\setbeamertemplate{subsection in toc shaded}[default][100]
+\setbeamertemplate{subsubsection in toc shaded}[default][100]
+
+\csundef{beamer@@tmpop@section in toc@KIT}
+\csundef{beamer@@tmpop@subsection in toc@KIT}
+\csundef{beamer@@tmpop@subsubsection in toc@KIT}
+
+\defbeamertemplate{section in toc}{KIT}{
+  \noindent\leavevmode\inserttocsection\par
+}
+\defbeamertemplate{subsection in toc}{KIT}{
+  \noindent\leavevmode\inserttocsubsection\par
+}
+\defbeamertemplate{subsubsection in toc}{KIT}{
+  \noindent\leavevmode\inserttocsubsubsection\par
+}
+
+\newcommand*{\slidecite}[1]{%
+  \newcommand*{\slide@cite}[1]{\noindent\color{red}\fullcite{##1}\par\smallskip}%
+  \begin{tikzpicture}[remember picture, overlay]%
+    \node[anchor = south west, xshift = 1em, yshift = 5ex] at (current page.south west) {%
+      \parbox{0.9\paperwidth}{%
+        \scriptsize\RaggedRight%
+        \forcsvlist\slide@cite{#1}%
+      }%
+    };%
+  \end{tikzpicture}%
+}
+
+\newcommand*{\textand}{\kern0.2em\textperiodcentered\kern0.2em}
+
+\newcommand*{\GraphE}{E}
+\newcommand*{\GraphGVE}{\Graph=(\GraphV,\GraphE)}
+\newcommand*{\GraphV}{V}
+\newcommand*{\Graph}{G}
+\newcommand*{\IntsN}{\mathbb{N}}
+\newcommand*{\Layout}{\Gamma}
+\newcommand*{\Reals}[1][]{\ifblank{#1}{\mathbb{R}}{\mathbb{R}_{#1}}}
+\newcommand*{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand*{\enum}[1]{\mbox{\texttt{#1}}}
+\newcommand*{\menum}[1]{\mbox{\text{\upshape\ttfamily#1}}}
+\newcommand*{\percent}{\,\%}
+\newcommand*{\vecnorm}[1]{\left\lVert#1\right\rVert}
+
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\length}{length}
+\DeclareMathOperator{\mean}{mean}
+\DeclareMathOperator{\stdev}{stdev}
+\DeclareMathOperator{\stress}{\menum{STRESS}}
+
+\renewcommand<>{\alert}[1]{{\only#2{\color{KITgreen}}{#1}}}
+
+\newcommand*{\InputTikzGraph@Normal}[3][]{\tikz[x=#2, y=-#2, #1]{\input{#3}}}
+
+\newcommand*{\InputTikzGraph@Dummy}[3][]{%
+  \urldef\inputtikzgraph@url\url{#3}%
+  \begin{tikzpicture}[x=#2, y=#2, #1]
+    \booltrue{tikzgraphpreamble}
+    \input{#3}
+    \begin{scope}[yscale=\aspectratio]
+      \draw[use as bounding box] (-0.5, -0.5) rectangle (0.5, 0.5);
+      \node[font=\tiny] at (0, 0) {\inputtikzgraph@url};
+    \end{scope}
+  \end{tikzpicture}
+}
+
+\let\InputTikzGraph\InputTikzGraph@Normal
+%\let\InputTikzGraph\InputTikzGraph@Dummy
+
+\newcommand*{\InputLuatikzPlot}[2][]{\input{#2}}
+
+\newcommand*{\PropertyDemo}[3][PROPERTY]{%
+  \begin{frame}
+    \frametitle{#3 (\enum{#1})}
+    \begin{tabular}{ccc}
+      \InputTikzGraph[graphcolor = KITpalegreen]{30mm}{pics/demograph-a.tikz}&
+      \InputTikzGraph[graphcolor = KITpalegreen]{30mm}{pics/demograph-b.tikz}&
+      \InputTikzGraph[graphcolor = KITblue]{30mm}{pics/demograph-c.tikz}\\[2ex]
+      % It would be too simple if Gnuplot could just /use/ our TeX color names ...
+      \InputLuatikzPlot{pics/#2-a.pgf}&
+      \InputLuatikzPlot{pics/#2-b.pgf}&
+      \InputLuatikzPlot{pics/#2-c.pgf}
+    \end{tabular}
   \end{frame}
 }
 
-\newcommand*{\percent}{\,\%}
+\newcommand*{\RandomThumbnailDemo}[2][x = 0.6\paperwidth, y = 0.3\paperheight]{%
+  \begin{center}
+    \begin{tikzpicture}[remember picture, overlay, #1]
+      \ifdef{\RandomSeed}{\pgfmathsetseed{\RandomSeed}}{}
+      \coordinate (origin) at (current page.center);
+      \begin{scope}[shift = (origin)]
+        \foreach \what in {#2} {
+          \node<+->[thumbnail] at ({0.5-rnd}, {0.5-rnd}) {%
+            \begin{tabular}{c}
+              \InputTikzGraph{0.25\textwidth}{pics/\what.tikz}\\[1ex]
+              \enum{\MakeUppercase{\what}}
+            \end{tabular}
+          };
+        }
+      \end{scope}
+    \end{tikzpicture}
+  \end{center}
+}
+
+% #1 ... expectation: (?) dunno, (-) negative, (+) positive
+% #2 ... 8-digit graph id (currently not used)
+% #3 ... 8-digit lhs layout id
+% #4 ... 8-digit rhs layout id
+% #5 ... discriminator (discmod, comb, stress)
+\newcommand*{\GetDiscriminatorResult}[5]{%
+  \ifcsvoid{msc@#3-#4@#5}{}{%
+    \msc@assert@result{#1}{\csuse{msc@#3-#4@#5}}{#5}{#3}{#4}%
+  }%
+  \csuse{msc@#3-#4@#5}%
+}
+
+\ifluatex
+  \newcommand*{\msc@assert@result}[5]{%
+    \directlua{%
+      signspec = "\luatexluaescapestring{#1}"
+      p = tonumber("\luatexluaescapestring{#2}")
+      discriminator = "\luatexluaescapestring{#3}"
+      lhsid = "\luatexluaescapestring{#4}"
+      rhsid = "\luatexluaescapestring{#5}"
+      doit = tonumber(kpse.var_value("MSC_TEX_ASSERT") or "0")
+      if doit then
+          formatstring = string.gsub(
+              "Checking assertion !s(!s, !s) !s 0 ...  !s (p = !+.3f !!)\@backslashchar n",
+              "[!]", "\@percentchar\@percentchar"
+          )
+          if signspec == "+" then
+              result = (p > 0) and "passed" or "failed"
+              texio.write_nl(string.format(formatstring, discriminator, lhsid, rhsid, ">", result, p))
+              if not (p > 0) then
+                  tex.error("assertion failed")
+              end
+          end
+          if signspec == "-" then
+              result = (p < 0) and "passed" or "failed"
+              texio.write_nl(string.format(formatstring, discriminator, lhsid, rhsid, "<", result, p))
+              if not (p < 0) then
+                  tex.error("assertion failed")
+              end
+          end
+      else
+          texio.write_nl("Assertions are not enables; set MSC_TEX_ASSERT=1 to enable\@backslashchar n")
+      end
+    }%
+  }
+\else
+  \newcommand*{\msc@assert@result}[5]{}
+\fi
+
+\newcommand*{\ShowDemoScale}{\let\democolor@scale\democolor@}
+\newcommand*{\ShowDemoResult}{\let\democolor@pin\democolor@}
+\newcommand*{\ShowDemo}{\ShowDemoScale\ShowDemoResult}
+
+\newcommand*{\democolor@}{KITred}
+\newcommand*{\democolor@scale}{white}
+\newcommand*{\democolor@pin}{white}
+
+\pgfkeys{
+  /msc/graphstudy/.cd,
+  comb/.estore in = \msc@graphstudy@comb,
+  discmod/.estore in = \msc@graphstudy@discmod,
+  stress/.estore in = \msc@graphstudy@stress,
+}
+
+\newcommand*{\DiscriminatorDemo}[3][]{%
+  \begin{center}
+    \pgfkeys{/msc/graphstudy/.cd, #1}
+    \begin{tikzpicture}[x = 0.01\paperwidth, y = 0.01\paperheight]
+      \begin{scope}[scale = 0.4]
+        \node at (-50, 0) {\InputTikzGraph{0.3\textwidth}{#2}};
+        \node at (+50, 0) {\InputTikzGraph{0.3\textwidth}{#3}};
+        \coordinate (atscale) at (0, -75);
+        \begin{scope}[shift = (atscale)]
+          \path[draw = \democolor@scale, thick, <->] (-110, 0) -- (+110, 0);
+          \path[draw = \democolor@scale, thick] (0, -3) -- (0, +3);
+          \node[text = \democolor@scale, font = \footnotesize, anchor = north, yshift = -0.5ex] at (-100, 0) {$-1$};
+          \node[text = \democolor@scale, font = \footnotesize, anchor = north, yshift = -0.5ex] at (   0, 0) {$0$};
+          \node[text = \democolor@scale, font = \footnotesize, anchor = north, yshift = -0.5ex] at (+100, 0) {$+1$};
+          \foreach \what in {comb, stress} {
+            \ifcsvoid{msc@graphstudy@\what}{}{%
+              \edef\msc@graphstudy@what{\csuse{msc@graphstudy@\what}}%
+              \path[draw = \democolor@pin] (\msc@graphstudy@what, 3pt) -- +(-2, +8) -- +(+2, +8) -- cycle;
+              \node[anchor = south, text = \democolor@pin, font = \scriptsize] at (\msc@graphstudy@what, 10) {%
+                \enum{\MakeUppercase{\what}}
+              };
+            }
+          }
+          \ifdefvoid{\msc@graphstudy@discmod}{}{%
+            \path[fill = \democolor@pin] (\msc@graphstudy@discmod, 3pt) -- +(-2, +8) -- +(+2, +8) -- cycle;
+          }
+        \end{scope}
+      \end{scope}
+    \end{tikzpicture}
+  \end{center}
+}
+
+\newcommand*{\FormatPercentageWithError}[3][2.5em]{%
+  \ifblank{#2}{}{\ensuremath{(\makebox[#1][r]{\ensuremath{#2}}\,\pm\makebox[2em][r]{\ensuremath{#3}}\,)\percent}}%
+}
+
+\newcommand*{\InputCompetingMetrics}[1]{%
+  \begingroup%
+  \newcommand*{\CompetingMetricResult}[5][\@undefined]{%
+    ##1 & \FormatPercentageWithError{##2}{##3} & \FormatPercentageWithError[2em]{##4}{##5}\\
+  }%
+  \begin{tabularx}{\linewidth}{Xr@{\qquad}r}%
+    \toprule%
+    \textit{Metric} & \textit{Success Rate} & \textit{Advantage}\\%
+    \midrule%
+    \input{#1}%
+    \bottomrule%
+  \end{tabularx}%
+  \endgroup%
+}
+
+\newcommand*{\InputPunctureResult}[2][\relax]{%
+  \begingroup%
+  \newcommand*{\PunctureResult}[5][\@undefined]{%
+    ##1 & \FormatPercentageWithError{##2}{##3} & \FormatPercentageWithError{##4}{##5}\\
+  }%
+  \input{#1}%
+  \begin{tabularx}{\linewidth}{Xr@{\qquad}r}%
+    \toprule%
+    \textit{Property} & \textit{Sole Exclusion} & \textit{Sole Inclusion}\\%
+    \midrule%
+    \input{#2}%
+    \midrule%
+    \PunctureResult[\textit{Baseline Using All Properties}]{\XValSuccessMean}{\XValSuccessStdev}{}{}%
+    \bottomrule%
+  \end{tabularx}%
+  \endgroup%
+}
+
+\newbool{tikzgraphpreamble}
+
+\newlength{\vertexsize}
+\setlength{\vertexsize}{2pt}
+
+\newcommand*{\graphcolor}{KITgreen}
+
+\pgfkeys{
+  /tikz/.cd,
+  graphcolor/.store in = \graphcolor,
+}
+
+\tikzset{%
+  vertex/.style = {
+    shape = circle,
+    fill = \graphcolor,
+    inner sep = 0pt,
+    minimum size = \vertexsize,
+  },
+  edge/.style = {
+    draw = \graphcolor,
+    thin,
+  },
+  smartbox/.style = {
+    fill = KITyellow!10,
+    draw = KITyellow,
+    inner sep = 1ex,
+    preaction = {draw, line width = 5pt, white},
+  },
+  thumbnail/.style = {
+    font = \small,
+    fill = white,
+    draw = gray,
+    inner sep = 1em,
+    preaction = { draw, line width = 2mm, white },
+  },
+}
 
 \makeatother
