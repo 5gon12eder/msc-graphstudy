@@ -41,9 +41,9 @@ foreach(layout ${example_layouts})
     add_custom_command(
         OUTPUT ${layout}.tikz
         COMMAND "${CMAKE_COMMAND}" -E env MSC_RANDOM_SEED= "${PROJECT_BINARY_DIR}/src/visualizations/picture"
-                --tikz -o "${layout}.tikz" "${CMAKE_CURRENT_SOURCE_DIR}/${layout}.xml.bz2"
+                --tikz -o "${layout}.tikz" "${PROJECT_SOURCE_DIR}/octets/${layout}.xml.bz2"
         VERBATIM
-        DEPENDS picture "${CMAKE_CURRENT_SOURCE_DIR}/${layout}.xml.bz2"
+        DEPENDS picture "${PROJECT_SOURCE_DIR}/octets/${layout}.xml.bz2"
     )
 endforeach(layout)
 
