@@ -43,6 +43,9 @@ arbitrary_column_width_okay_modes = frozenset([ 'bibtex', 'json', 'xml' ])
 # File name extensions for which we do not enforce line lengths to be within limits.
 arbitrary_column_width_okay_extensions = frozenset([ '.json' ])
 
+# Mapping of file modes to character(s) that "excuse" and overly long line (if they appear last on the line).
+overlong_line_excuses = { 'tex' : '%', 'latex' : '%', 'shell-script' : '#' }
+
 # Globbing expressions matching files which are known to be textual even if they don't say so.
 well_known_textual_files = [
     '*.txt',
@@ -124,11 +127,10 @@ def check_files(filenames, fix, verboseout, summaryout):
             bad_files += 1
             continue
         filetype = guess_file_mode(lines)
-        istex = determine_whether_this_is_a_tex_file(filetype, filename)
         kwargs = {
             'maxcols' : get_max_columns(filetype, filename),
-            'eolbs' : not (istex or filetype in [ 'markdown', 'text' ]),
-            'eolsuffix' : '%' if istex else '',
+            'eolbs' : filetype not in [ 'text', 'markdown', 'tex', 'latex', 'bibtex' ],
+            'eolsuffix' : overlong_line_excuses.get(filetype, ''),
             'maketabs' : filetype in [ 'makefile' ] or basename.lower() in [ 'makefile', 'gnumakefile' ],
             'xml' : { 'xml' : 'xml', 'html' : 'html' }.get(filetype),
         }
@@ -148,12 +150,6 @@ def get_max_columns(mode, filename):
     if filename is not None and any(filename.endswith(ext) for ext in arbitrary_column_width_okay_extensions):
         return None
     return line_width
-
-def determine_whether_this_is_a_tex_file(mode, filename):
-    if mode is not None:
-        return mode in { 'tex', 'latex', 'bibtex' }
-    if filename is not None:
-        return filename.endswith('.tex')
 
 def check_content(filename, lines, verboseout, maxcols=None, eolbs=True, eolsuffix='', maketabs=False, xml=None):
     ok = True
