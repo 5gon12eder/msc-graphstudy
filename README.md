@@ -10,11 +10,14 @@
 
 # Aesthetic Discrimination of Graph Layouts
 
-This package contains the all code for the master's thesis *Aesthetic Value of Graph Layouts: Investigation of
-Statistical Syndromes for Automatic Quantification* of Moritz Klammler and the subsequent paper *Aesthetic
-Discrimination of Graph Layouts* by Moritz Klammler, Tamara Mchedlidze and Alexey Pak.  It is self-contained to
-reproduce all experiments from scratch and even typeset the written thesis, presentation slides and conference paper
-automatically incorporating the most recent results.
+This package contains the all code for [Moritz Klammler's master's thesis](http://klammler.eu/msc/)
+*Aesthetic Value of Graph Layouts: Investigation of Statistical Syndromes for Automatic Quantification*
+and the subsequent paper *Aesthetic Discrimination of Graph Layouts* by
+[Moritz Klammler](https://www.researchgate.net/profile/Moritz_Klammler),
+[Tamara Mchedlidze](https://www.researchgate.net/profile/Tamara_Mchedlidze) and
+[Alexey Pak](https://www.researchgate.net/profile/Alexey_Pak).
+It is self-contained to reproduce all experiments from scratch and even typeset the written thesis, presentation slides
+and conference paper automatically incorporating the most recent results.
 
 ## Publications and Citation
 
