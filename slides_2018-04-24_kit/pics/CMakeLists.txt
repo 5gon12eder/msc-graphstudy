@@ -21,7 +21,7 @@ set(slides_kit_picfiles_static
     CACHE INTERNAL ""
 )
 
-set(auxlist CACHE INTERNAL "")
+set(auxlist)
 
 list(APPEND auxlist example-a.tikz example-b.tikz)
 add_custom_command(

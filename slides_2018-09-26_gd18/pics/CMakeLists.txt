@@ -16,7 +16,8 @@
 # <http://www.gnu.org/licenses/>.
 
 set(slides_gd18_picfiles_static CACHE INTERNAL "")
-set(auxlist CACHE INTERNAL "")
+
+set(auxlist)
 
 set(slides_gd18_picfiles_dynamic ${auxlist} CACHE INTERNAL "")
 set(slides_gd18_picfiles ${slides_gd18_picfiles_static} ${slides_gd18_picfiles_dynamic} CACHE INTERNAL "")

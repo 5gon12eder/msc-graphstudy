@@ -29,7 +29,7 @@ set(paper_picfiles_static
     CACHE INTERNAL ""
 )
 
-set(auxlist CACHE INTERNAL "")
+set(auxlist)
 
 set(example_layouts
     8314f2c1-4d644640-more 8314f2c1-bac12550-less

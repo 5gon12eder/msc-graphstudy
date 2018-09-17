@@ -35,7 +35,7 @@ set(report_picfiles_static
     CACHE INTERNAL ""
 )
 
-set(auxlist CACHE INTERNAL "")
+set(auxlist)
 
 list(APPEND auxlist romanesco.jpg)
 add_custom_command(
