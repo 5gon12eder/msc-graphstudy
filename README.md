@@ -103,16 +103,18 @@ comment at the top of each file aims to prescribe the situation of the individua
 Finally, the paper submitted to GD'18 and included in this repository was co-authored by Tamara Mchedlidze and Alexey
 Pak together with Moritz Klammler who collectively own the copyright of the prose files.
 
+<!-- Cross-Reference: ./COPYING_GPL3.txt: FILE -->
 Unless mentioned otherwise, all files in this repository are provided under the terms of the *GNU General Public
 License* as published by the *Free Software Foundation*, either version 3 of the license, or (at your option) any later
-version.  You can find the full text of the license in a file called `./COPYING_GPL3.txt` or `./LICENSE` as well as
-[online](https://www.gnu.org/licenses/gpl-3.0.html).
+version.  You can find the full text of the license in a file called [`./COPYING_GPL3.txt`](./COPYING_GPL3.txt) or
+`./LICENSE` as well as [online](https://www.gnu.org/licenses/gpl-3.0.html).
 
+<!-- Cross-Reference: ./COPYING_MIT.txt: FILE -->
 Some source files were added to this repository for convenience but not originally written for this project.  They are
 usually provided under a more flexible free software license known as the &ldquo;MIT&rdquo; or &ldquo;X11&rdquo;
 license.  If so, the comment at the top of the source file will mention that, including a full reproduction of the (very
-short) license text.  The text of this license can also be found in the file `./COPYING_MIT.txt` as well as
-[online](https://opensource.org/licenses/MIT).
+short) license text.  The text of this license can also be found in the file [`./COPYING_MIT.txt`](./COPYING_MIT.txt) as
+well as [online](https://opensource.org/licenses/MIT).
 
 A number of small auxiliary files is provided under an even less restrictive [&ldquo;all-permissive&rdquo;
 license](https://www.gnu.org/prep/maintain/html_node/License-Notices-for-Other-Files.html).  The files to which this
@@ -120,17 +122,18 @@ applies bear a comment at the top which says: &ldquo;Copying and distribution of
 modification, are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
 This file is offered as-is, without any warranty.&rdquo; This is exactly what it is.
 
+<!-- Cross-Reference: ./COPYING_CC4-BY-NC-ND.txt: FILE -->
 The *prose* files (but none of the functional code) in the `./report/`, `./paper/` and `./slides_*` directories are
 licensed under a *Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License* the text for which
-can be found in a file called `./COPYING_CC4-BY-NC-ND.txt` as well as
+can be found in a file called [`./COPYING_CC4-BY-NC-ND.txt`](./COPYING_CC4-BY-NC-ND.txt) as well as
 [online](https://creativecommons.org/licenses/by-nc-nd/4.0/).  The files to which this restrictive license applies all
 mention this in a comment at the top of the file.
 
 Finally, this `README` document is published under the terms of the *GNU Free Documentation License*, Version 1.3 or any
 later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no
-Back-Cover Texts.  A copy of the license is included in the section entitled &ldquo;GNU Free Documentation
-License&rdquo; and can also be found in a file called `/.COPYING_GFDL.txt` as well as
-[online](https://www.gnu.org/licenses/fdl-1.3.html).
+Back-Cover Texts.  A copy of the license is included in the section entitled
+&ldquo;[GNU Free Documentation License](#gnu-free-documentation-license)&rdquo; and can also be found in a file called
+[`/.COPYING_GFDL.txt`](/.COPYING_GFDL.txt) as well as [online](https://www.gnu.org/licenses/fdl-1.3.html).
 
 **Tip:** Running the script `./maintainer/copyright` with no arguments from the top-level source directory (of a Git
 clone) will print the license used for each file in the repository.
@@ -229,7 +232,8 @@ distribution was tested and is known to work.
 
 In order to typeset the slides, the KIT's *beamer* theme must be available.  KIT members can obtain it from the KIT's
 [intranet](https://intranet.kit.edu/praesentationen.php).  Unfortunately, this service is not available to the general
-public.  Please consult the section titled &ldquo;Typesetting Documents&rdquo; for a discussion of some workarounds.
+public.  Please consult the section titled &ldquo;[Typesetting Documents](#typesetting-documents)&rdquo; for a
+discussion of some workarounds.
 
 
 ## Downloading, Configuring, Building and Testing the Software
@@ -644,8 +648,10 @@ The following graph sizes are defined.  A graph with <var>n</var> vertices belon
  `LARGE`    |                      1,000 |                   100,000
  `HUGE`     |                    100,000 |                   &infin;
 
-The size classes are specified by the enumerator `GraphSizes` which is defined in the file `./driver/constants.py`.  In
-case of doubt, please refer to this definition and consider the information provided by the table above as outdated.
+<!-- Cross-Reference: ./driver/constants.py:236: "class GraphSizes(enum.IntEnum):" -->
+The size classes are specified by the enumerator `GraphSizes` which is defined in the file
+[`./driver/constants.py`](./driver/constants.py#L236).  In case of doubt, please refer to this definition and consider
+the information provided by the table above as outdated.
 
 The following graph generators are defined:
 
@@ -691,7 +697,9 @@ The following graph generators are defined:
    of random bodies of revolution
  - `TREE` &mdash; probabilistic algorithm creating random trees
 
-These constants are specified by the enumerator `Generators` which is defined in the file `./driver/constants.py`.
+<!-- Cross-Reference: ./driver/constants.py:205: "class Generators(enum.IntEnum):" -->
+These constants are specified by the enumerator `Generators` which is defined in the file
+[`./driver/constants.py`](./driver/constants.py#L205).
 
 **Download Cache:** Downloaded files can be *cached* locally in a directory specified by the environment variable
 `MSC_CACHE_DIR` or the the system's default temporary directory (`/tmp/` on POSIX) if said variable is not set.  If you
@@ -735,7 +743,9 @@ The following layout algorithms are defined:
  - `PHANTOM` &mdash; garbage layout algorithm using the coordinates of a force-directed layout computed for a random
    &ldquo;phantom&rdquo; graph (which has the same number of nodes and edges)
 
-These constants are specified by the enumerator `Layouts` which is defined in the file `./driver/constants.py`.
+<!-- Cross-Reference: ./driver/constants.py:314: "class Layouts(enum.IntEnum):" -->
+These constants are specified by the enumerator `Layouts` which is defined in the file
+[`./driver/constants.py`](./driver/constants.py#L314).
 
 #### Interpolated (`interpolation.cfg`) and Worsened (`worsening.cfg`) Layouts
 
@@ -756,7 +766,9 @@ The following layout interpolation algorithms are available:
  - `XLINEAR` &mdash; like `LINEAR` but tries to reduce paradox effects by aligning the principal exes of the two parent
    layouts beforehand
 
-These constants are specified by the enumerator `LayInter` which is defined in the file `./driver/constants.py`.
+<!-- Cross-Reference: ./driver/constants.py:337: "class LayInter(enum.IntEnum):" -->
+These constants are specified by the enumerator `LayInter` which is defined in the file
+[`./driver/constants.py`](./driver/constants.py#L337).
 
 The following layout worsening algorithms are available:
 
@@ -766,7 +778,9 @@ The following layout worsening algorithms are available:
    by Schaefer et al.
  - `PERTURB` &mdash; adds white noise to vertex coordinates
 
-These constants are specified by the enumerator `LayWorse` which is defined in the file `./driver/constants.py`.
+<!-- Cross-Reference: ./driver/constants.py:342: "class LayWorse(enum.IntEnum):" -->
+These constants are specified by the enumerator `LayWorse` which is defined in the file
+[`./driver/constants.py`](./driver/constants.py#L342).
 
 #### Properties (`properties-disc.cfg` and `properties-cont.cfg`) and Metrics (`metrics.cfg`)
 
@@ -790,7 +804,9 @@ The following properties are available:
  - `PRINCOMP2ND` &mdash; node coordinates along the second (minor) principal axis
  - `TENSION` &mdash; quotients of Euclidian distance in the layout and graph-theoretical distance between vertices
 
-These constants are specified by the enumerator `Properties` which is defined in the file `./driver/constants.py`.
+<!-- Cross-Reference: ./driver/constants.py:366: "class Properties(enum.IntEnum):" -->
+These constants are specified by the enumerator `Properties` which is defined in the file
+[`./driver/constants.py`](./driver/constants.py#L366).
 
 The following metrics are available:
 
@@ -804,7 +820,9 @@ The following metrics are available:
  - `ANGULAR_RESOLUTION` &mdash; minimal angle between any two edges incident to the same node
  - `EDGE_LENGTH_STDEV` &mdash; standard deviation of edge lengths
 
-These constants are specified by the enumerator `Metrics` which is defined in the file `./driver/constants.py`.
+<!-- Cross-Reference: ./driver/constants.py:398: "class Metrics(enum.IntEnum):" -->
+These constants are specified by the enumerator `Metrics` which is defined in the file
+[`./driver/constants.py`](./driver/constants.py#L398).
 
 Note that the `HUANG` discriminator cannot work unless the `CROSS_COUNT`, `CROSS_RESOLUTION`, `ANGULAR_RESOLUTION` and
 `EDGE_LENGTH_STDEV` metrics are available.
@@ -946,11 +964,13 @@ ignored.  You can, therefore, write
 
 which will be interpreted as if you had written `{ "foo" : 42 }` instead.
 
-To get an idea, you might want to have a look at the file `./driver/resources/imports.json` which provides the
-definitions for the well-known graph archives that are supported out-of-the-box.  The one but important difference to be
-aware of is that this file specifies archives as the values in a JSON object (with the key being the name of the
-well-known import source) while the configuration file you may write is supposed to contain the archive specifications
-as the elements of a JSON array (with no keys) instead.
+<!-- Cross-Reference: ./driver/resources/imports.json: FILE -->
+To get an idea, you might want to have a look at the file
+[`./driver/resources/imports.json`](./driver/resources/imports.json) which provides the definitions for the well-known
+graph archives that are supported out-of-the-box.  The one but important difference to be aware of is that this file
+specifies archives as the values in a JSON object (with the key being the name of the well-known import source) while
+the configuration file you may write is supposed to contain the archive specifications as the elements of a JSON array
+(with no keys) instead.
 
 ### Environment Variables
 
@@ -1021,8 +1041,8 @@ documents using LuaLaTex which is pretty darn slow.  Expect build times of sever
 
 **On-Demand Downloads:** The documents include some example graphs taken from public graph collections which will be
 downloaded on-demand when the documents are typeset.  Unless the files are already available from a local cache, access
-to the internet will be required.  See the section &ldquo;Automatic File Downloads&rdquo; for more information.  Some
-documents may require additional downloads (other than graphs) that will be mentioned below.
+to the internet will be required.  See the section &ldquo;[Automatic File Downloads](#automatic-file-downloads)&rdquo;
+for more information.  Some documents may require additional downloads (other than graphs) that will be mentioned below.
 
 **TeX'nical Troubleshooting:** If the environment variable `MSC_TEX_REPORT_HTML` is set (to an absolute file name), the
 `./utils/typeset.py` script will write a report (in HTML format) to that file which contains a nicely formatted
@@ -1181,10 +1201,10 @@ after it failed and in this case, you'll understand what effect the variable has
 
 Copyright (C) 2018 Moritz Klammler
 
+<!-- Cross-Reference: ./COPYING_GFDL.txt: FILE -->
 Permission is granted to copy, distribute and/or modify this document under the terms of the
-[*GNU Free Documentation License*](https://raw.githubusercontent.com/5gon12eder/msc-graphstudy/master/COPYING_GFDL.txt),
-Version 1.3 or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover
-Texts, and no Back-Cover Texts.
+[*GNU Free Documentation License*](./COPYING_GFDL.txt), Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 
 
 ## TODOs for this `README` Document
