@@ -428,16 +428,7 @@ add_custom_command(
     DEPENDS interpol inter-parent-a.xml inter-parent-b.xml
 )
 
-add_custom_command(
-    OUTPUT xlinear-00000.xml xlinear-02500.xml xlinear-07500.xml xlinear-10000.xml
-    COMMAND "${CMAKE_COMMAND}" -E env "MSC_RANDOM_SEED=5njaKlZeaMUV"
-            "${PROJECT_BINARY_DIR}/src/bitrans/interpol" -c -o "xlinear-%.xml" -r 0.00 -r 0.25 -r 0.75 -r 1.00
-            inter-parent-c.xml inter-parent-d.xml
-    VERBATIM
-    DEPENDS interpol inter-parent-c.xml inter-parent-d.xml
-)
-
-foreach(inter linear xlinear)
+foreach(inter linear)
     foreach(rate 00000 02500 07500 10000)
         list(APPEND auxlist ${inter}-${rate}.tikz)
         add_custom_command(
