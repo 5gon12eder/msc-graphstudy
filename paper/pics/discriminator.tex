@@ -6,8 +6,14 @@
 % Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
 % provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
 
+\providecommand{\ScaleFactor}{1}
+\providecommand*{\SubfigLabelSM}{(a)}
+\providecommand*{\SubfigLabelGM}{(b)}
+\providecommand{\PrimaryColor}{TangoSkyBlue3}
+\providecommand{\SecondaryColor}{TangoSkyBlue1}
 \begin{tikzpicture}
   [
+    scale = \ScaleFactor,
     layer/.style = {
       rectangle,
       draw,
@@ -19,7 +25,7 @@
     },
     dense/.style = {
       layer,
-      fill = TangoSkyBlue1!20,
+      fill = \SecondaryColor!20,
     },
     operator/.style = {
       circle,
@@ -28,16 +34,16 @@
       font = \scriptsize,
     },
     signal/.style = {
-      draw = TangoSkyBlue3,
+      draw = \PrimaryColor,
       thick,
       ->,
     },
     sigwd/.style = {
       font = \scriptsize,
-      text = TangoSkyBlue3,
+      text = \PrimaryColor,
     },
     sigwdmark/.style = {
-      draw = TangoSkyBlue3,
+      draw = \PrimaryColor,
       very thin,
     },
     node distance = 5mm,
@@ -122,7 +128,7 @@
 
   \end{scope}
 
-  \node at (smlabel|-label) {(a)};
-  \node at (gmlabel|-label) {(b)};
+  \node at (smlabel|-label) {\SubfigLabelSM};
+  \node at (gmlabel|-label) {\SubfigLabelGM};
 
 \end{tikzpicture}
