@@ -39,6 +39,15 @@ biber_tool_options=(
     --strip-comments
 )
 
+find_symlinks_cmd=(
+    find .
+    -regextype posix-extended
+    -regex '^[.]/(\.git|build|build-[[:alnum:]._-]+|my-[[:alnum:]._-]+)/?$' -prune
+    -or
+    -type l
+    -print
+)
+
 filelist=()
 cmakefiles=()
 bibtexfiles=()
@@ -119,6 +128,8 @@ function perform_all_checks {
     status=0
     printf_checking "Checking whether you're mentioned in the AUTHORS file"
     check_authors_file AUTHORS || status=1
+    printf_checking "Checking symbolic links"
+    check_symlinks || status=1
     printf_checking "Checking cross-references in the README document"
     check_readme_crossrefs README.md || status=1
     printf_checking "Checking copyright notices in %d files" ${#filelist[@]}
@@ -140,6 +151,25 @@ function check_authors_file {
     expected="$(printf '"%s" <%s>' "${user_name}" "${user_email}")"
     [ -r "$1" ] || notgood "$1: File is not readable"
     sed -e 's;#.*;;g' "$1" | grep -q -F "${expected}" || notgood "$1: Please add yourself: ${expected}"
+}
+
+function check_symlinks {
+    local status symlinks file target
+    [ $# -eq 0 ] || fatal "check_symlinks: Wrong number of arguments (this is a bug)"
+    status=0
+    is_version_controlled '.msc-graphstudy' || fatal "Git reports questionable information"
+    mapfile -t symlinks < <("${find_symlinks_cmd[@]}")
+    for file in "${symlinks[@]}"
+    do
+        is_version_controlled "${file}" || continue
+        target="$(readlink -e "${file}")"                                                                               \
+            || notgood "${file}: Broken symbolic link"                                                                  \
+            || { status=1; continue; }
+        is_version_controlled "${target}"                                                                               \
+            || notgood "${file}: Target of symlink not under version control: ${target}"                                \
+            || { status=1; continue; }
+    done
+    return ${status}
 }
 
 function check_bibtex_files {
@@ -290,6 +320,10 @@ function printf_checking {
 
 function is_regular_file {
     [ -f "$1" ] && [ ! -L "$1" ]
+}
+
+function is_version_controlled {
+    git ls-files --error-unmatch -- "$@" 1>/dev/null 2>/dev/null
 }
 
 handle_cmd_args "$@"
