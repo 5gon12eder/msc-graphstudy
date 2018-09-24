@@ -1,0 +1,14 @@
+// -*- coding:utf-8; mode:javascript; -*-
+
+// Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+//
+// Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+// provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+{
+    "type"        : "DIR",
+    "format"      : "graphml",
+    "compression" : "bzip2",
+    "directory"   : "${MSC_SOURCE_DIR}/octets/",
+    "pattern"     : "*.xml.bz2"
+}
