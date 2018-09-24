@@ -32,9 +32,9 @@ set(paper_picfiles_static
 set(auxlist)
 
 set(example_layouts
-    8314f2c1-4d644640-more 8314f2c1-bac12550-less
-    d8c1498f-8c5ad49b-more d8c1498f-4c2beafc-less
-    5b3b66d2-49e8882a-more 5b3b66d2-f60fcc04-less
+    8314f2c1-0b878c80-more 8314f2c1-c7b63d0b-less
+    d8c1498f-4c326179-more d8c1498f-234952e3-less
+    5b3b66d2-a07125fe-more 5b3b66d2-101708ec-less
 )
 foreach(layout ${example_layouts})
     list(APPEND auxlist ${layout}.tikz)
