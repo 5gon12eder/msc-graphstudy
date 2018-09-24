@@ -9,7 +9,7 @@
 {
     "type"      : "DIR",
     "format"    : "GraphML",
-    "directory" : "${PROJECT_SOURCE_DIR}/test/data/",
+    "directory" : "${MSC_SOURCE_DIR}/test/data/",
     "pattern"   : "*-graph.xml",
     "layout"    : false
 }

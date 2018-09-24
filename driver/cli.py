@@ -117,9 +117,10 @@ class AbstractMain(object):
         del ns._loglevel
         del ns._verbose
         del ns._quiet
-        ns.configdir = os.path.abspath(ns.configdir)
-        ns.bindir = os.path.abspath(ns.bindir)
-        ns.datadir = os.path.abspath(ns.datadir)
+        ns.srcdir    = os.environ['MSC_SOURCE_DIR'] = os.getcwd()
+        ns.bindir    = os.environ['MSC_BINARY_DIR'] = os.path.abspath(ns.bindir)
+        ns.configdir = os.environ['MSC_CONFIG_DIR'] = os.path.abspath(ns.configdir)
+        ns.datadir   = os.environ['MSC_DATA_DIR']   = os.path.abspath(ns.datadir)
         self._argparse_hook_after(ns)
         self.__name_space = ns
         self.__argument_parser = None

@@ -42,10 +42,7 @@ add_test(
 add_test(
     NAME systest-driver-all
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    COMMAND "${CMAKE_COMMAND}" -E env
-            "PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
-            "PROJECT_BINARY_DIR=${PROJECT_BINARY_DIR}"
-            "${Python3_EXECUTABLE}" -m driver.deploy
+    COMMAND "${Python3_EXECUTABLE}" -m driver.deploy
             "--configdir=${PROJECT_SOURCE_DIR}/test/config/"
             "--datadir=${PROJECT_BINARY_DIR}/_systest/output/"
             "--bindir=${PROJECT_BINARY_DIR}/"
@@ -68,10 +65,7 @@ add_test(
 add_test(
     NAME systest-driver-integrity-1st
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    COMMAND "${CMAKE_COMMAND}" -E env
-            "PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
-            "PROJECT_BINARY_DIR=${PROJECT_BINARY_DIR}"
-            "${Python3_EXECUTABLE}" -m driver.integrity
+    COMMAND "${Python3_EXECUTABLE}" -m driver.integrity
             "--configdir=${PROJECT_SOURCE_DIR}/test/config/"
             "--datadir=${PROJECT_BINARY_DIR}/_systest/output/"
             "--bindir=${PROJECT_BINARY_DIR}/"
@@ -81,10 +75,7 @@ add_test(
 add_test(
     NAME systest-driver-integrity-2nd
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    COMMAND "${CMAKE_COMMAND}" -E env
-            "PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
-            "PROJECT_BINARY_DIR=${PROJECT_BINARY_DIR}"
-            "${Python3_EXECUTABLE}" -m driver.integrity
+    COMMAND "${Python3_EXECUTABLE}" -m driver.integrity
             "--configdir=${PROJECT_SOURCE_DIR}/test/config/"
             "--datadir=${PROJECT_BINARY_DIR}/_systest/output/"
             "--bindir=${PROJECT_BINARY_DIR}/"
@@ -101,10 +92,7 @@ add_test(
 add_test(
     NAME systest-driver-cleanup
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    COMMAND "${CMAKE_COMMAND}" -E env
-            "PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
-            "PROJECT_BINARY_DIR=${PROJECT_BINARY_DIR}"
-            "${Python3_EXECUTABLE}" -m driver.deploy
+    COMMAND "${Python3_EXECUTABLE}" -m driver.deploy
             "--configdir=${PROJECT_SOURCE_DIR}/test/data/config/"
             "--datadir=${PROJECT_BINARY_DIR}/_systest/output/"
             "--bindir=${PROJECT_BINARY_DIR}"
