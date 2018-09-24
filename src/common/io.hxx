@@ -139,6 +139,26 @@ namespace msc
 
     /**
      * @brief
+     *     Loads a layout from a file in the specified format if present; otherwise just the graph.
+     *
+     * @param src
+     *     file to read from
+     *
+     * @param format
+     *     layout file format
+     *
+     * @returns
+     *     a pair with the graph and layout (the latter may be null)
+     *
+     * @throws std::exception
+     *     if no layout or graph can be read from the given file
+     *
+     */
+    std::pair<std::unique_ptr<ogdf::Graph>, std::unique_ptr<ogdf::GraphAttributes>>
+    import_layout_or_graph(const input_file& src, fileformats format);
+
+    /**
+     * @brief
      *     Stores a graph in a file using the default format.
      *
      * @param graph

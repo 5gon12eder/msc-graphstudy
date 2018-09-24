@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -39,6 +40,7 @@
 #include "meta.hxx"
 #include "normalizer.hxx"
 #include "ogdf_fix.hxx"
+#include "useful.hxx"
 
 #define PROGRAM_NAME "import"
 
@@ -94,9 +96,10 @@ namespace /*anonymous*/
     {
         msc::input_file input{"-"};
         msc::output_file output{"-"};
+        msc::output_file output_layout{};
         msc::output_file meta{};
         msc::fileformats format{};
-        bool layout{};
+        std::optional<bool> layout{};
         bool simplify{};
     };
 
@@ -110,7 +113,6 @@ namespace /*anonymous*/
     {
         auto info = msc::json_object{};
         info["graph"] = msc::graph_fingerprint(graph);
-        info["native"] = msc::json_bool{false};
         info["nodes"] = msc::json_diff{graph.numberOfNodes()};
         info["edges"] = msc::json_diff{graph.numberOfEdges()};
         info["filename"] = msc::make_json(dst.filename());
@@ -118,29 +120,58 @@ namespace /*anonymous*/
         return info;
     }
 
-    msc::json_object get_info(const ogdf::GraphAttributes& attrs, const msc::output_file& dst)
+    msc::json_object get_info(const ogdf::GraphAttributes& attrs,
+                              const msc::output_file& output,
+                              const msc::output_file& output_layout)
     {
         const auto bbox = msc::get_bounding_box_size(attrs);
-        auto info = get_info(attrs.constGraph(), dst);
-        info["native"] = msc::json_bool{true};
+        auto info = get_info(attrs.constGraph(), output);
+        if (output_layout.terminal() != msc::terminals::null) {
+            info["filename-layout"] = msc::make_json(output_layout.filename());
+        }
         info["layout"] = msc::layout_fingerprint(attrs);
         info["width"] = msc::json_real{bbox.x()};
         info["height"] = msc::json_real{bbox.y()};
         return info;
     }
 
+    void store_graph_and_layout(const ogdf::GraphAttributes& attrs,
+                                const msc::output_file output,
+                                const msc::output_file output_layout)
+    {
+        if (output_layout.terminal() == msc::terminals::null) {
+            msc::store_layout(attrs, output);
+        } else {
+            msc::store_graph(attrs.constGraph(), output);
+            msc::store_layout(attrs, output_layout);
+        }
+    }
+
     void application::operator()() const
     {
-        if (this->parameters.layout) {
+        if (!this->parameters.layout.has_value() && !this->parameters.simplify) {
+            const auto [graph, attrs] = msc::import_layout_or_graph(this->parameters.input, this->parameters.format);
+            check_graph(*graph);
+            if (attrs) {
+                msc::normalize_layout(*attrs);
+                store_graph_and_layout(*attrs, this->parameters.output, this->parameters.output_layout);
+                const auto info = get_info(*attrs, this->parameters.output, this->parameters.output_layout);
+                msc::print_meta(info, this->parameters.meta);
+            } else {
+                msc::store_graph(*graph, this->parameters.output);
+                msc::print_meta(get_info(*graph, this->parameters.output), this->parameters.meta);
+            }
+        } else if (this->parameters.layout.value_or(false) == true) {
             if (this->parameters.simplify) {
-                throw std::invalid_argument{"Simplification is only supported for graphs with no layout"};
+                throw std::invalid_argument{"Only graphs with no layout can be simplified"};
             }
             const auto [graph, attrs] = msc::import_layout(this->parameters.input, this->parameters.format);
             check_graph(*graph);
             msc::normalize_layout(*attrs);
-            msc::store_layout(*attrs, this->parameters.output);
-            msc::print_meta(get_info(*attrs, this->parameters.output), this->parameters.meta);
-        } else {
+            store_graph_and_layout(*attrs, this->parameters.output, this->parameters.output_layout);
+            const auto info = get_info(*attrs, this->parameters.output, this->parameters.output_layout);
+            msc::print_meta(info, this->parameters.meta);
+        } else if (this->parameters.layout.value_or(false) == false) {
             auto graph = msc::import_graph(this->parameters.input, this->parameters.format);
             if (this->parameters.simplify) {
                 graph = simplify_graph(*graph);
@@ -149,6 +180,8 @@ namespace /*anonymous*/
             }
             msc::store_graph(*graph, this->parameters.output);
             msc::print_meta(get_info(*graph, this->parameters.output), this->parameters.meta);
+        } else {
+            MSC_NOT_REACHED();
         }
     }
 

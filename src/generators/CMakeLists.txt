@@ -20,7 +20,9 @@ target_link_libraries(import PRIVATE common ogdf ${Boost_PROGRAM_OPTIONS_LIBRARI
 add_test(NAME clitest-import-1st COMMAND ./import --help)
 add_test(NAME clitest-import-2nd COMMAND ./import --version)
 add_test(NAME clitest-import-3rd COMMAND ./import -o STDIO -f GraphML -m STDIO "${TEST_GRAPH_FILE}")
-add_test(NAME clitest-import-4rd COMMAND ./import -o STDIO -f GraphML -m STDIO -l "${TEST_LAYOUT_FILE}")
+add_test(NAME clitest-import-4th COMMAND ./import -o STDIO -f GraphML -m STDIO "${TEST_LAYOUT_FILE}")
+add_test(NAME clitest-import-5th COMMAND ./import -o STDIO -f GraphML -m STDIO --layout=0 "${TEST_LAYOUT_FILE}")
+add_test(NAME clitest-import-6th COMMAND ./import -o STDIO -f GraphML -m STDIO --layout=1 "${TEST_LAYOUT_FILE}")
 
 add_executable(lindenmayer lindenmayer.cxx)
 target_link_libraries(lindenmayer PRIVATE common ogdf ${Boost_PROGRAM_OPTIONS_LIBRARIES})

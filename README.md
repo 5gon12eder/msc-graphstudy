@@ -585,6 +585,9 @@ The following driver modules are available:
  - `integrity` &mdash; checks integrity of the database and can try to fix them
  - `model` &mdash; allows access to internals useful for preparing documents
 
+**Warning:** The `integrity` module is not very well tested and might have fatal bugs.  Be sure to have a backup of your
+(already corrupted) data before you screw it completely.
+
 ### Invocation
 
 As everything in this project, the driver modules all support a `--help` option which will cause them to print a short
@@ -871,8 +874,8 @@ attributes mentioned as nested items.  Items with no default value mentioned are
       directory
     - `recursive` (boolean, default: `false`) &mdash; selects whether or not the directory shall be scanned recursively
       for graph files to import
-    - `layout` (boolean, default: `false`) &mdash; specifies whether or not the graph files have an associated native
-      layout
+    - `layout` (boolean, default: `null`) &mdash; specifies whether or not the graph files have an associated native
+      layout<sup><i>e</i></sup>
     - `simplify` (boolean, default: `false`) &mdash; specifies whether or not to &ldquo;simplify&rdquo; the imported
       graphs by pruning multiple edges, loops and making the graph undirected
 
@@ -891,8 +894,8 @@ attributes mentioned as nested items.  Items with no default value mentioned are
       checksum
     - `pattern` (string, default: `*`) &mdash; specifies a POSIX globbing expression by which to select files in the
       directory
-    - `layout` (boolean, default: `false`) &mdash; specifies whether or not the graph files have an associated native
-      layout
+    - `layout` (boolean, default: `null`) &mdash; specifies whether or not the graph files have an associated native
+      layout<sup><i>e</i></sup>
     - `simplify` (boolean, default: `false`) &mdash; specifies whether or not to &ldquo;simplify&rdquo; the imported
       graphs by pruning multiple edges, loops and making the graph undirected
 
@@ -903,8 +906,8 @@ attributes mentioned as nested items.  Items with no default value mentioned are
     - `format` (string<sup><i>d</i></sup>) &mdash; specifies the file format used by the archive
     - `compression` (string<sup><i>c</i></sup>, default: `NONE`) &mdash; specifies the compression (if any) applied to
       the files in the archive
-    - `layout` (boolean, default: `false`) &mdash; specifies whether or not the graph files have an associated native
-      layout
+    - `layout` (boolean, default: `null`) &mdash; specifies whether or not the graph files have an associated native
+      layout<sup><i>e</i></sup>
     - `simplify` (boolean, default: `false`) &mdash; specifies whether or not to &ldquo;simplify&rdquo; the imported
       graphs by pruning multiple edges, loops and making the graph undirected
     - `name` (string<sup><i>b</i></sup>, default: `www`) &mdash; specifies an informal name for the archive and should
@@ -955,6 +958,15 @@ available.  Please also refer to the reference documentation of the
  - [`STP`](http://steinlib.zib.de/format.php) &mdash; SteinLib STP Data Format
  - [`TLP`](http://tulip.labri.fr/TulipDrupal/?q=tlp-file-format) &mdash; Tulip software graph format
  - [`YGRAPH`](http://www3.cs.stonybrook.edu/~algorith/implement/nauty/distrib/makebg.c)
+
+<sup><i>e)</i></sup>&nbsp;If `layout` is set to `true` then all graphs must have an associated layout which will be
+treated as the native layout for the respective graph.  If the archive contains multiple versions of the same graph, all
+but one will be discarded.  If `layout` is set to `false`, only the graph data will be imported even if layout data
+would be available.  Duplicate graphs will be discarded.  If `layout` is set to the special value `null` (which is the
+default) then graphs are assumed to have no native layout but if a graph happens to have associated layout information,
+it will be imported and (later) treated as an unclassified layout.  (Such layouts will not be used for training or
+testing and have no implicit quality assigned.)  In this case, if the archive contains multiple versions of the same
+graph, all layouts (if any) will be imported.
 
 Unlike vanilla JSON, the format used for the `imports.json` file allows you to use simple comments introduced by two
 consecutive forward-slashes as the first non-white-space characters on a line and will cause the entire line to be

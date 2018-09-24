@@ -422,10 +422,10 @@ add_custom_command(
            pathological-xlinear-10000.tikz
     # We process the inputs through 'import' because the hand-written GraphML files are not normalized.
     COMMAND "${CMAKE_COMMAND}" -E env MSC_RANDOM_SEED=
-            "${PROJECT_BINARY_DIR}/src/generators/import" -f graphml -l -o pathological-xlinear-aa.xml
+            "${PROJECT_BINARY_DIR}/src/generators/import" -f graphml -l 1 -o pathological-xlinear-aa.xml
             "${CMAKE_CURRENT_SOURCE_DIR}/pathological-xlinear-a.xml"
     COMMAND "${CMAKE_COMMAND}" -E env MSC_RANDOM_SEED=
-            "${PROJECT_BINARY_DIR}/src/generators/import" -f graphml -l -o pathological-xlinear-bb.xml
+            "${PROJECT_BINARY_DIR}/src/generators/import" -f graphml -l 1 -o pathological-xlinear-bb.xml
             "${CMAKE_CURRENT_SOURCE_DIR}/pathological-xlinear-b.xml"
     COMMAND "${CMAKE_COMMAND}" -E env MSC_RANDOM_SEED=
             "${PROJECT_BINARY_DIR}/src/bitrans/interpol" -c -o "pathological-xlinear-%.xml"

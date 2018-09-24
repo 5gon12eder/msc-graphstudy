@@ -270,6 +270,18 @@ namespace msc
         return result;
     }
 
+    std::pair<std::unique_ptr<ogdf::Graph>, std::unique_ptr<ogdf::GraphAttributes>>
+    import_layout_or_graph(const input_file& src, const fileformats form)
+    {
+        auto stream = boost::iostreams::filtering_istream{};
+        const auto name = prepare_stream(stream, src);
+        auto result = read_layout_from_stream(stream, form, name);
+        if (is_degenerated_layout(*result.second)) {
+            result.second.reset();
+        }
+        return result;
+    }
+
     void export_graph(const ogdf::Graph& graph, const output_file& dst, const fileformats form)
     {
         auto stream = boost::iostreams::filtering_ostream{};

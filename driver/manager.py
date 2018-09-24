@@ -396,21 +396,24 @@ class Manager(object):
         with self.sql_ctx as curs:
             return self.idmatch_curs(curs, *args, **kwargs)
 
-    def idmatch_curs(self, curs, table, prefix, minlength=None, exception=ValueError):
+    def idmatch_curs(self, curs, table, prefix, fingerprint=False, minlength=None, exception=ValueError):
         assert table in [ 'Graphs', 'Layouts' ]
+        assert not fingerprint or table == 'Layouts'
+        (column, what) = ('fingerprint', "fingerprint") if fingerprint else ('id', "ID")
         prefix = prefix.strip()
         if not prefix:
-            raise exception("The empty string is not an unambiguous prefix for an ID")
+            raise exception("The empty string is not an unambiguous prefix for an {:s}".format(what))
         if any(c not in string.hexdigits for c in prefix):
-            raise exception("The string {!r} cannot possibly be a prefix of any ID".format(prefix))
+            raise exception("The string {!r} cannot possibly be a prefix of any {:s}".format(prefix, what))
         if minlength is not None and len(prefix) < minlength:
             raise exception("Prefix {!s} is shorter than {:d} bytes".format(prefix, minlength))
         parameters = singleton(prefix.upper() + '%')
-        rows = self.sql_exec_curs(curs, "SELECT `id` FROM `{:s}` WHERE hex(`id`) LIKE ?".format(table), parameters)
+        query = "SELECT `id` FROM `{tab:s}` WHERE hex(`{col:s}`) LIKE ?".format(tab=table, col=column)
+        rows = self.sql_exec_curs(curs, query, parameters)
         if not rows:
-            raise exception("Prefix {!s} does not match any ID".format(prefix))
+            raise exception("Prefix {!s} does not match any {:s}".format(prefix, what))
         if len(rows) > 1:
-            raise exception("Prefix {!s} is ambiguous (matches {:d} IDs)".format(prefix, len(rows)))
+            raise exception("Prefix {!s} is ambiguous (matches {:d} {:s}s)".format(prefix, len(rows), what))
         return get_one(get_one(rows))
 
     def __record_exec_time(self, program, time):

@@ -124,6 +124,14 @@ namespace msc
      *     <td>optional</td>
      *   </tr>
      *   <tr>
+     *     <td></td>
+     *     <td>`--output-layout`</td>
+     *     <td>`output_layout`</td>
+     *     <td>`output_file`</td>
+     *     <td></td>
+     *     <td>optional</td>
+     *   </tr>
+     *   <tr>
      *     <td>`-m`</td>
      *     <td>`--meta`</td>
      *     <td>`meta`</td>
@@ -154,6 +162,14 @@ namespace msc
      *     <td>`bool`</td>
      *     <td>`false`</td>
      *     <td>boolean flag</td>
+     *   </tr>
+     *   <tr>
+     *     <td>`-l`</td>
+     *     <td>`--layout`</td>
+     *     <td>`layout`</td>
+     *     <td>`std::optional&lt;bool&gt;`</td>
+     *     <td>`std::nullopt`</td>
+     *     <td>tristate flag</td>
      *   </tr>
      *   <tr>
      *     <td>`-y`</td>

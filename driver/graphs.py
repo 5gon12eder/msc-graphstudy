@@ -115,8 +115,10 @@ def do_graphs(mngr : Manager, badlog : BadLog):
         worklist[gen].request(size, num)
     for (gen, bl) in worklist.items():
         _update_bucket_list(mngr, gen, bl)
-    for (gen, bl) in filter(lambda kv : kv[1], worklist.items()):
-        _generate_graphs(mngr, gen, bl, mngr.config.import_sources)
+    # Make sure that IMPORT graphs are the first (so the user has the last word).
+    for pred in [ (lambda g : g is Generators.IMPORT), (lambda g : g is not Generators.IMPORT) ]:
+        for (gen, bl) in filter(lambda kv : pred(kv[0]) and kv[1], worklist.items()):
+            _generate_graphs(mngr, gen, bl, mngr.config.import_sources)
 
 def _update_bucket_list(mngr : Manager, gen : Generators, bl : _BucketList):
     quick = _quick_archive_import_eh()
@@ -183,8 +185,10 @@ def _gen_generic(mngr : Manager, gen : Generators, bl : _BucketList):
                         "Asked {:s} for a {:s} graph but got a {:s} one which I'll have to discard".format(
                             gen.name, size.name, actualsize.name))
                     continue
-            if _insert_graph(mngr, gen, meta, tempdir=tempdir):
+            if _insert_graph(mngr, gen, meta):
                 bl.decrement(actualsize)
+            if meta.get('layout'):
+                _insert_layout(mngr, meta, native=True)
 
 def _call_generic_tool(mngr : Manager, gen : Generators, size : GraphSizes, tempdir : str):
     executable = os.path.join(mngr.abs_bindir, 'src', 'generators',  _GEN_PROGS[gen])
@@ -205,8 +209,14 @@ def _gen_import(mngr : Manager, gen : Generators, src : ImportSource, bl : _Buck
             '--output={:s}'.format(os.path.join(tempdir, enum_to_json(gen) + GRAPH_FILE_SUFFIX)),
             '--meta={:s}'.format('STDIO'),
         ]
-        if src.layout: cmd.append('--layout')
-        if src.simplify: cmd.append('--simplify')
+        if src.layout is not None:
+            cmd.append('--layout={:d}'.format(int(src.layout)))
+        else:
+            cmd.append('--output-layout={:s}'.format(os.path.join(tempdir, 'layout' + GRAPH_FILE_SUFFIX)))
+        if src.simplify:
+            cmd.append('--simplify')
+        native = src.layout is True
+        poisoned = src.layout is None
         cmd.append('STDIO' if src.compression is None else 'STDIO:' + src.compression)  # Let me open that file for you
         archlen = len(archive)  # This is a potentially expensive operation so do it only once
         count = 0
@@ -228,17 +238,19 @@ def _gen_import(mngr : Manager, gen : Generators, src : ImportSource, bl : _Buck
             if not bl.offer(actualsize):
                 logging.notice("Discarding {:s} {:s} graph (not wanted)".format(actualsize.name, gen.name))
                 continue
-            if _insert_graph(mngr, gen, meta, tempdir=tempdir):
+            if _insert_graph(mngr, gen, meta, native=native, poisoned=poisoned):
                 bl.decrement(actualsize)
                 count += 1
+            if meta.get('layout'):
+                _insert_layout(mngr, meta, native=native)
         logging.info("[{:6.2f} %] Imported {:d} {:s} graphs from {!r}".format(100.0, count, gen.name, archive.name))
         for (size, diff) in bl.items():
             logging.warning("{:s} archive exhausted but {:d} {:s} graphs are still missing".format(
                 gen.name, diff, size.name))
 
-def _insert_graph(mngr : Manager, gen : Generators, meta : dict, tempdir : str):
+def _insert_graph(mngr : Manager, gen : Generators, meta : dict, native : bool = False, poisoned : bool = False):
+    assert not (native and poisoned)
     graphid = Id(meta['graph'])
-    native = bool(meta.get('native', False))
     filename = mngr.make_graph_filename(graphid, generator=gen)
     with mngr.sql_ctx as curs:
         if mngr.sql_select_curs(curs, 'Graphs', id=graphid):
@@ -247,12 +259,40 @@ def _insert_graph(mngr : Manager, gen : Generators, meta : dict, tempdir : str):
         mngr.sql_insert_curs(
             curs, 'Graphs',
             id=graphid, generator=gen, file=filename, nodes=meta['nodes'], edges=meta['edges'],
-            native=native, seed=encoded(meta.get('seed')), fingerprint=prepare_fingerprint(meta.get('layout')),
+            native=native, poisoned=poisoned, seed=encoded(meta.get('seed')),
         )
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    logging.debug("Renaming graph file {!r} to {!r}".format(meta['filename'], filename))
-    os.rename(meta['filename'], filename)
-    return True
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        logging.debug("Renaming graph file {!r} to {!r}".format(meta['filename'], filename))
+        os.rename(meta['filename'], filename)
+        return True
+
+def _insert_layout(mngr: Manager, meta : dict, native : bool = False):
+    with mngr.sql_ctx as curs:
+        layout = Layouts.NATIVE if native else None
+        graphid = Id(meta['graph'])
+        fingerprint = prepare_fingerprint(meta.get('layout'))
+        if not native and mngr.sql_select_curs(curs, 'Layouts', graph=graphid, layout=layout, fingerprint=fingerprint):
+            logging.notice(
+                "Discarding unknown layout of graph {gid!s} with fingerprint {fp!s} (already exists)"
+                .format(gid=graphid, fp=Id(fingerprint))
+            )
+            return False
+        layoutid = mngr.make_unique_layout_id(curs)
+        filename = mngr.make_layout_filename(graphid, layoutid, layout=layout)
+        mngr.sql_insert_curs(
+            curs, 'Layouts', id=layoutid, graph=graphid, layout=layout, file=filename, fingerprint=fingerprint
+        )
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        if native:
+            graphfilename = get_one(r['file'] for r in mngr.sql_select_curs(curs, 'Graphs', id=graphid))
+            directory = os.path.dirname(filename)
+            symlinktarget = os.path.relpath(graphfilename, start=directory)
+            logging.info("Creating symbolic link: {!r} -> {!r}".format(filename, symlinktarget))
+            os.symlink(symlinktarget, filename)
+        else:
+            logging.debug("Renaming layout file {!r} to {!r}".format(meta['filename-layout'], filename))
+            os.rename(meta['filename-layout'], filename)
+        return True
 
 _QUICK_ARCHIVE_IMPORT = None
 

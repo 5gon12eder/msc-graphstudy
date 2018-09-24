@@ -299,6 +299,7 @@ class _CfgGraphs(_Config):
         answer.extend((gen, GraphSizes.SMALL,  3) for gen in Generators if not gen.imported)
         answer.extend((gen, GraphSizes.MEDIUM, 2) for gen in Generators if not gen.imported)
         answer.append((Generators.ROME, GraphSizes.SMALL, 5))
+        answer.extend((Generators.IMPORT, sz, None) for sz in GraphSizes)
         return answer
 
 class _CfgLayouts(_ConfigBySize):

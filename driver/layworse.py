@@ -47,25 +47,25 @@ def do_lay_worse(mngr : Manager, badlog : BadLog):
     precision = 1000.0
     c2d = lambda x : round(precision * x)
     d2c = lambda x : x / precision
-    for row in mngr.sql_select('Layouts', layout=object):
-        graphid = row['graph']
-        layoutid = row['id']
-        parentfile = row['file']
-        for worse in mngr.config.desired_lay_worse.keys():
-            want = set(map(c2d, mngr.config.desired_lay_worse[worse]))
-            have = { c2d(r['rate']) for r in mngr.sql_select('WorseLayouts', method=worse, parent=layoutid) }
-            need = set(map(d2c, want - have))
-            if not need:
-                continue
-            if badlog.get_bad(Actions.LAY_WORSE, layoutid, worse):
-                logging.info("Skipping worsening of layout {!s} via {:s} ...".format(layoutid, worse.name))
-                continue
-            logging.info("Worsening layout {!s} in {:d} steps via {:s} ...".format(layoutid, len(need), worse.name))
-            try:
-                _worsen_generic(mngr, worse, graphid, layoutid, rates=need, parentfile=parentfile)
-            except RecoverableError as e:
-                badlog.set_bad(Actions.LAY_WORSE, layoutid, worse, msg=str(e))
-                logging.error("Cannot worsen layout {!s} via {:s}: {!s}".format(layoutid, worse.name, e))
+    for graphid in map(lambda r : r['id'], mngr.sql_select('Graphs', poisoned=False)):
+        for row in mngr.sql_select('Layouts', graph=graphid, layout=object):
+            layoutid = row['id']
+            parentfile = row['file']
+            for worse in mngr.config.desired_lay_worse.keys():
+                want = set(map(c2d, mngr.config.desired_lay_worse[worse]))
+                have = { c2d(r['rate']) for r in mngr.sql_select('WorseLayouts', method=worse, parent=layoutid) }
+                need = set(map(d2c, want - have))
+                if not need:
+                    continue
+                if badlog.get_bad(Actions.LAY_WORSE, layoutid, worse):
+                    logging.info("Skipping worsening of layout {!s} via {:s} ...".format(layoutid, worse.name))
+                    continue
+                logging.info("Worsening layout {!s} in {:d} steps via {:s} ...".format(layoutid, len(need), worse.name))
+                try:
+                    _worsen_generic(mngr, worse, graphid, layoutid, rates=need, parentfile=parentfile)
+                except RecoverableError as e:
+                    badlog.set_bad(Actions.LAY_WORSE, layoutid, worse, msg=str(e))
+                    logging.error("Cannot worsen layout {!s} via {:s}: {!s}".format(layoutid, worse.name, e))
 
 def _worsen_generic(mngr : Manager, worse : LayWorse, graphid : Id, parentid : Id, rates : list, parentfile : str):
     with mngr.make_tempdir() as tempdir:

@@ -41,7 +41,7 @@ def do_lay_inter(mngr : Manager, badlog : BadLog):
     precision = 1000.0
     c2d = lambda x : round(precision * x)
     d2c = lambda x : x / precision
-    for graphid in map(lambda r : r['id'], mngr.sql_select('Graphs')):
+    for graphid in map(lambda r : r['id'], mngr.sql_select('Graphs', poisoned=False)):
         layouts = { r['id'] : r['file'] for r in mngr.sql_select('Layouts', graph=graphid, layout=object) }
         for (id1, id2) in itertools.combinations(sorted(layouts.keys(), key=Id.getkey), 2):
             for inter in mngr.config.desired_lay_inter.keys():

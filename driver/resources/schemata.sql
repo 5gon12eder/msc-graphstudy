@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS `Graphs` (
     `file`        TEXT            NOT NULL UNIQUE,
     `nodes`       INTEGER         NOT NULL CHECK (`nodes` >= 0),
     `edges`       INTEGER         NOT NULL CHECK (`edges` >= 0),
-    `native`      LOGICAL         NOT NULL CHECK (`native` IN (0, 1)),
-    `fingerprint` BLOB,
+    `native`      LOGICAL         DEFAULT 0 CHECK (`native`   IN (0, 1)),
+    `poisoned`    LOGICAL         DEFAULT 0 CHECK (`poisoned` IN (0, 1)),
     `seed`        BLOB
 );
 
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `Layouts` (
     `file`        TEXT           NOT NULL UNIQUE,
     `width`       REAL           CHECK (`width`  ISNULL OR `width`  >= 0.0),
     `height`      REAL           CHECK (`height` ISNULL OR `height` >= 0.0),
-    `fingerprint` BLOB,
+    `fingerprint` BLOB           NOT NULL,
     `seed`        BLOB
 );
 

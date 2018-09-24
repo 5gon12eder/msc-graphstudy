@@ -227,6 +227,36 @@ namespace msc
         };  // struct option_output
 
         template <typename CliResT, typename = void>
+        struct option_output_layout : basic_option_handler<CliResT> { };
+
+        template <typename CliResT>
+        struct option_output_layout
+        <
+            CliResT,
+            std::enable_if_t<std::is_same_v<decltype(CliResT::output_layout), output_file>>
+        >
+            : basic_option_handler<CliResT>
+        {
+
+            static void add([[maybe_unused]] CliResT& results, po::options_description& description)
+            {
+                assert(results.output.terminal() == terminals::stdio);
+                description.add_options()(
+                    "output-layout", po::value<std::string>()->value_name("FILE"),
+                    "write layout data separately to FILE (default: write only one output file)"
+                );
+            }
+
+            static void handle_after(CliResT& results, po::variables_map& varmap)
+            {
+                if (varmap.count("output-layout")) {
+                    results.output_layout.assign_from_spec(varmap["output-layout"].as<std::string>());
+                }
+            }
+
+        };  // struct option_output_layout
+
+        template <typename CliResT, typename = void>
         struct option_meta : basic_option_handler<CliResT> { };
 
         template <typename CliResT>
@@ -296,10 +326,10 @@ namespace msc
         };  // struct option_format
 
         template <typename CliResT, typename = void>
-        struct option_layout : basic_option_handler<CliResT> { };
+        struct option_layout_2 : basic_option_handler<CliResT> { };
 
         template <typename CliResT>
-        struct option_layout<CliResT, std::enable_if_t<std::is_same_v<decltype(CliResT::layout), bool>>>
+        struct option_layout_2<CliResT, std::enable_if_t<std::is_same_v<decltype(CliResT::layout), bool>>>
             : basic_option_handler<CliResT>
         {
 
@@ -312,7 +342,37 @@ namespace msc
                 );
             }
 
-        };  // struct option_layout
+        };  // struct option_layout_2
+
+        template <typename CliResT, typename = void>
+        struct option_layout_3 : basic_option_handler<CliResT> { };
+
+        template <typename CliResT>
+        struct option_layout_3
+        <
+            CliResT,
+            std::enable_if_t<std::is_same_v<decltype(CliResT::layout), std::optional<bool>>>
+        >
+            : basic_option_handler<CliResT>
+        {
+
+            static void add([[maybe_unused]] CliResT& results, po::options_description& description)
+            {
+                assert(!results.layout.has_value());
+                description.add_options()(
+                    "layout,l", po::value<bool>()->value_name("BOOL"),
+                    "whether to expect and use an associated layout (default: use if and only if available)"
+                );
+            }
+
+            static void handle_after(CliResT& results, po::variables_map& varmap)
+            {
+                if (varmap.count("layout")) {
+                    results.layout = varmap["layout"].as<bool>();
+                }
+            }
+
+        };  // struct option_layout_3
 
         template <typename CliResT, typename = void>
         struct option_simplify : basic_option_handler<CliResT> { };
@@ -985,9 +1045,11 @@ namespace msc
 
         using all_options_handler = option_handler<
             option_output,
+            option_output_layout,
             option_meta,
             option_format,
-            option_layout,
+            option_layout_2,
+            option_layout_3,
             option_simplify,
             option_nodes,
             option_torus,

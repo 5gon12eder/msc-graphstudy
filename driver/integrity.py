@@ -51,6 +51,7 @@ _REQUIRED_FOR_LAYOUT = [
     'id',
     'graph',
     'file',
+    'fingerprint',
 ]
 
 _REQUIRED_FOR_INTER_LAYOUTS = [
@@ -228,21 +229,39 @@ class Checker(object):
             for row in self.__mngr.sql_select_curs(curs, 'Layouts', layout=None):
                 layoutid = row['id']
                 filename = row['file']
+                if self.__mngr.sql_select_curs(curs, 'Graphs', id=row['graph'], poisoned=True):
+                    continue
                 if self.__mngr.sql_select_curs(curs, 'InterLayouts', id=layoutid):
                     continue
                 if self.__mngr.sql_select_curs(curs, 'WorseLayouts', id=layoutid):
                     continue
-                self.__bemoan("Improper layout {!s} not mentioned for any transformation".format(layoutid))
+                self.__bemoan("Irregular layout {!s} neither transformed nor from poisoned graph".format(layoutid))
                 self.__remove_from_db(curs, "DELETE FROM `Layouts` WHERE `id` = ?", layoutid)
                 self.__remove_from_fs(filename)
+            for row in self.__mngr.sql_select_curs(curs, 'Graphs', poisoned=True):
+                graphid = row['id']
+                if self.__mngr.sql_select_curs(curs, 'Layouts', graph=graphid, layout=object):
+                    self.__bemoan("Poisoned graph {!s} shall not have regular layouts".format(graphid))
+                    self.__remove_from_db(curs, "DELETE FROM `Layouts` WHERE `graph` = ? AND `layout` NOTNULL", graphid)
 
     def __check_inter_layouts(self):
         crossrefs = { 'id' : ('Layouts', 'id'), 'parent1st' : ('Layouts', 'id'), 'parent2nd' : ('Layouts', 'id') }
         self.__check_table('InterLayouts', _REQUIRED_FOR_INTER_LAYOUTS, crossrefs=crossrefs)
+        self.__check_transformed_parents('InterLayouts', [ 'parent1st', 'parent2nd' ], what="interpolated")
 
     def __check_worse_layouts(self):
         crossrefs = { 'id' : ('Layouts', 'id'), 'parent' : ('Layouts', 'id') }
         self.__check_table('WorseLayouts', _REQUIRED_FOR_WORSE_LAYOUTS, crossrefs=crossrefs)
+        self.__check_transformed_parents('WorseLayouts', [ 'parent' ], what="worsened")
+
+    def __check_transformed_parents(self, table, parentcolumns, what="transformed"):
+        with self.__mngr.sql_ctx as curs:
+            for row in self.__mngr.sql_select_curs(curs, table):
+                layoutid = row['id']
+                for parentid in (row[col] for col in parentcolumns):
+                    for bad in self.__mngr.sql_select_curs(curs, 'Layouts', id=parentid, layout=None):
+                        self.__bemoan("Parents of {what:s} layout {!s} shall be regular".format(layoutid, what=what))
+                        self.__remove_from_db(curs, "DELETE FROM `Layouts` WHERE `id` = ?", layoutid)
 
     def __check_properties(self):
         self.__check_property_tables()

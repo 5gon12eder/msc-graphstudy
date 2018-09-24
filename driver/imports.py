@@ -50,7 +50,7 @@ from .xjson import *
 
 class ImportSource(object):
 
-    def __init__(self, format : str = None, compression : str = None, layout : bool = False, simplify : bool = False):
+    def __init__(self, format : str = None, compression : str = None, layout : bool = None, simplify : bool = False):
         self.format = format
         self.compression = compression
         self.layout = layout
@@ -135,7 +135,7 @@ class DirectoryImportSource(ImportSource):
                  compression : str = None,
                  pattern : str = '*',
                  recursive : bool = False,
-                 layout : bool = False,
+                 layout : bool = None,
                  simplify : bool = False,
     ):
         super().__init__(format=format, compression=compression, layout=layout, simplify=simplify)
@@ -191,7 +191,7 @@ class TarImportSource(ImportSource):
                  cache : str = None,
                  checksum : str = None,
                  pattern : str = '*',
-                 layout : bool = False,
+                 layout : bool = None,
                  simplify : bool = False,
     ):
         super().__init__(format=format, compression=compression, layout=layout, simplify=simplify)
@@ -311,7 +311,7 @@ class UrlImportSource(ImportSource):
                  urls : list,
                  format : str,
                  compression : str = None,
-                 layout : bool = False,
+                 layout : bool = None,
                  simplify : bool = False,
                  name : str = 'www',
                  cache : bool = False,
