@@ -23,20 +23,24 @@ set(slides_kit_picfiles_static
 
 set(auxlist)
 
-list(APPEND auxlist example-a.tikz example-b.tikz)
+list(APPEND auxlist example-a.tikz)
 add_custom_command(
-    OUTPUT example-a.tikz example-b.tikz
-    COMMAND "${CMAKE_COMMAND}" -E env "MSC_RANDOM_SEED=xGNDKM5hQQfT"
-            "${PROJECT_BINARY_DIR}/src/generators/lindenmayer" -n 100 -o example-a.xml
-    COMMAND "${CMAKE_COMMAND}" -E env "MSC_RANDOM_SEED=CVfXPkkdrVI4"
-            "${PROJECT_BINARY_DIR}/src/layouts/force" -a fmmm -o example-b.xml example-a.xml
+    OUTPUT example-a.tikz
     COMMAND "${CMAKE_COMMAND}" -E env MSC_RANDOM_SEED=
-            "${PROJECT_BINARY_DIR}/src/visualizations/picture" --tikz -o example-a.tikz example-a.xml
-    COMMAND "${CMAKE_COMMAND}" -E env MSC_RANDOM_SEED=
-            "${PROJECT_BINARY_DIR}/src/visualizations/picture" --tikz -o example-b.tikz example-b.xml
-    BYPRODUCTS example-a.xml example-b.xml
+            "${PROJECT_BINARY_DIR}/src/visualizations/picture" --tikz -o example-a.tikz
+            "${PROJECT_SOURCE_DIR}/octets/2c0ab2fa-dab7fdeb.xml.bz2"
     VERBATIM
-    DEPENDS lindenmayer force picture
+    DEPENDS picture "${PROJECT_SOURCE_DIR}/octets/2c0ab2fa-dab7fdeb.xml.bz2"
+)
+
+list(APPEND auxlist example-b.tikz)
+add_custom_command(
+    OUTPUT example-b.tikz
+    COMMAND "${CMAKE_COMMAND}" -E env MSC_RANDOM_SEED=
+            "${PROJECT_BINARY_DIR}/src/visualizations/picture" --tikz -o example-b.tikz
+            "${PROJECT_SOURCE_DIR}/octets/2c0ab2fa-fb8d2845.xml.bz2"
+    VERBATIM
+    DEPENDS picture "${PROJECT_SOURCE_DIR}/octets/2c0ab2fa-fb8d2845.xml.bz2"
 )
 
 list(APPEND auxlist lindenmayer.tikz)
