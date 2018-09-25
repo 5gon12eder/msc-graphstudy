@@ -182,6 +182,12 @@ find_program(MAKEINDEX_EXECUTABLE makeindex DOC "Makeindex executable (https://w
 find_program(PDFTOPS_EXECUTABLE   pdftops   DOC "PDF to PostScript converter executable compatible to 'pdftops'")
 find_program(ZIP_EXECUTABLE       zip       DOC "Info-ZIP compatible ZIP archiver executable (http://www.info-zip.org)")
 
+# This nonsense is just because people cannot share...
+set(MSC_KIT_BEAMER_ZIP "" CACHE PATH "ZIP archive to provide the KIT's beamer theme in a drop-in fashion")
+set(MSC_LOGO_KIT  "${PROJECT_SOURCE_DIR}/octest/dummy-logo-kit.pdf"  CACHE PATH "KIT logo (PDF)")
+set(MSC_LOGO_ALGO "${PROJECT_SOURCE_DIR}/octest/dummy-logo-algo.pdf" CACHE PATH "Algorithm's Working Group logo (PDF)")
+set(MSC_LOGO_IOSB "${PROJECT_SOURCE_DIR}/octest/dummy-logo-iosb.pdf" CACHE PATH "Fraunhofer IOSB logo (PDF)")
+
 add_subdirectory(utils)
 add_subdirectory(src)
 add_subdirectory(test)

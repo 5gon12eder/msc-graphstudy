@@ -47,8 +47,6 @@ set(report_dependencies
     fonts/Roboto-Regular.ttf
     graphstudy.cls
     literature.bib
-    logos/algo.pdf
-    logos/kit.pdf
     notation.tex
     preamble.tex
     titlepage.tex

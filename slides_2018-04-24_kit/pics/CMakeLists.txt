@@ -15,13 +15,20 @@
 # <http://www.gnu.org/licenses/>.
 
 set(slides_kit_picfiles_static
-    algo-logo.pdf
     titlepicture.png
     webui-compare.png
     CACHE INTERNAL ""
 )
 
 set(auxlist)
+
+list(APPEND auxlist algo-logo.pdf)
+add_custom_command(
+    OUTPUT algo-logo.pdf
+    COMMAND "${CMAKE_COMMAND}" -E copy "${MSC_LOGO_ALGO}" algo-logo.pdf
+    VERBATIM
+    DEPENDS "${MSC_LOGO_ALGO}"
+)
 
 list(APPEND auxlist example-a.tikz)
 add_custom_command(

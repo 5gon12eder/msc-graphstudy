@@ -1071,6 +1071,17 @@ experiments from scratch (which takes an enormous amount of time), it is *not* a
 you may set the environment variable `MSC_LAZY_EVAL_OKAY` to a positive integer which will produce versions of the
 publications with dummy values substituted for the actual evaluation results.
 
+**Official Logos:** In order to avoid copyright and trademark issues, no official logos are included in the repository.
+Instead, a transparent picture of the same size will be used.  You can provide the absolute paths of those logos you
+have handy by setting the CMake variables `MSC_LOGO_KIT`, `MSC_LOGO_ALGO` and `MSC_LOGO_IOSB` accordingly.  The logos
+must be in PDF format.  (The `./maintainer/configure` script will recognize an environment variable with the same name
+and pass its value on to CMake.)
+
+**Checking Assertions via TeX:** Some (admittedly very few) textual claims can be verified by automatic assertions added
+to the LaTeX code via `\directlua` magic.  In order to enable these checks, set the environment variable
+`MSC_TEX_ASSERT` to a positive integer.  You should not combine this with setting `MSC_LAZY_EVAL_OKAY` as you cannot
+expect correct results when cheating in the first place.
+
 ### Typesetting the Written Thesis
 
 Building the `report` target will download the [*Roboto*](https://fonts.google.com/specimen/Roboto) font from

@@ -231,8 +231,9 @@ def get_cmake_command(cfgname, srcdir='.', builddir='.', vardepsdir=None):
         'CMAKE_COLOR_MAKEFILE' : False,
         'EXTRA_CMAKE_CXX_FLAGS' : list(EXTRA_MAINTAINER_CXX_FLAGS),
     }
-    try: cmakeargs['MSC_KIT_BEAMER_ZIP'] = os.environ['MSC_KIT_BEAMER_ZIP']
-    except KeyError: pass
+    for envvar in [ 'MSC_KIT_BEAMER_ZIP', 'MSC_LOGO_KIT', 'MSC_LOGO_ALGO', 'MSC_LOGO_IOSB' ]:
+        try: cmakeargs[envvar] = os.environ[envvar]
+        except KeyError: pass
     if vardepsdir is not None:
         cmakeargs['CMAKE_INCLUDE_PATH'] = os.path.join(vardepsdir, 'include')
         cmakeargs['CMAKE_LIBRARY_PATH'] = os.path.join(vardepsdir, 'lib')

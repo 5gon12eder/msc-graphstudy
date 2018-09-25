@@ -52,27 +52,21 @@ foreach(item ${slides_kit_picfiles_dynamic})
     set_source_files_properties("pics/${item}" PROPERTIES GENERATED TRUE)
 endforeach(item)
 
-set(MSC_KIT_BEAMER_ZIP
-    "${CMAKE_CURRENT_BINARY_DIR}/kit-beamer.zip"
-    CACHE PATH "ZIP archive to provide the KIT's beamer theme in a drop-in fashion"
-)
-
-add_custom_command(
-    OUTPUT kit-beamer.stamp
-    COMMAND "${CMAKE_COMMAND}" -E tar xf "${MSC_KIT_BEAMER_ZIP}" --format=zip
-    COMMAND "${CMAKE_COMMAND}" -E touch kit-beamer.stamp
-    VERBATIM
-    DEPENDS "${MSC_KIT_BEAMER_ZIP}"
-)
-
-add_custom_command(
-    OUTPUT kit-beamer.zip
-    COMMAND "${CMAKE_COMMAND}" -E touch kit-beamer.stamp
-    COMMAND "${CMAKE_COMMAND}" -E tar cf kit-beamer.zip --format=zip -- kit-beamer.stamp
-    VERBATIM
-    BYPRODUCTS kit-beamer.stamp
-    COMMENT "Creating stub archive '${CMAKE_CURRENT_BINARY_DIR}/kit-beamer.zip'"
-)
+if(EXISTS "${MSC_KIT_BEAMER_ZIP}")
+    add_custom_command(
+        OUTPUT kit-beamer.stamp
+        COMMAND "${CMAKE_COMMAND}" -E tar xf "${MSC_KIT_BEAMER_ZIP}" --format=zip
+        COMMAND "${CMAKE_COMMAND}" -E touch kit-beamer.stamp
+        VERBATIM
+        DEPENDS "${MSC_KIT_BEAMER_ZIP}"
+    )
+else()
+    add_custom_command(
+        OUTPUT kit-beamer.stamp
+        COMMAND "${CMAKE_COMMAND}" -E touch kit-beamer.stamp
+        VERBATIM
+    )
+endif()
 
 add_custom_command(
     OUTPUT graphstudy.pdf

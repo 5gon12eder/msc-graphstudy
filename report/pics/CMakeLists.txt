@@ -37,6 +37,22 @@ set(report_picfiles_static
 
 set(auxlist)
 
+list(APPEND auxlist kit-logo.pdf)
+add_custom_command(
+    OUTPUT kit-logo.pdf
+    COMMAND "${CMAKE_COMMAND}" -E copy "${MSC_LOGO_KIT}" kit-logo.pdf
+    VERBATIM
+    DEPENDS "${MSC_LOGO_KIT}"
+)
+
+list(APPEND auxlist algo-logo.pdf)
+add_custom_command(
+    OUTPUT algo-logo.pdf
+    COMMAND "${CMAKE_COMMAND}" -E copy "${MSC_LOGO_ALGO}" algo-logo.pdf
+    VERBATIM
+    DEPENDS "${MSC_LOGO_ALGO}"
+)
+
 list(APPEND auxlist romanesco.jpg)
 add_custom_command(
     OUTPUT romanesco.jpg
