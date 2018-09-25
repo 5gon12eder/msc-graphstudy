@@ -208,7 +208,7 @@ class Checker(object):
     def __check_tempdirs(self):
         if self.__files is None:
             return
-        for (key, item) in filter(lambda kv: fnmatch.fnmatch(kv[0], 'temp-*'), self.__files.items()):
+        for (key, item) in list(filter(lambda kv: fnmatch.fnmatch(kv[0], 'temp-*'), self.__files.items())):
             if item.is_dir():
                 self.__bemoan("Orphaned temporary directory {!r}".format(key))
                 self.__remove_from_fs(key, recursive=True)
