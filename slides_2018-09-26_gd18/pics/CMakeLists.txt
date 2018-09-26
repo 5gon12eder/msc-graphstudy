@@ -490,7 +490,7 @@ foreach(letter a b c)
 endforeach(letter)
 
 set(demoletters a b c)
-set(democolors "#82BE3C" "#82BE3C" "#4664AA")
+set(democolors "#4664AA" "#4664AA" "#82BE3C")
 
 foreach(i RANGE 2)
     list(GET demoletters ${i} letter)
@@ -531,6 +531,67 @@ foreach(i RANGE 2)
         DEPENDS rdf-global property-config.gplt rdf-global.gplt ${demobase}.xml
     )
 endforeach(i)
+
+# ---------------------- #
+#   Entropy Regression   #
+# ---------------------- #
+
+add_custom_command(
+    OUTPUT entropy-regression.xml
+    COMMAND "${CMAKE_COMMAND}" -E env "MSC_RANDOM_SEED=xe8jFVGvR9iE"
+            "${PROJECT_BINARY_DIR}/src/generators/grid" -n 1000 -o entropy-regression.xml
+    VERBATIM
+    DEPENDS grid
+)
+
+add_custom_command(
+    OUTPUT entropy-regression-00100.xml
+           entropy-regression-00200.xml
+           entropy-regression-00500.xml
+           entropy-regression-01000.xml
+           entropy-regression-02000.xml
+    COMMAND "${CMAKE_COMMAND}" -E env "MSC_RANDOM_SEED=JsggEOr9x3dQ"
+            "${PROJECT_BINARY_DIR}/src/unitrans/perturb" -r 0.01 -r 0.02 -r 0.05 -r 0.10 -r 0.20
+            -o entropy-regression-%.xml entropy-regression.xml
+    VERBATIM
+    DEPENDS perturb entropy-regression.xml
+)
+
+set(regression_binflags -b 8 -b 11 -b 16 -b 23 -b 32 -b 45 -b 64 -b 91 -b 128 -b 181 -b 256 -b 362 -b 512)
+foreach(rate 00100 00200 00500 01000 02000)
+    add_custom_command(
+        OUTPUT entropy-regression-${rate}.json
+        COMMAND "${CMAKE_COMMAND}" -E env MSC_RANDOM_SEED= "${PROJECT_BINARY_DIR}/src/properties/angular"
+                -k boxed ${regression_binflags} -o NULL -m entropy-regression-${rate}.json
+                entropy-regression-${rate}.xml
+        VERBATIM
+        DEPENDS angular entropy-regression-${rate}.xml
+    )
+    add_custom_command(
+        OUTPUT entropy-regression-${rate}.txt entropy-regression-${rate}.gplt
+        COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/utils/prepare-entropy-regression.py"
+                -k bincount -l ${rate}
+                -o entropy-regression-${rate}.txt
+                -r entropy-regression-${rate}.gplt
+                entropy-regression-${rate}.json
+        VERBATIM
+        DEPENDS entropy-regression-${rate}.json
+                "${PROJECT_SOURCE_DIR}/utils/prepare-entropy-regression.py"
+    )
+endforeach(rate)
+
+list(APPEND auxlist entropy-regression.pgf)
+add_custom_command(
+    OUTPUT entropy-regression.pgf
+    COMMAND "${GNUPLOT_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/entropy-regression.gplt"
+    VERBATIM
+    DEPENDS entropy-regression.gplt
+            entropy-regression-00100.txt
+            entropy-regression-00200.txt
+            entropy-regression-00500.txt
+            entropy-regression-01000.txt
+            entropy-regression-02000.txt
+)
 
 set(slides_gd18_picfiles_dynamic ${auxlist} CACHE INTERNAL "")
 set(slides_gd18_picfiles ${slides_gd18_picfiles_static} ${slides_gd18_picfiles_dynamic} CACHE INTERNAL "")

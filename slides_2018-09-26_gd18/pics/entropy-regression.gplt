@@ -1,0 +1,44 @@
+#! /usr/bin/gnuplot
+#! -*- coding:utf-8; mode:shell-script; -*-
+
+# Copyright (C) 2018 Karlsruhe Institute of Technology
+# Copyright (C) 2018 Moritz Klammler <moritz.klammler@alumni.kit.edu>
+#
+# Copying and distribution of this file, with or without modification, are permitted in any medium without royalty
+# provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+
+set terminal tikz tightboundingbox plotsize 60mm, 45mm font ",8"
+set output 'entropy-regression.pgf'
+
+set xrange [* : *]
+set yrange [* : *]
+
+set xtics 1
+set ytics 1
+
+set xlabel "$\\log_2(\\beta)$"
+set ylabel "$\\Entropy\\:/\\:\\text{bit}$" offset character -1, 0
+
+set key left Left reverse samplen 0 font ",6"
+
+load 'entropy-regression-00100.gplt'
+load 'entropy-regression-00200.gplt'
+load 'entropy-regression-00500.gplt'
+load 'entropy-regression-01000.gplt'
+load 'entropy-regression-02000.gplt'
+
+plot f_00100(x) linecolor '#4664AA' linewidth 2 notitle,                                                                \
+     f_00200(x) linecolor '#82BE3C' linewidth 2 notitle,                                                                \
+     f_00500(x) linecolor '#FAE614' linewidth 2 notitle,                                                                \
+     f_01000(x) linecolor '#DCA01E' linewidth 2 notitle,                                                                \
+     f_02000(x) linecolor '#A01E28' linewidth 2 notitle,                                                                \
+     'entropy-regression-00100.txt' with points linecolor '#4664AA' ps 1.0 pt 1                                         \
+         title sprintf("\\regression[1]{%+.2f}{%.2f}", c0_00100, c1_00100),                                             \
+     'entropy-regression-00200.txt' with points linecolor '#82BE3C' ps 1.0 pt 2                                         \
+         title sprintf("\\regression[2]{%+.2f}{%.2f}", c0_00200, c1_00200),                                             \
+     'entropy-regression-00500.txt' with points linecolor '#FAE614' ps 1.0 pt 3                                         \
+         title sprintf("\\regression[5]{%+.2f}{%.2f}", c0_00500, c1_00500),                                             \
+     'entropy-regression-01000.txt' with points linecolor '#DCA01E' ps 1.0 pt 4                                         \
+         title sprintf("\\regression[10]{%+.2f}{%.2f}", c0_01000, c1_01000),                                            \
+     'entropy-regression-02000.txt' with points linecolor '#A01E28' ps 1.0 pt 8                                         \
+         title sprintf("\\regression[20]{%+.2f}{%.2f}", c0_02000, c1_02000)

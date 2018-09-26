@@ -13,6 +13,7 @@
 \usepackage{fontspec}
 \usepackage{polyglossia}
 \usepackage{amsmath,amsfonts}
+\usepackage{mathrsfs}
 \usepackage{csquotes}
 \usepackage{etoolbox}
 \usepackage{tabularx}
@@ -34,6 +35,7 @@
 \usetikzlibrary{fit}
 \usetikzlibrary{matrix}
 \usetikzlibrary{positioning}
+\usetikzlibrary{shapes}
 
 \setmainlanguage{english}
 
@@ -56,10 +58,6 @@
 }
 
 \setbeamercolor{structure}{fg=KITgreen}
-%\setbeamercolor*{palette secondary}{fg=KITgreen}
-%\setbeamercolor*{palette tertiary}{fg=KITgreen}
-
-\AtBeginSection[\relax]{\frame{\frametitle{Agenda}\tableofcontents[currentsection]}}
 
 \setbeamerfont*{section in toc}{size=\large, series=\bfseries}
 \setbeamerfont*{section in toc shaded}{size=\large}
@@ -120,13 +118,25 @@
 \newcommand*{\percent}{\,\%}
 \newcommand*{\vecnorm}[1]{\left\lVert#1\right\rVert}
 
+\newcommand*{\Entropy}{\@ifstar\EntropyDifferential\EntropyDiscrete}
+\newcommand*{\EntropyDiscrete}{\mathscr{E}}
+\newcommand*{\EntropyDifferential}{\mathscr{D}}
+
 \DeclareMathOperator{\dist}{dist}
 \DeclareMathOperator{\length}{length}
 \DeclareMathOperator{\mean}{mean}
 \DeclareMathOperator{\stdev}{stdev}
 \DeclareMathOperator{\stress}{\menum{STRESS}}
 
-\renewcommand<>{\alert}[1]{{\only#2{\color{KITgreen}}{#1}}}
+\undef{\strong}
+\newcommand*{\strong}[1]{\textcolor{KITgreen}{\textbf{#1}}}
+
+\newlength{\highlight@width}
+\newcommand*{\highlight@}{\color{KITorange}\bfseries}
+\newcommand{\highlight}[3][c]{%
+  \settowidth{\highlight@width}{\highlight@#3}%
+  \makebox[\highlight@width][#1]{\only<#2>{\highlight@}#3}%
+}
 
 \newcommand*{\InputTikzGraph@Normal}[3][]{\tikz[x=#2, y=-#2, #1]{\input{#3}}}
 
@@ -136,8 +146,8 @@
     \booltrue{tikzgraphpreamble}
     \input{#3}
     \begin{scope}[yscale=\aspectratio]
-      \draw[use as bounding box] (-0.5, -0.5) rectangle (0.5, 0.5);
-      \node[font=\tiny] at (0, 0) {\inputtikzgraph@url};
+      \path[draw = \graphcolor, thick, use as bounding box] (-0.5, -0.5) rectangle (0.5, 0.5);
+      \node[text = \graphcolor, font = \tiny] at (0, 0) {\inputtikzgraph@url};
     \end{scope}
   \end{tikzpicture}
 }
@@ -151,9 +161,9 @@
   \begin{frame}
     \frametitle{#3 (\enum{#1})}
     \begin{tabular}{ccc}
-      \InputTikzGraph[graphcolor = KITpalegreen]{30mm}{pics/demograph-a.tikz}&
-      \InputTikzGraph[graphcolor = KITpalegreen]{30mm}{pics/demograph-b.tikz}&
-      \InputTikzGraph[graphcolor = KITblue]{30mm}{pics/demograph-c.tikz}\\[2ex]
+      \InputTikzGraph[graphcolor = KITblue]{30mm}{pics/demograph-a.tikz}&
+      \InputTikzGraph[graphcolor = KITblue]{30mm}{pics/demograph-b.tikz}&
+      \InputTikzGraph[graphcolor = KITpalegreen]{30mm}{pics/demograph-c.tikz}\\[2ex]
       % It would be too simple if Gnuplot could just /use/ our TeX color names ...
       \InputLuatikzPlot{pics/#2-a.pgf}&
       \InputLuatikzPlot{pics/#2-b.pgf}&
@@ -243,6 +253,10 @@
   comb/.estore in = \msc@graphstudy@comb,
   discmod/.estore in = \msc@graphstudy@discmod,
   stress/.estore in = \msc@graphstudy@stress,
+  % These keys only exist so we can trigger the side effects of expanding the argument (performing the assertion).
+  no-comb/.estore in = \msc@graphstudy@dummy,
+  no-discmod/.estore in = \msc@graphstudy@dummy,
+  no-stress/.estore in = \msc@graphstudy@dummy,
 }
 
 \newcommand*{\DiscriminatorDemo}[3][]{%
@@ -314,12 +328,19 @@
   \endgroup%
 }
 
+\newcommand*{\regression}[3][???]{\ensuremath{f(x) = #2 + #3 \kern2pt x}}
+
 \newbool{tikzgraphpreamble}
 
 \newlength{\vertexsize}
 \setlength{\vertexsize}{2pt}
 
-\newcommand*{\graphcolor}{KITgreen}
+\colorlet{layoutcolor}{KITblue}
+\colorlet{goodlayoutcolor}{KITpalegreen}
+\colorlet{badlayoutcolor}{KITred}
+\colorlet{nospecialcolor}{KITblack!50}
+
+\newcommand*{\graphcolor}{layoutcolor}
 
 \pgfkeys{
   /tikz/.cd,
@@ -338,8 +359,9 @@
     thin,
   },
   smartbox/.style = {
-    fill = KITyellow!10,
-    draw = KITyellow,
+    fill = KITyellow,
+    draw = KITorange,
+    semithick,
     inner sep = 1ex,
     preaction = {draw, line width = 5pt, white},
   },
@@ -348,7 +370,7 @@
     fill = white,
     draw = gray,
     inner sep = 1em,
-    preaction = { draw, line width = 2mm, white },
+    preaction = { draw, line width = 10pt, white },
   },
 }
 

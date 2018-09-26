@@ -10,8 +10,14 @@
 \documentclass{beamer}
 
 \input{preamble.tex}
+
+\providecommand*{\BonusSlide}{beamer}
+
 \TitleImage[viewport = {303 303 703 703}]{pics/titlepicture.pdf}
-\logo{\pgfimage[width = \KITlogowd]{pics/iosb-logo.pdf}}
+
+% There is s not-so-smart but very restrictive "safety check" built into the KIT's beamer theme that should prevent you
+% from making the secondary logo too large.  Well, I can see your point alright ...
+\logo{\tikz[remember picture]{ \coordinate(secondarylogo); }}
 
 \addbibresource{literature.bib}
 
@@ -42,9 +48,12 @@
 
 \begin{frame}
   \maketitle
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[anchor = north east] at (secondarylogo) {\pgfimage[height = 7mm]{pics/iosb-logo.pdf}};
+  \end{tikzpicture}
 \end{frame}
 
-\begin{frame}
+\begin{frame}<\BonusSlide>
   \frametitle{\abstractname}
   \noindent\parbox{\textwidth}{%
     \footnotesize
@@ -62,12 +71,11 @@
   \slidecite{Arxiv,MScThesis,GitHubRepo}
 \end{frame}
 
-\section{Motivation}
-\subsection{Problem Statement}
+\section{Problem Statement}
 
 \begin{frame}
   \frametitle{Problem Statement}
-  Given two \alert<2>{vertex layouts} \(\Layout_a\) and \(\Layout_b\) for the same \alert<3>{simple graph}
+  Given two \highlight{2}{vertex layouts} \(\Layout_a\) and \(\Layout_b\) for the same \highlight{3}{simple graph}
   \(\GraphGVE\).\newline
   Is \(\Layout_a\) or \(\Layout_b\) more aesthetically pleasing?
   \par\vspace{1pc}
@@ -92,9 +100,12 @@
   \end{tikzpicture}
 \end{frame}
 
+% Show agenda before each but the first section.
+\AtBeginSection[\relax]{\frame{\frametitle{\contentsname}\tableofcontents[currentsection]}}
+
 \section{Related Work}
 
-\begin{frame}<1>[label = relatedwork]
+\begin{frame}<1,2>[label = relatedwork]
   \frametitle{Related Work}
   \begin{itemize}
   \item<+-> Simple Metrics
@@ -108,6 +119,8 @@
     \bigskip
   \item<+-> % Combined Metric
     \( \menum{COMB}(\Gamma_i) = \sum_{M} w_M \: z_{M}(\Gamma_i) \)
+    \qquad with \qquad
+    \( z_M = ( M(\Gamma_i) - \mu_M ) \: / \: \sigma_M \)
     \bigskip
   \item<+-> % Stress
     \(
@@ -118,35 +131,103 @@
   \slidecite{Huang2013,Kamada1989}
 \end{frame}
 
-\againframe<2>{relatedwork}
-
 \begin{frame}
   \frametitle{Related Work}
   \framesubtitle{Combined Metric (\enum{COMB})}
   \ShowDemoScale\only<2>{\ShowDemoResult}
   \DiscriminatorDemo[%
-    comb = \GetDiscriminatorResult{+}{5b3b66d2}{a07125fe}{101708ec}{comb},
+    comb       = \GetDiscriminatorResult{+}{5b3b66d2}{a07125fe}{101708ec}{comb},
+    no-discmod = \GetDiscriminatorResult{-}{5b3b66d2}{a07125fe}{101708ec}{discmod},
   ]{pics/5b3b66d2-a07125fe-more.tikz}{pics/5b3b66d2-101708ec-less.tikz}
 \end{frame}
 
-\againframe<2>{relatedwork}
+\againframe<2,3>{relatedwork}
 
 \begin{frame}
   \frametitle{Related Work}
   \frametitle{Stress (\enum{STRESS})}
   \ShowDemoScale\only<2>{\ShowDemoResult}
   \DiscriminatorDemo[%
-    stress = \GetDiscriminatorResult{+}{8314f2c1}{0b878c80}{c7b63d0b}{stress},
+    stress     = \GetDiscriminatorResult{+}{8314f2c1}{0b878c80}{c7b63d0b}{stress},
+    no-discmod = \GetDiscriminatorResult{-}{8314f2c1}{0b878c80}{c7b63d0b}{discmod},
   ]{pics/8314f2c1-0b878c80-more.tikz}{pics/8314f2c1-c7b63d0b-less.tikz}
 \end{frame}
 
 \section{Methodology}
 
-\begin{frame}[label = outermethod]
-  %\frametitle{Aesthetic Discrimination}
+\begin{frame}<-6>[label = outermethod]
+  \frametitle{Methodology Overview}
+  \only<6>{\newcommand*{\overspecial}{data}}
+  \only<7>{\newcommand*{\overspecial}{featex}}
+  \only<8>{\newcommand*{\overspecial}{discmod}}
+  \ifdef{\overspecial}{%
+    \ifdefstring{\overspecial}{data}{%
+      \newcommand*{\ColorData}{KITyellow}
+      \newcommand*{\ColorDataA}{KITyellow}
+      \newcommand*{\ColorDataAs}{KITyellow}
+      \newcommand*{\ColorDataB}{KITyellow}
+      \newcommand*{\ColorDataBs}{KITyellow}
+      \newcommand*{\TextColorData}{KITorange}
+      \newcommand*{\TextColorDataA}{\ColorDataA}
+      \newcommand*{\TextColorDataB}{\ColorDataB}
+    }{%
+      \newcommand*{\ColorData}{nospecialcolor}
+      \newcommand*{\ColorDataA}{nospecialcolor}
+      \newcommand*{\ColorDataAs}{nospecialcolor}
+      \newcommand*{\ColorDataB}{nospecialcolor}
+      \newcommand*{\ColorDataBs}{nospecialcolor}
+      \newcommand*{\TextColorData}{nospecialcolor}
+      \newcommand*{\TextColorDataA}{\ColorDataA}
+      \newcommand*{\TextColorDataB}{\ColorDataB}
+    }
+    \ifdefstring{\overspecial}{featex}{%
+      \newcommand*{\ColorFeatex}{KITyellow}
+      \newcommand*{\ColorFeatexA}{KITyellow}
+      \newcommand*{\ColorFeatexB}{KITyellow}
+      \newcommand*{\TextColorFeatex}{KITorange}
+      \newcommand*{\TextColorFeatexA}{\TextColorFeatex}
+      \newcommand*{\TextColorFeatexB}{\TextColorFeatex}
+    }{%
+      \newcommand*{\ColorFeatex}{nospecialcolor}
+      \newcommand*{\ColorFeatexA}{nospecialcolor}
+      \newcommand*{\ColorFeatexB}{nospecialcolor}
+      \newcommand*{\TextColorFeatex}{nospecialcolor}
+      \newcommand*{\TextColorFeatexA}{\TextColorFeatex}
+      \newcommand*{\TextColorFeatexB}{\TextColorFeatex}
+    }
+    \ifdefstring{\overspecial}{discmod}{%
+      \newcommand*{\ColorDiscmod}{KITyellow}
+      \newcommand*{\TextColorDiscmod}{KITorange}
+    }{%
+      \newcommand*{\ColorDiscmod}{nospecialcolor}
+      \newcommand*{\TextColorDiscmod}{KITblack}
+    }
+  }{%
+    \newcommand*{\ColorDataA}{goodlayoutcolor}
+    \newcommand*{\ColorDataB}{badlayoutcolor}
+    \alt<4->{
+      \newcommand*{\ColorDataAs}{goodlayoutcolor}
+      \newcommand*{\ColorDataBs}{badlayoutcolor}
+    }{
+      \newcommand*{\ColorDataAs}{white}
+      \newcommand*{\ColorDataBs}{white}
+    }
+    \newcommand*{\TextColorData}{KITblack}
+    \newcommand*{\TextColorDataA}{\ColorDataA}
+    \newcommand*{\TextColorDataB}{\ColorDataB}
+    \newcommand*{\ColorFeatex}{layoutcolor}
+    \newcommand*{\ColorFeatexA}{goodlayoutcolor}
+    \newcommand*{\ColorFeatexB}{badlayoutcolor}
+    \newcommand*{\TextColorFeatexA}{\ColorFeatexA}
+    \newcommand*{\TextColorFeatexB}{\ColorFeatexB}
+    \newcommand*{\TextColorFeatex}{KITblack}
+    \newcommand*{\ColorDiscmod}{layoutcolor}
+    \newcommand*{\TextColorDiscmod}{KITblack}
+  }
   \begin{tikzpicture}[inner sep = 2ex]
+    \coordinate (origin) at (0, 0);
     \node (ex1more) at (-1, 0) {%
-      \begin{tikzpicture}[graphcolor = KITblue]
+      \begin{tikzpicture}[graphcolor = \ColorDataA]
         \node[vertex] (v1) at (-0.5, -0.5) {};
         \node[vertex] (v2) at (-0.5, +0.5) {};
         \node[vertex] (v3) at (+0.5, -0.5) {};
@@ -155,7 +236,7 @@
       \end{tikzpicture}
     };
     \node (ex1less) at (+1, 0) {%
-      \begin{tikzpicture}[graphcolor = KITred]
+      \begin{tikzpicture}[graphcolor = \ColorDataB]
         \node[vertex] (v1) at (-0.5, -0.5) {};
         \node[vertex] (v2) at (-0.5, +0.5) {};
         \node[vertex] (v3) at (+0.5, +0.5) {};
@@ -163,8 +244,10 @@
         \draw[edge] (v1) -- (v2) -- (v4) -- (v3) -- (v1);
       \end{tikzpicture}
     };
+    \node<-3>[text = \TextColorDataA, anchor = base, below = 0ex of ex1more] {$\Gamma_a$};
+    \node<-3>[text = \TextColorDataB, anchor = base, below = 0ex of ex1less] {$\Gamma_b$};
     \node (ex2more) at (-1, -2) {%
-      \begin{tikzpicture}[graphcolor = KITblue]
+      \begin{tikzpicture}[graphcolor = \ColorDataAs]
         \node[vertex] (v1) at (330:7mm) {};
         \node[vertex] (v2) at (210:7mm) {};
         \node[vertex] (v3) at (90:7mm) {};
@@ -172,17 +255,17 @@
       \end{tikzpicture}
     };
     \node (ex2less) at (+1, -2) {%
-      \begin{tikzpicture}[graphcolor = KITred]
+      \begin{tikzpicture}[graphcolor = \ColorDataBs]
         \node[vertex] (v1) at (330:7mm) {};
         \node[vertex] (v2) at (210:7mm) {};
         \node[vertex] (v3) at (10:9mm) {};
         \draw[edge] (v1) -- (v2) -- (v3) -- (v1);
       \end{tikzpicture}
     };
-    \node[text = KITblue] (exdotsmore) at (-1, -3.5) {$\vdots$};
-    \node[text = KITred ] (exdotsless) at (+1, -3.5) {$\vdots$};
+    \node[text = \ColorDataAs] (exdotsmore) at (-1, -3.5) {$\vdots$};
+    \node[text = \ColorDataBs ] (exdotsless) at (+1, -3.5) {$\vdots$};
     \node (exnmore) at (-1, -5) {%
-      \begin{tikzpicture}[graphcolor = KITblue]
+      \begin{tikzpicture}[graphcolor = \ColorDataAs]
         \node[vertex] (v1) at (-1.0,  0.0) {};
         \node[vertex] (v2) at (-0.5,  0.0) {};
         \node[vertex] (v3) at (+0.5,  0.0) {};
@@ -195,7 +278,7 @@
       \end{tikzpicture}
     };
     \node (exnless) at (+1, -5) {%
-      \begin{tikzpicture}[graphcolor = KITred]
+      \begin{tikzpicture}[graphcolor = \ColorDataBs]
         \node[vertex] (v1) at (+1.0, +0.5) {};
         \node[vertex] (v2) at (+0.5, +0.5) {};
         \node[vertex] (v3) at (+0.5, -0.5) {};
@@ -212,50 +295,55 @@
     \coordinate (auxdots) at (auxx|-exdotsless);
     \coordinate (auxn) at (auxx|-exnless.south);
     \coordinate (auxy) at ($(ex1more)!0.5!(ex1less)$);
+    \coordinate[above = 7ex of auxy] (topaux);
     \coordinate[below = 2ex of auxy] (auxy1a);
     \coordinate[above = 2ex of auxy] (auxy1b);
-    \node<2->[draw = KITpalegreen, fill = KITpalegreen!50, align = center, inner sep = 2ex] (model) at (7, -2)
-             {Discriminator\\Model};
+    \node[anchor = base west, text = white] at (topaux) {Please take this into account for the Bounding Box!};
+    %\draw<2>[dashed] (ex1more.south west) rectangle (ex1less.north east);
+    \node<2->[draw = \ColorDiscmod, fill = \ColorDiscmod!50, text = \TextColorDiscmod, align = center, inner sep = 2ex]
+             (model) at (7, -2) {Discriminator\\Model};
     \coordinate<2-> (modelina) at ($(model.north west)!0.5!(model.north)$);
     \coordinate<2-> (modelinb) at ($(model.north east)!0.5!(model.north)$);
     \coordinate<2->[below = 4ex of model] (submod);
-    \draw<2->[KITpalegreen, <->] (model.west|-submod) -- (model.east|-submod);
-    \draw<2->[KITpalegreen] (submod) +(0, -3pt) -- +(0, +3pt);
-    \fill<3>[KITpalegreen] (submod) ++(-2em, 0) -- +(-1ex, 2ex) -- +(+1ex, 2ex) -- cycle;
-    \draw<3>[dashed] (ex1more.south west) rectangle (ex1less.north east);
-    \draw<3>[->, shorten < = 1ex, shorten > = 1ex, very thick, KITblue] (ex1less.east|-auxy1a)
-    -- (auxx|-auxy1a) to node[fill = white, inner sep = 1ex]{$f(\Gamma_a)$} (model.west|-auxy1a)
-    -- (modelina|-auxy1a) -- (modelina);
-    \draw<3>[->, shorten < = 1ex, shorten > = 1ex, very thick, KITred] (ex1less.east|-auxy1b)
-    -- (auxx|-auxy1b) to node[fill = white, inner sep = 1ex]{$f(\Gamma_b)$} (model.west|-auxy1b)
-    -- (modelinb|-auxy1b) -- (modelinb);
-    \draw<4>[<->, shorten > = 1ex] (aux1) to node[below, rotate = 90]{training} (auxdots);
-    \draw<4>[<->, shorten > = 1ex] (auxn) to node[below, rotate = 90]{testing} (auxdots);
+    \draw<2->[\ColorDiscmod, <->] (model.west|-submod) -- (model.east|-submod);
+    \draw<2->[\ColorDiscmod] (submod) +(0, -3pt) -- +(0, +3pt);
+    \fill<2->[\ColorDiscmod] (submod) ++(-2em, 0) -- +(-1ex, 2ex) -- +(+1ex, 2ex) -- cycle;
+    \coordinate<3>[right = 4.5cm of topaux, anchor = base] (featex);
+    \node<3->[text = \TextColorFeatexA, inner sep = 5pt] (featexa) at (featex|-auxy1a) {$f(\Gamma_a)$};
+    \node<3->[text = \TextColorFeatexB, inner sep = 5pt] (featexb) at (featex|-auxy1b) {$f(\Gamma_b)$};
+    \draw<3->[->, shorten > = 1ex, very thick, \ColorFeatexA]
+             (ex1less.east|-featexa) -- (featexa) -- (modelina|-featexa) -- (modelina);
+    \draw<3->[->, shorten > = 1ex, very thick, \ColorFeatexB]
+             (ex1less.east|-featexb) -- (featexb) -- (modelinb|-featexb) -- (modelinb);
+    \node<3->[anchor = base, text = \TextColorFeatex] at (featex|-topaux) {Feature Extraction};
+    \node<4->[anchor = base, text = \TextColorData] at (origin|-topaux) {Labeled Pairs};
+    \draw<5>[<->, shorten > = 1ex, draw = \ColorDiscmod, thick, preaction = {-, draw = white, line width = 10pt}] (aux1)
+     to node[below, rotate = 90, text = \ColorDiscmod]{training} (auxdots);
+    \draw<5>[<->, shorten > = 1ex, draw = \ColorDiscmod, thick] (auxn)
+     to node[below, rotate = 90, text = \ColorDiscmod]{testing} (auxdots);
   \end{tikzpicture}
 \end{frame}
-
-\subsection{Data Acquisition {\&} Augmentation}
 
 \begin{frame}<1>[label = databullets]
   \frametitle{Data Acquisition {\&} Augmentation}
   \begin{enumerate}
   \item<1-> Collect a large number of graphs
     \begin{itemize}
-    \item\alert{imported graphs} --- from public collections
-    \item\alert{generated graphs} --- using probabilistic algorithms
+    \item\strong{imported graphs} --- from public collections
+    \item\strong{generated graphs} --- using probabilistic algorithms
     \end{itemize}
     \par\bigskip
   \item<2-> Compute various layouts for these graphs
     \begin{itemize}
-    \item\alert{native layouts} --- fall out of the graph generation process
-    \item\alert{proper layouts} --- using common state-of-the-art algorithms
-    \item\alert{garbage layouts} --- using more or less random placements of vertices
+    \item\strong{native layouts} --- fall out of the graph generation process
+    \item\strong{proper layouts} --- using common state-of-the-art algorithms
+    \item\strong{garbage layouts} --- using more or less random placements of vertices
     \end{itemize}
     \par\bigskip
   \item<3-> Use data augmentation to expand this corpus
     \begin{itemize}
-    \item\alert{layout worsening} --- degrade proper layout by given rate
-    \item\alert{layout interpolation} --- compute layout \enquote{between} proper and garbage layout
+    \item\strong{layout worsening} --- degrade proper layout by given rate
+    \item\strong{layout interpolation} --- compute layout \enquote{between} proper and garbage layout
     \end{itemize}
   \end{enumerate}
 \end{frame}
@@ -275,7 +363,7 @@
       {lindenmayer, mosaic1, mosaic2, grid, torus1, torus2, quasi3d, quasi4d, quasi5d, quasi6d, bottle, tree}
 \end{frame}
 
-\againframe<2>{databullets}
+\againframe<1,2>{databullets}
 
 \begin{frame}
   \frametitle{Data Acquisition {\&} Augmentation}
@@ -283,21 +371,21 @@
   \begin{center}
     \small\noindent%
     \begin{tabular}{l@{\quad}c@{\qquad\qquad}c@{\qquad\qquad}c}
-        \rotatebox{90}{\emph{proper}}
-      & \InputTikzGraph[graphcolor = KITblue]{0.2\textwidth}{pics/native.tikz}
-      & \InputTikzGraph[graphcolor = KITblue]{0.2\textwidth}{pics/fmmm.tikz}
-      & \InputTikzGraph[graphcolor = KITblue]{0.2\textwidth}{pics/stress.tikz}\\[1ex]
+        \rotatebox{90}{\qquad\emph{proper}}
+      & \InputTikzGraph[graphcolor = goodlayoutcolor]{0.2\textwidth}{pics/native.tikz}
+      & \InputTikzGraph[graphcolor = goodlayoutcolor]{0.2\textwidth}{pics/fmmm.tikz}
+      & \InputTikzGraph[graphcolor = goodlayoutcolor]{0.2\textwidth}{pics/stress.tikz}\\[1ex]
       & \enum{NATIVE} & \enum{FMMM} & \enum{STRESS}\\[2ex]
-        \rotatebox{90}{\emph{garbage}}
-      & \InputTikzGraph[graphcolor = KITred]{0.2\textwidth}{pics/random-uniform.tikz}
-      & \InputTikzGraph[graphcolor = KITred]{0.2\textwidth}{pics/random-normal.tikz}
-      & \InputTikzGraph[graphcolor = KITred]{0.2\textwidth}{pics/phantom.tikz}\\[1ex]
+        \rotatebox{90}{\qquad\emph{garbage}}
+      & \InputTikzGraph[graphcolor = badlayoutcolor]{0.2\textwidth}{pics/random-uniform.tikz}
+      & \InputTikzGraph[graphcolor = badlayoutcolor]{0.2\textwidth}{pics/random-normal.tikz}
+      & \InputTikzGraph[graphcolor = badlayoutcolor]{0.2\textwidth}{pics/phantom.tikz}\\[1ex]
       & \enum{RANDOM\_UNIFORM} & \enum{RANDOM\_NORMAL} & \enum{PHANTOM}
     \end{tabular}
   \end{center}
 \end{frame}
 
-\againframe<3>{databullets}
+\againframe<2,3>{databullets}
 
 \begin{frame}
   \frametitle{Data Acquisition {\&} Augmentation}
@@ -371,21 +459,22 @@
   \begin{center}
     \small\noindent%
     \begin{tabular}{c@{\qquad\qquad}c@{\qquad\qquad}c@{\qquad\qquad}c}
-      \InputTikzGraph[graphcolor = KITred!0!KITblue]{0.2\textwidth}{pics/linear-00000.tikz}&
-      \InputTikzGraph[graphcolor = KITred!20!KITblue]{0.2\textwidth}{pics/linear-02000.tikz}&
-      \InputTikzGraph[graphcolor = KITred!40!KITblue]{0.2\textwidth}{pics/linear-04000.tikz}\\[1ex]
+      \InputTikzGraph[graphcolor = badlayoutcolor!0!goodlayoutcolor]{0.2\textwidth}{pics/linear-00000.tikz}&
+      \InputTikzGraph[graphcolor = badlayoutcolor!20!goodlayoutcolor]{0.2\textwidth}{pics/linear-02000.tikz}&
+      \InputTikzGraph[graphcolor = badlayoutcolor!40!goodlayoutcolor]{0.2\textwidth}{pics/linear-04000.tikz}\\[1ex]
       $r=0\percent$ & $r=20\percent$ & $r=40\percent$\\[2ex]
-      \InputTikzGraph[graphcolor = KITred!60!KITblue]{0.2\textwidth}{pics/linear-06000.tikz}&
-      \InputTikzGraph[graphcolor = KITred!80!KITblue]{0.2\textwidth}{pics/linear-08000.tikz}&
-      \InputTikzGraph[graphcolor = KITred!100!KITblue]{0.2\textwidth}{pics/linear-10000.tikz}\\[1ex]
+      \InputTikzGraph[graphcolor = badlayoutcolor!60!goodlayoutcolor]{0.2\textwidth}{pics/linear-06000.tikz}&
+      \InputTikzGraph[graphcolor = badlayoutcolor!80!goodlayoutcolor]{0.2\textwidth}{pics/linear-08000.tikz}&
+      \InputTikzGraph[graphcolor = badlayoutcolor!100!goodlayoutcolor]{0.2\textwidth}{pics/linear-10000.tikz}\\[1ex]
       $r=60\percent$ & $r=80\percent$ & $r=100\percent$
     \end{tabular}
   \end{center}
 \end{frame}
 
-\againframe<3>{outermethod}
+\againframe<7>{outermethod}
 
-\begin{frame}<-3>[label = innermethod]
+\begin{frame}<-4>[label = innermethod]
+  \frametitle{Feature Extraction Overview}
   \begin{tikzpicture}
     [
       dataflow/.style = {
@@ -395,31 +484,32 @@
       transformation/.style = {
         dataflow,
         decorate,
-        decoration = {snake, amplitude = 1.5pt, segment length = 1em, post length = 2pt},
+        decoration = {snake, amplitude = 1pt, segment length = 1em, post length = 2pt},
       },
     ]
 
-    \node<-3> (layout) {\InputTikzGraph[graphcolor = KITblack]{3cm}{pics/smtape.tikz}};
+    \node<-4> (layout) {\InputTikzGraph{3cm}{pics/psadmit.tikz}};
 
-    \begin{scope}[node distance = 4ex]
-      \node<2->[right = 2cm of layout.north east, anchor = base west] (princomp1)  {\enum{PRINCOMP1}};
-      \node<2->[below = of princomp1.base west,   anchor = base west] (princomp2)  {\enum{PRINCOMP2}};
-      \node<2->[below = of princomp2.base west,   anchor = base west] (angular)    {\enum{ANGULAR}};
-      \node<2->[below = of angular.base west,     anchor = base west] (edgelength) {\enum{EDGE\_LENGTH}};
-      \node<2->[below = of edgelength.base west,  anchor = base west] (tension)    {\enum{TENSION}};
-      \node<2->[below = of tension.base west,     anchor = base west] (rdfglobal)  {\enum{RDF\_GLOBAL}};
-      \node<2->[below = of rdfglobal.base west,   anchor = base west] (rdflocal)   {\(\menum{RDF\_LOCAL}(d)\)};
-      \node<2->[fit = (princomp1) (princomp2) (angular) (edgelength) (tension) (rdfglobal) (rdflocal)] (properties) {};
+    \alt<1>{\colorlet{hackcolor}{white}}{\colorlet{hackcolor}{black}}
+    \begin{scope}[node distance = 4ex, text = hackcolor]
+      \node[right = 2cm of layout.north east, anchor = base west] (princomp1)  {\enum{PRINCOMP1}};
+      \node[below = of princomp1.base west,   anchor = base west] (princomp2)  {\enum{PRINCOMP2}};
+      \node[below = of princomp2.base west,   anchor = base west] (angular)    {\highlight[l]{4}{\enum{ANGULAR}}};
+      \node[below = of angular.base west,     anchor = base west] (edgelength) {\enum{EDGE\_LENGTH}};
+      \node[below = of edgelength.base west,  anchor = base west] (tension)    {\enum{TENSION}};
+      \node[below = of tension.base west,     anchor = base west] (rdfglobal)  {\highlight[l]{4}{\enum{RDF\_GLOBAL}}};
+      \node[below = of rdfglobal.base west,   anchor = base west] (rdflocal)   {\(\menum{RDF\_LOCAL}(d)\)};
+      \node[fit = (princomp1) (princomp2) (angular) (edgelength) (tension) (rdfglobal) (rdflocal)] (properties) {};
     \end{scope}
 
     \begin{scope}
-      \draw<2-3>[->, transformation] (layout) -- (princomp1.west);
-      \draw<2-3>[->, transformation] (layout) -- (princomp2.west);
-      \draw<2-3>[->, transformation] (layout) -- (angular.west);
-      \draw<2-3>[->, transformation] (layout) -- (edgelength.west);
-      \draw<2-3>[->, transformation] (layout) -- (tension.west);
-      \draw<2-3>[->, transformation] (layout) -- (rdfglobal.west);
-      \draw<2-3>[->, transformation] (layout) -- (rdflocal.west);
+      \draw<2-4>[->, transformation] (layout) -- (princomp1.west);
+      \draw<2-4>[->, transformation] (layout) -- (princomp2.west);
+      \draw<2-4>[->, transformation] (layout) -- (angular.west);
+      \draw<2-4>[->, transformation] (layout) -- (edgelength.west);
+      \draw<2-4>[->, transformation] (layout) -- (tension.west);
+      \draw<2-4>[->, transformation] (layout) -- (rdfglobal.west);
+      \draw<2-4>[->, transformation] (layout) -- (rdflocal.west);
     \end{scope}
 
     \begin{scope}
@@ -470,7 +560,7 @@
   \end{tikzpicture}
 \end{frame}
 
-\begin{frame}
+\begin{frame}<\BonusSlide>
   \frametitle{Statistical Syndromes of Graph Layouts}
   \begin{itemize}
     \item\enum{PRINVEC1} and \enum{PRINVEC2} --- first and second principal axis of vertex coordinates
@@ -496,25 +586,42 @@
 \PropertyDemo[ANGULAR]{angular}{Angles Between Incident Edges}
 \PropertyDemo[RDF\_GLOBAL]{rdf-global}{Radial Distribution Function}
 
-\againframe<3->{innermethod}
+\againframe<5->{innermethod}
 
 \begin{frame}
   \frametitle{Feature Extraction}
   We need to condense syndromes into a feature vector of fixed size.
+  \par\bigskip
   \begin{itemize}
   \item arithmetic mean
   \item root mean squared (RMS)
-  \item entropy of distribution
+  \end{itemize}
+  \begin{itemize}
+  \item<4-> entropy of distribution
     \begin{itemize}
     \item Problem: depends on data aggregation (histogram bin / filter width)
     \item $\to$ Compute entropy for several histograms with different bin widths
     \item $\to$ Perform linear regression
     \item $\to$ Use regression parameters instead of entropy
-    \item For continuous filter, use Scott's Normal Reference Rule to fix filter width and compute differential entropy
     \end{itemize}
   \end{itemize}
-  \slidecite{Scott1979}
+  \begin{tikzpicture}
+    [
+      remember picture,
+      overlay,
+      node distance = 1pc,
+    ]
+    \node<2>[thumbnail, anchor = center] at (current page.center) {%
+      \begin{tabular}{c@{\qquad}c}
+        \InputTikzGraph{30mm}{pics/demograph-a.tikz} & \InputTikzGraph{30mm}{pics/demograph-b.tikz}\\[3ex]
+        \InputLuatikzPlot{pics/angular-a.pgf}        & \InputLuatikzPlot{pics/angular-b.pgf}
+      \end{tabular}
+    };
+    \node<5>[thumbnail, anchor = center] at (current page.center) {\InputLuatikzPlot{pics/entropy-regression.pgf}};
+  \end{tikzpicture}
 \end{frame}
+
+\againframe<8>{outermethod}
 
 \begin{frame}
   \frametitle{Siamese Neural Network}
@@ -531,10 +638,8 @@
 
 \section{Evaluation}
 
-\subsection{Comparison With Competing Metrics}
-
 \begin{frame}
-  \frametitle{Comparison With Competing Metrics}
+  \frametitle{Comparison With Other Metrics}
   \InputCompetingMetrics{eval-competing-metrics.tex}
   \par\vfill
   \begin{itemize}
@@ -546,7 +651,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Comparison With Competing Metrics}
+  \frametitle{Comparison With Other Metrics}
   \ShowDemo\DiscriminatorDemo[%
     discmod = \GetDiscriminatorResult{-}{d8c1498f}{4c326179}{234952e3}{discmod},
     comb    = \GetDiscriminatorResult{+}{d8c1498f}{4c326179}{234952e3}{comb},
@@ -554,9 +659,7 @@
   ]{pics/d8c1498f-4c326179-more.tikz}{pics/d8c1498f-234952e3-less.tikz}
 \end{frame}
 
-\subsection{Significance of Individual Syndromes}
-
-\begin{frame}
+\begin{frame}<\BonusSlide>
   \frametitle{Significance of Individual Syndromes}
   \begin{center}
     \InputPunctureResult[eval-cross-valid.tex]{eval-puncture.tex}
@@ -572,11 +675,11 @@
 \begin{frame}
   \frametitle{Conclusion and Future Work}
   \begin{itemize}
-  \item Automatic discrimination of layout's aesthetic value
-  \item Based on statistical syndromes
-  \item Inspired by Statistical Physics and Crystallography
-  \item Using machine learning techniques (neural network)
-  \item Accuracy usually outperforms competing metrics
+  \item Binary discrimination instead of absolute aesthetic measure
+  \item Avoid a priori assumptions about influence on aesthetics
+  \item Use of statistical syndromes inspired by Statistical Physics and Crystallography
+  \item Data driven approach (machine learning)
+  \item Accuracy usually outperforms other metrics
   \item \citeurl{GitHubRepo}
   \end{itemize}
   \par\bigskip
