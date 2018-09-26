@@ -39,7 +39,6 @@ file(
          "*.out"
          "*.run.xml"
          "*.snm"
-         "*.stamp"
          "*.toc"
          "*.upa"
          "*.upb"
@@ -56,4 +55,9 @@ if(${garbage_file_count} GREATER 0)
         message(STATUS "Deleting garbage file ${item}")
     endforeach(item)
     file(REMOVE ${garbage_files})
+endif()
+
+if(EXISTS "$ENV{MSC_TEX_REPORT_HTML}")
+    message(STATUS "Deleting TeX log file $ENV{MSC_TEX_REPORT_HTML}")
+    file(REMOVE "$ENV{MSC_TEX_REPORT_HTML}")
 endif()
