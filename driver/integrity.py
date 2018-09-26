@@ -131,7 +131,14 @@ class Checker(object):
         self.__repair = bool(repair)
         self.__issues = None
         self.__iterprefix = None
-        self.__files = None if fast else self.__index_files()
+        filename = os.getenv('MSC_INTEGRITY_CACHE_DATADIR_INDEX')
+        if fast:
+            self.__files = None
+        elif filename is not None and os.path.isfile(filename):
+            self.__files = _load_indexed_files(filename)
+        else:
+            self.__files = self.__index_files()
+            _store_indexed_files(self.__files, filename)
 
     def __call__(self, iteration=None):
         self.__mngr.sql_exec("PRAGMA foreign_keys = OFF", tuple())
@@ -438,6 +445,20 @@ class Checker(object):
                 (what, size) = _get_file_info(self.__files[filename])
                 self.__bemoan("Stray file {!r} ({:s}, {:,d} bytes)".format(filename, what, size))
                 self.__remove_from_fs(filename)
+
+
+def _store_indexed_files(index, filename=None):
+    if filename is None:
+        return False
+    logging.notice("Saving index of data directory tree to file {!r} ...".format(filename))
+    raise NotImplementedError()
+
+def _load_indexed_files(filename=None):
+    if filename is None:
+        return None
+    logging.notice("Loading index of data directory tree from file {!r} ...".format(filename))
+    # TODO: Ideally, we could assert that the index is up to date; but how?  Maybe using directory timestamps?
+    raise NotImplementedError()
 
 def _get_file_info(info):
     st = info.stat(follow_symlinks=False)
