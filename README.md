@@ -560,6 +560,12 @@ cause an error.
 The `phantom` tool is also sensitive to the environment variable `MSC_DUMP_PHANTOM` which, when set, will be interpreted
 as a file name into which to dump the &ldquo;phantom&rdquo; graph.
 
+The `princomp` tool uses the value of the environment variable `MSC_PRINCOMP_ORTHO_TOL` &ndash; which should be a small
+positive floating-point number &epsilon;&nbsp;&gt;&nbsp;0 to decide whether its results should be discarded because
+<var><b>p</b><sub>1</sub></var>&nbsp;&#x22C5;&nbsp;<var><b>p</b><sub>2</sub></var>&nbsp;&gt;&nbsp;&epsilon; where
+<var><b>p</b><sub>1</sub></var> and <var><b>p</b><sub>2</sub></var> are the determinded first and second principal axes
+respectively.  The default value is &epsilon;&nbsp;2<sup>&minus;10</sup> if the environment variable is not set.
+
 Finally, all command line tools honor the `COLUMNS` environment variable in case that a syscall to determine the
 terminal width is not available or does not succeed in order to determine the width of the `--help` output.  This
 variable should be set to a positive integer (your shell might do this automatically).

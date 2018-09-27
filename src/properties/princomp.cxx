@@ -19,6 +19,8 @@
 #endif
 
 #include <cassert>
+#include <cmath>
+#include <cstdlib>
 #include <numeric>
 #include <random>
 
@@ -85,17 +87,52 @@ namespace /*anonymous*/
         return coords;
     }
 
+    double get_orthogonality_tolerance() noexcept
+    {
+        const auto default_tolerance = 1.0 / 1024;
+        const char envvar[] = "MSC_PRINCOMP_ORTHO_TOL";
+        if (const auto envval = std::getenv(envvar)) {
+            char* endptr = nullptr;
+            const auto tolerance = std::strtold(envval, &endptr);
+            if (*endptr != '\0') {
+                std::clog << PROGRAM_NAME << ": " << envvar << ": "
+                          << "Cannot parse environment variable (falling back to " << default_tolerance << " instead)"
+                          << std::endl;
+                return default_tolerance;
+            }
+            if (!std::isfinite(tolerance) || (tolerance < 0.0)) {
+                std::clog << PROGRAM_NAME << ": " << envvar << ": "
+                          << "Ignoring environment variable (falling back to " << default_tolerance << " instead)"
+                          << std::endl;
+                return default_tolerance;
+            }
+        }
+        return default_tolerance;
+    }
+
+    template <std::size_t Ith>
+    msc::point2d do_find_axis(const std::vector<msc::point2d>& coords, std::mt19937& engine)
+    {
+        static_assert((Ith == 1) || (Ith == 2));
+        constexpr auto ith = std::integral_constant<std::size_t, Ith>{};
+        const auto axes = msc::find_primary_axes_nondestructive(coords, engine, ith);
+        if constexpr (ith == 2) {
+            const auto major = std::get<0>(axes);
+            const auto minor = std::get<1>(axes);
+            const auto tol = get_orthogonality_tolerance();
+            if (dot(minor, major) > tol) {
+                throw std::runtime_error{"First and second principal axes are not orthogonal"};
+            }
+        }
+        return axes.back();
+    }
+
     msc::point2d find_axis(const std::vector<msc::point2d>& coords, std::mt19937& engine, const int component)
     {
-        using constant_1 = std::integral_constant<std::size_t, 1>;
-        using constant_2 = std::integral_constant<std::size_t, 2>;
         switch (component) {
-        case 1:
-            return msc::find_primary_axes_nondestructive(coords, engine, constant_1{}).back();
-        case 2:
-            return msc::find_primary_axes_nondestructive(coords, engine, constant_2{}).back();
-        default:
-            throw std::invalid_argument{"Invalid component selection: " + std::to_string(component)};
+        case 1:  return do_find_axis<1>(coords, engine);
+        case 2:  return do_find_axis<2>(coords, engine);
+        default: throw std::invalid_argument{"Invalid component selection: " + std::to_string(component)};
         }
     }
 
