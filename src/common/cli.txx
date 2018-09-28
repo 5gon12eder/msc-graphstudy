@@ -458,8 +458,10 @@ namespace msc
             static void add(CliResT& results, po::options_description& description)
             {
                 assert(results.hyperdim > 0);
-                const auto helptext = "project a grid in N-dimensional hyper space (default: N = "
-                    + std::to_string(results.hyperdim) + ")";
+                const auto helptext = concat(
+                    "project from a N-dimensional hyper space ",
+                    "(default: N = ", std::to_string(results.hyperdim), ")"
+                );
                 description.add_options()(
                     "hyperdim,h", po::value<int>(&results.hyperdim)->value_name("N"),
                     helptext.c_str()

@@ -661,9 +661,9 @@ The following graph sizes are defined.  A graph with <var>n</var> vertices belon
  `LARGE`    |                      1,000 |                   100,000
  `HUGE`     |                    100,000 |                   &infin;
 
-<!-- Cross-Reference: ./driver/constants.py:236: "class GraphSizes(enum.IntEnum):" -->
+<!-- Cross-Reference: ./driver/constants.py:237: "class GraphSizes(enum.IntEnum):" -->
 The size classes are specified by the enumerator `GraphSizes` which is defined in the file
-[`./driver/constants.py`](./driver/constants.py#L236).  In case of doubt, please refer to this definition and consider
+[`./driver/constants.py`](./driver/constants.py#L237).  In case of doubt, please refer to this definition and consider
 the information provided by the table above as outdated.
 
 The following graph generators are defined:
@@ -709,6 +709,8 @@ The following graph generators are defined:
  - `BOTTLE` &mdash; probabilistic algorithm creating graphs with native layouts as axonometric projections of 3D-meshes
    of random bodies of revolution
  - `TREE` &mdash; probabilistic algorithm creating random trees
+ - `RANDGEO` &mdash; Generates a random geometric graph using a procedure similar to the one presented by Markus Chimani
+   at GD'18
 
 <!-- Cross-Reference: ./driver/constants.py:205: "class Generators(enum.IntEnum):" -->
 These constants are specified by the enumerator `Generators` which is defined in the file
@@ -756,9 +758,9 @@ The following layout algorithms are defined:
  - `PHANTOM` &mdash; garbage layout algorithm using the coordinates of a force-directed layout computed for a random
    &ldquo;phantom&rdquo; graph (which has the same number of nodes and edges)
 
-<!-- Cross-Reference: ./driver/constants.py:314: "class Layouts(enum.IntEnum):" -->
+<!-- Cross-Reference: ./driver/constants.py:315: "class Layouts(enum.IntEnum):" -->
 These constants are specified by the enumerator `Layouts` which is defined in the file
-[`./driver/constants.py`](./driver/constants.py#L314).
+[`./driver/constants.py`](./driver/constants.py#L315).
 
 #### Interpolated (`interpolation.cfg`) and Worsened (`worsening.cfg`) Layouts
 
@@ -779,9 +781,9 @@ The following layout interpolation algorithms are available:
  - `XLINEAR` &mdash; like `LINEAR` but tries to reduce paradox effects by aligning the principal exes of the two parent
    layouts beforehand
 
-<!-- Cross-Reference: ./driver/constants.py:337: "class LayInter(enum.IntEnum):" -->
+<!-- Cross-Reference: ./driver/constants.py:339: "class LayInter(enum.IntEnum):" -->
 These constants are specified by the enumerator `LayInter` which is defined in the file
-[`./driver/constants.py`](./driver/constants.py#L337).
+[`./driver/constants.py`](./driver/constants.py#L339).
 
 The following layout worsening algorithms are available:
 
@@ -791,9 +793,9 @@ The following layout worsening algorithms are available:
    by Schaefer et al.
  - `PERTURB` &mdash; adds white noise to vertex coordinates
 
-<!-- Cross-Reference: ./driver/constants.py:342: "class LayWorse(enum.IntEnum):" -->
+<!-- Cross-Reference: ./driver/constants.py:344: "class LayWorse(enum.IntEnum):" -->
 These constants are specified by the enumerator `LayWorse` which is defined in the file
-[`./driver/constants.py`](./driver/constants.py#L342).
+[`./driver/constants.py`](./driver/constants.py#L344).
 
 #### Properties (`properties-disc.cfg` and `properties-cont.cfg`) and Metrics (`metrics.cfg`)
 
@@ -817,9 +819,9 @@ The following properties are available:
  - `PRINCOMP2ND` &mdash; node coordinates along the second (minor) principal axis
  - `TENSION` &mdash; quotients of Euclidian distance in the layout and graph-theoretical distance between vertices
 
-<!-- Cross-Reference: ./driver/constants.py:366: "class Properties(enum.IntEnum):" -->
+<!-- Cross-Reference: ./driver/constants.py:368: "class Properties(enum.IntEnum):" -->
 These constants are specified by the enumerator `Properties` which is defined in the file
-[`./driver/constants.py`](./driver/constants.py#L366).
+[`./driver/constants.py`](./driver/constants.py#L368).
 
 The following metrics are available:
 
@@ -833,9 +835,9 @@ The following metrics are available:
  - `ANGULAR_RESOLUTION` &mdash; minimal angle between any two edges incident to the same node
  - `EDGE_LENGTH_STDEV` &mdash; standard deviation of edge lengths
 
-<!-- Cross-Reference: ./driver/constants.py:398: "class Metrics(enum.IntEnum):" -->
+<!-- Cross-Reference: ./driver/constants.py:400: "class Metrics(enum.IntEnum):" -->
 These constants are specified by the enumerator `Metrics` which is defined in the file
-[`./driver/constants.py`](./driver/constants.py#L398).
+[`./driver/constants.py`](./driver/constants.py#L400).
 
 Note that the `HUANG` discriminator cannot work unless the `CROSS_COUNT`, `CROSS_RESOLUTION`, `ANGULAR_RESOLUTION` and
 `EDGE_LENGTH_STDEV` metrics are available.

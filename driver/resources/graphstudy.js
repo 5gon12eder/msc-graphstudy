@@ -135,13 +135,28 @@ const LONG_CONSTANT_NAMES = {
     },
     'generators' : function(name) {
         switch (name) {
-        case 'RANDDAG':     return "Random DAG Collection";
-        case 'NORTH':       return "NORTH Collection";
-        case 'ROME':        return "ROME Collection";
-        case 'IMPORT':      return "Generic Import Source";
-        case 'LINDENMAYER': return "Stochastic L-System";
-        case 'QUASI':       return "Quasi Crystal";
         case 'GRID':        return "Regular Grid";
+        case 'SMTAPE':      return "SMTAPE Set of Harwell-Boeing Collection in NIST's Matrix Merket";
+        case 'PSADMIT' :    return "PSADMIT Set of Harwell-Boeing Collection in NIST's Matrix Merket";
+        case 'GRENOBLE' :   return "GRENOBLE Set of Harwell-Boeing Collection in NIST's Matrix Merket";
+        case 'BCSPWR' :     return "BCSPWR Set of Harwell-Boeing Collection in NIST's Matrix Merket";
+        case 'RANDDAG' :    return "Random DAG Collection (graphdrawing.org)";
+        case 'NORTH' :      return "NORTH Collection (graphdrawing.org)";
+        case 'ROME' :       return "ROME Collection (graphdrawing.org)";
+        case 'IMPORT' :     return "Generic Import Source";
+        case 'LINDENMAYER' : return "Stochastic L-System";
+        case 'QUASI3D' :    return "Quasi Crystal (3 Dimensions)";
+        case 'QUASI4D' :    return "Quasi Crystal (4 Dimensions)";
+        case 'QUASI5D' :    return "Quasi Crystal (5 Dimensions)";
+        case 'QUASI6D' :    return "Quasi Crystal (6 Dimensions)";
+        case 'GRID' :       return "Regular Grid";
+        case 'TORUS1' :     return "1-Torus (Cylinder)";
+        case 'TORUS2' :     return "2-Torus (Doughnut)";
+        case 'MOSAIC1' :    return "Planar Recursive Face-Splitting";
+        case 'MOSAIC2' :    return "Planar Recursive Face-Splitting (Symmetric)";
+        case 'BOTTLE' :     return "3D-Mesh";
+        case 'TREE' :       return "Random Tree";
+        case 'RANDGEO' :    return "Random Geometric Graph";
         default:            return "Unknown Generator";
         };
     },
@@ -162,12 +177,13 @@ const LONG_CONSTANT_NAMES = {
     },
     'properties' : function(name) {
         switch (name) {
-        case 'ANGULAR':     return "Adjacent Edge Angular Distribution";
         case 'RDF_GLOBAL':  return "Global Radial Distribution Function";
         case 'RDF_LOCAL':   return "Local Radial Distribution Function";
+        case 'ANGULAR':     return "Adjacent Edge Angular Distribution";
         case 'EDGE_LENGTH': return "Edge Length Distribution";
-        case 'PRINCOMP1ST': return "Node Coordinate Distribution / Major Component";
-        case 'PRINCOMP2ND': return "Node Coordinate Distribution / Minor Component";
+        case 'PRINCOMP1ST': return "Node Coordinate Distribution - Major Component";
+        case 'PRINCOMP2ND': return "Node Coordinate Distribution - Minor Component";
+        case 'TENSION':     return "Ratio of graph-theoretical and Euclidian distances";
         default:            return "Unknown Property";
         };
     },

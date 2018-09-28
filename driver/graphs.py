@@ -41,6 +41,7 @@ _GEN_PROGS = {
     Generators.MOSAIC2     : 'mosaic',
     Generators.BOTTLE      : 'bottle',
     Generators.TREE        : 'tree',
+    Generators.RANDGEO     : 'randgeo',
 }
 
 _GEN_FLAGS = {
@@ -56,6 +57,7 @@ _GEN_FLAGS = {
     Generators.MOSAIC2     : [ '--symmetric' ],
     Generators.BOTTLE      : [ ],
     Generators.TREE        : [ ],
+    Generators.RANDGEO     : [ '--hyperdim=3' ],
 }
 
 assert all(g in _GEN_PROGS for g in Generators if not g.imported)

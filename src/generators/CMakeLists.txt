@@ -66,3 +66,9 @@ target_link_libraries(tree PUBLIC common ogdf ${Boost_PROGRAM_OPTIONS_LIBRARIES}
 add_test(NAME clitest-tree-1st COMMAND ./tree --help)
 add_test(NAME clitest-tree-2nd COMMAND ./tree --version)
 add_test(NAME clitest-tree-3rd COMMAND ./tree -n 100 -o STDIO)
+
+add_executable(randgeo randgeo.cxx)
+target_link_libraries(randgeo PUBLIC common ogdf ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+add_test(NAME clitest-randgeo-1st COMMAND ./randgeo --help)
+add_test(NAME clitest-randgeo-2nd COMMAND ./randgeo --version)
+add_test(NAME clitest-randgeo-3rd COMMAND ./randgeo -n 100 -o STDIO)

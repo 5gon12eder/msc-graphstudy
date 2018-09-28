@@ -228,6 +228,7 @@ class Generators(enum.IntEnum):
     MOSAIC2     =  42
     BOTTLE      =  50
     TREE        =  60
+    RANDGEO     =  70
 
     @property
     def imported(self):
@@ -313,15 +314,16 @@ assert all(z in _GRAPH_SIZE_ATTRIBUTES for z in GraphSizes)
 
 class Layouts(enum.IntEnum):
 
+    # native
     NATIVE              =  0
+    # proper
     FMMM                = 10
     STRESS              = 11
     DAVIDSON_HAREL      = 12
     SPRING_EMBEDDER_KK  = 13
     PIVOT_MDS           = 14
     SUGIYAMA            = 21
-    # IMPRED            = 31
-
+    # garbage
     RANDOM_UNIFORM      =  -1
     RANDOM_NORMAL       =  -2
     PHANTOM             = -10
